@@ -1,5 +1,7 @@
-Bisma ( Developer ) : gk ada yang curhat kah? plis curhat dong gua gabut
-
-a ( anomali1 )
-b ( anomali2 )
-c ( anomali3 )
+a
+b
+c
+d
+e
+f
+g
