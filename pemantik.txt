@@ -1,4 +1,0 @@
-jam: 20.47
-pesan: Halo
-
-
