@@ -1,6 +1,2 @@
-Bisma ( App Dev ) : Gk ada yang curhat kah?, pls curhat dong gua gabut bjir
-Rasya ( Web Dev ) : Bantu gw benerin UI web aja nih!
-Bisma ( App Dev ) : emang UI webnya kenapa?
-Rasya ( Web Dev ) : Ngebug xD
-Bisma ( App Dev ) : Lah
-
+jam: 20.27
+pesan: Halo
