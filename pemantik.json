@@ -1,6 +1,8 @@
 [
- { "jam":"16:30", "pesan":"Halo" },
- { "jam":"16:31", "pesan":"OY" },
- { "jam":"16:32", "pesan":"b" }
+ {"time":"08:05:00",
+  "name":"Pemantik",
+  "msg":"Selamat pagi"},
+ {"time":"08:00:05",
+  "name":"Pemantik",
+  "msg":"Bagaimana perasaanmu hari ini?"}
 ]
-
