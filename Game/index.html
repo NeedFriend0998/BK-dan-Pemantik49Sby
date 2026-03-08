@@ -1,0 +1,1389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stand Up - Anti-Bullying Game</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Silkscreen&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0e14;
+      --bg-alt: #121820;
+      --fg: #e6e8eb;
+      --muted: #5a6270;
+      --accent: #ff6b35;
+      --accent-glow: rgba(255, 107, 53, 0.4);
+      --positive: #22c55e;
+      --negative: #ef4444;
+      --card: #1a2028;
+      --border: #2a3441;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Space Grotesk', sans-serif;
+      background: var(--bg);
+      color: var(--fg);
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+    }
+
+    .pixel-font {
+      font-family: 'Silkscreen', cursive;
+    }
+
+    /* Game Container */
+    #gameContainer {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Screens */
+    .game-screen {
+      position: absolute;
+      inset: 0;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.5s ease;
+    }
+
+    .game-screen.active {
+      display: flex;
+    }
+
+    /* Menu Screen */
+    #menuScreen {
+      background: 
+        radial-gradient(ellipse 100% 80% at 50% 120%, rgba(255, 107, 53, 0.15) 0%, transparent 50%),
+        linear-gradient(180deg, var(--bg) 0%, var(--bg-alt) 100%);
+    }
+
+    .title-glow {
+      text-shadow: 0 0 40px var(--accent-glow);
+    }
+
+    /* Play Button */
+    .play-btn {
+      position: relative;
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), #ff8f66);
+      border: 4px solid rgba(255,255,255,0.2);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 10px 40px var(--accent-glow);
+    }
+
+    .play-btn:hover {
+      transform: scale(1.1);
+      box-shadow: 0 15px 60px var(--accent-glow);
+    }
+
+    .play-btn:active {
+      transform: scale(0.95);
+    }
+
+    .play-btn::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 55%;
+      transform: translate(-50%, -50%);
+      border-style: solid;
+      border-width: 20px 0 20px 35px;
+      border-color: transparent transparent transparent white;
+    }
+
+    /* Character Select */
+    .character-card {
+      width: 200px;
+      padding: 24px;
+      background: var(--card);
+      border: 3px solid var(--border);
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-align: center;
+    }
+
+    .character-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-8px);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    }
+
+    .character-card.selected {
+      border-color: var(--accent);
+      background: linear-gradient(180deg, var(--card), rgba(255, 107, 53, 0.1));
+    }
+
+    .character-avatar {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 16px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+    }
+
+    /* Game World */
+    #gameWorld {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      background: #1a1f28;
+    }
+
+    #gameCanvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* HUD */
+    #gameHUD {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      right: 20px;
+      display: none;
+      justify-content: space-between;
+      align-items: flex-start;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    #gameHUD.active {
+      display: flex;
+    }
+
+    .hud-panel {
+      background: rgba(10, 14, 20, 0.9);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 16px;
+      backdrop-filter: blur(10px);
+    }
+
+    /* Analog Stick */
+    #analogContainer {
+      position: absolute;
+      bottom: 30px;
+      left: 30px;
+      width: 140px;
+      height: 140px;
+      z-index: 20;
+      display: none;
+    }
+
+    #analogContainer.active {
+      display: block;
+    }
+
+    .analog-base {
+      position: absolute;
+      width: 140px;
+      height: 140px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 3px solid rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+    }
+
+    .analog-stick {
+      position: absolute;
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(135deg, #fff 0%, #ccc 100%);
+      border-radius: 50%;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      cursor: grab;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+      transition: background 0.2s;
+    }
+
+    .analog-stick:active {
+      cursor: grabbing;
+      background: linear-gradient(135deg, #ff6b35 0%, #ff8f66 100%);
+    }
+
+    /* Action Button */
+    #actionBtn {
+      position: absolute;
+      bottom: 50px;
+      right: 40px;
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), #ff8f66);
+      border: none;
+      cursor: pointer;
+      z-index: 20;
+      display: none;
+      font-family: 'Silkscreen', cursive;
+      font-size: 14px;
+      color: white;
+      box-shadow: 0 8px 30px var(--accent-glow);
+      transition: all 0.2s ease;
+    }
+
+    #actionBtn.active {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #actionBtn:hover {
+      transform: scale(1.1);
+    }
+
+    #actionBtn:active {
+      transform: scale(0.9);
+    }
+
+    /* Dialog Box */
+    #dialogBox {
+      position: absolute;
+      bottom: 200px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 90%;
+      max-width: 600px;
+      background: rgba(10, 14, 20, 0.95);
+      border: 3px solid var(--accent);
+      border-radius: 16px;
+      padding: 20px;
+      z-index: 30;
+      display: none;
+    }
+
+    #dialogBox.active {
+      display: block;
+      animation: dialogPop 0.3s ease;
+    }
+
+    @keyframes dialogPop {
+      0% { transform: translateX(-50%) scale(0.8); opacity: 0; }
+      100% { transform: translateX(-50%) scale(1); opacity: 1; }
+    }
+
+    .dialog-speaker {
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+
+    .dialog-text {
+      line-height: 1.6;
+      margin-bottom: 16px;
+    }
+
+    .dialog-choices {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .dialog-choice {
+      padding: 12px 16px;
+      background: var(--card);
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: left;
+      color: var(--fg);
+      font-size: 14px;
+    }
+
+    .dialog-choice:hover {
+      border-color: var(--accent);
+      background: rgba(255, 107, 53, 0.1);
+      transform: translateX(8px);
+    }
+
+    /* Mini Map */
+    #miniMap {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      width: 150px;
+      height: 100px;
+      background: rgba(10, 14, 20, 0.8);
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      display: none;
+    }
+
+    #miniMap.active {
+      display: block;
+    }
+
+    /* Notification */
+    #notification {
+      position: absolute;
+      top: 80px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-20px);
+      padding: 12px 24px;
+      background: var(--card);
+      border: 2px solid var(--accent);
+      border-radius: 10px;
+      font-weight: 600;
+      z-index: 25;
+      opacity: 0;
+      transition: all 0.3s ease;
+      pointer-events: none;
+    }
+
+    #notification.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    #notification.positive {
+      border-color: var(--positive);
+      color: var(--positive);
+    }
+
+    #notification.negative {
+      border-color: var(--negative);
+      color: var(--negative);
+    }
+
+    /* Results Screen */
+    #resultsScreen {
+      background: 
+        radial-gradient(ellipse 80% 60% at 50% 100%, rgba(255, 107, 53, 0.2) 0%, transparent 50%),
+        var(--bg);
+    }
+
+    .result-stat {
+      text-align: center;
+      padding: 20px;
+      background: var(--card);
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      min-width: 140px;
+    }
+
+    /* Loading */
+    .loading-bar {
+      width: 200px;
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .loading-fill {
+      height: 100%;
+      background: var(--accent);
+      animation: loading 1.5s ease-in-out infinite;
+    }
+
+    @keyframes loading {
+      0% { width: 0; margin-left: 0; }
+      50% { width: 100%; margin-left: 0; }
+      100% { width: 0; margin-left: 100%; }
+    }
+
+    /* Reduced motion */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="gameContainer">
+    
+    <!-- MENU SCREEN -->
+    <div id="menuScreen" class="game-screen active">
+      <div class="pixel-font text-6xl md:text-8xl mb-4 title-glow text-center" style="color: var(--accent);">
+        STAND UP
+      </div>
+      <p class="text-lg md:text-xl mb-12 text-center opacity-70 max-w-md px-4">
+        Navigate school life and learn how to handle bullying situations
+      </p>
+      
+      <button id="playButton" class="play-btn" aria-label="Play Game">
+      </button>
+      
+      <p class="pixel-font text-sm mt-8 opacity-50">TAP TO START</p>
+      
+      <div class="mt-12 flex gap-8 text-center text-sm opacity-60">
+        <div>
+          <div class="text-2xl mb-1">5</div>
+          <div>Levels</div>
+        </div>
+        <div>
+          <div class="text-2xl mb-1">3</div>
+          <div>Characters</div>
+        </div>
+        <div>
+          <div class="text-2xl mb-1">15+</div>
+          <div>Choices</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHARACTER SELECT SCREEN -->
+    <div id="characterScreen" class="game-screen">
+      <h2 class="pixel-font text-3xl mb-2" style="color: var(--accent);">CHOOSE CHARACTER</h2>
+      <p class="mb-10 opacity-70">Select who you want to be in this story</p>
+      
+      <div class="flex flex-wrap justify-center gap-6 px-4">
+        <div class="character-card" data-character="student">
+          <div class="character-avatar" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8);">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+              <circle cx="12" cy="8" r="4"/>
+              <path d="M4 20c0-4 4-6 8-6s8 2 8 6"/>
+            </svg>
+          </div>
+          <h3 class="pixel-font text-lg mb-2">Student</h3>
+          <p class="text-sm opacity-70">Learn to handle bullying as a target</p>
+        </div>
+        
+        <div class="character-card" data-character="bystander">
+          <div class="character-avatar" style="background: linear-gradient(135deg, #8b5cf6, #6d28d9);">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M2 12c2-5 6-8 10-8s8 3 10 8c-2 5-6 8-10 8s-8-3-10-8z"/>
+            </svg>
+          </div>
+          <h3 class="pixel-font text-lg mb-2">Bystander</h3>
+          <p class="text-sm opacity-70">Witness and learn to intervene</p>
+        </div>
+        
+        <div class="character-card" data-character="upstander">
+          <div class="character-avatar" style="background: linear-gradient(135deg, #22c55e, #16a34a);">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+              <path d="M12 2l3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z"/>
+            </svg>
+          </div>
+          <h3 class="pixel-font text-lg mb-2">Upstander</h3>
+          <p class="text-sm opacity-70">Master intervention skills</p>
+        </div>
+      </div>
+      
+      <button id="startGameBtn" class="mt-10 px-10 py-4 bg-gradient-to-r from-orange-500 to-orange-400 rounded-full pixel-font text-lg opacity-30 pointer-events-none transition-all" disabled>
+        START MISSION
+      </button>
+    </div>
+
+    <!-- GAME SCREEN -->
+    <div id="gameScreen" class="game-screen">
+      <div id="gameWorld">
+        <canvas id="gameCanvas"></canvas>
+      </div>
+      
+      <!-- HUD -->
+      <div id="gameHUD">
+        <div class="hud-panel">
+          <div class="pixel-font text-xs opacity-50">LEVEL</div>
+          <div id="hudLevel" class="pixel-font text-xl" style="color: var(--accent);">1</div>
+        </div>
+        
+        <div class="hud-panel">
+          <div class="flex items-center gap-3">
+            <div>
+              <div class="pixel-font text-xs opacity-50">EMPATHY</div>
+              <div id="hudEmpathy" class="pixel-font text-xl">0</div>
+            </div>
+            <div class="w-px h-8 bg-gray-600"></div>
+            <div>
+              <div class="pixel-font text-xs opacity-50">ACTIONS</div>
+              <div id="hudActions" class="pixel-font text-xl">0</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Mini Map -->
+      <div id="miniMap">
+        <canvas id="miniMapCanvas" width="150" height="100"></canvas>
+      </div>
+      
+      <!-- Analog Stick -->
+      <div id="analogContainer">
+        <div class="analog-base"></div>
+        <div id="analogStick" class="analog-stick"></div>
+      </div>
+      
+      <!-- Action Button -->
+      <button id="actionBtn" aria-label="Interact">ACT</button>
+      
+      <!-- Dialog Box -->
+      <div id="dialogBox">
+        <div id="dialogSpeaker" class="dialog-speaker pixel-font"></div>
+        <div id="dialogText" class="dialog-text"></div>
+        <div id="dialogChoices" class="dialog-choices"></div>
+      </div>
+      
+      <!-- Notification -->
+      <div id="notification"></div>
+    </div>
+
+    <!-- RESULTS SCREEN -->
+    <div id="resultsScreen" class="game-screen">
+      <div class="pixel-font text-5xl mb-2" style="color: var(--accent);">MISSION COMPLETE</div>
+      <p class="mb-10 opacity-70">Here's how you did</p>
+      
+      <div class="flex flex-wrap justify-center gap-6 mb-10">
+        <div class="result-stat">
+          <div id="resultScore" class="pixel-font text-4xl" style="color: var(--accent);">0</div>
+          <div class="text-sm opacity-70 mt-1">Empathy Points</div>
+        </div>
+        <div class="result-stat">
+          <div id="resultGood" class="pixel-font text-4xl" style="color: var(--positive);">0</div>
+          <div class="text-sm opacity-70 mt-1">Good Choices</div>
+        </div>
+        <div class="result-stat">
+          <div id="resultBad" class="pixel-font text-4xl" style="color: var(--negative);">0</div>
+          <div class="text-sm opacity-70 mt-1">Poor Choices</div>
+        </div>
+      </div>
+      
+      <div id="resultMessage" class="text-center max-w-md mb-10 px-4 text-lg opacity-80"></div>
+      
+      <div class="flex gap-4 flex-wrap justify-center">
+        <button id="restartBtn" class="px-8 py-3 bg-gradient-to-r from-orange-500 to-orange-400 rounded-full pixel-font">
+          PLAY AGAIN
+        </button>
+        <button id="menuBtn" class="px-8 py-3 bg-transparent border-2 border-gray-600 rounded-full pixel-font hover:border-gray-400">
+          MAIN MENU
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ==================== GAME ENGINE ====================
+    const Game = {
+      canvas: null,
+      ctx: null,
+      miniMapCanvas: null,
+      miniMapCtx: null,
+      width: 0,
+      height: 0,
+      running: false,
+      lastTime: 0,
+      
+      // Game State
+      state: {
+        screen: 'menu',
+        character: null,
+        level: 1,
+        empathy: 0,
+        goodChoices: 0,
+        badChoices: 0,
+        interactions: 0
+      },
+      
+      // Player
+      player: {
+        x: 400,
+        y: 300,
+        width: 40,
+        height: 60,
+        speed: 200,
+        vx: 0,
+        vy: 0,
+        direction: 'down',
+        animFrame: 0,
+        color: '#3b82f6'
+      },
+      
+      // World
+      world: {
+        width: 1200,
+        height: 800,
+        offsetX: 0,
+        offsetY: 0
+      },
+      
+      // NPCs
+      npcs: [],
+      
+      // Interactables
+      interactables: [],
+      
+      // Current interaction
+      currentInteraction: null,
+      
+      // Input state
+      input: {
+        analogX: 0,
+        analogY: 0,
+        keys: {}
+      }
+    };
+
+    // ==================== SCENARIOS DATA ====================
+    const scenarios = [
+      {
+        level: 1,
+        name: "The Hallway",
+        description: "Witness verbal bullying in the hallway",
+        npcs: [
+          { id: 'bully1', x: 500, y: 300, width: 40, height: 60, color: '#ef4444', name: 'Alex', type: 'bully' },
+          { id: 'victim1', x: 550, y: 320, width: 40, height: 60, color: '#3b82f6', name: 'Sam', type: 'victim' }
+        ],
+        interactables: [
+          { id: 'event1', x: 520, y: 300, width: 80, height: 80, type: 'bullying', triggered: false }
+        ],
+        dialog: {
+          speaker: "Scenario",
+          text: "You see Alex making fun of Sam's clothes. Other students are walking by, ignoring it. What do you do?",
+          choices: [
+            { text: "Walk away quickly", consequence: 'negative', points: -5, message: "Ignoring bullying allows it to continue. Sam feels more alone." },
+            { text: "Stop and observe", consequence: 'neutral', points: 5, message: "You're aware something is wrong. What's your next move?" },
+            { text: "Approach and distract", consequence: 'positive', points: 15, message: "Great choice! Distraction is a powerful intervention technique." }
+          ]
+        }
+      },
+      {
+        level: 2,
+        name: "The Cafeteria",
+        description: "Social exclusion at lunch",
+        npcs: [
+          { id: 'group1', x: 300, y: 400, width: 120, height: 60, color: '#a855f7', name: 'Popular Group', type: 'group' },
+          { id: 'victim2', x: 600, y: 450, width: 40, height: 60, color: '#22c55e', name: 'Jordan', type: 'victim' }
+        ],
+        interactables: [
+          { id: 'event2', x: 450, y: 400, width: 200, height: 100, type: 'exclusion', triggered: false }
+        ],
+        dialog: {
+          speaker: "Scenario",
+          text: "Jordan is sitting alone. The popular group made it clear they're not welcome at their table. Jordan looks devastated.",
+          choices: [
+            { text: "Sit with Jordan and start a conversation", consequence: 'positive', points: 20, message: "Incredible! You showed Jordan they matter. This is true upstander behavior." },
+            { text: "Feel bad but do nothing", consequence: 'negative', points: 0, message: "Empathy without action helps no one. Your presence could have made a difference." },
+            { text: "Tell a teacher about the situation", consequence: 'positive', points: 10, message: "Good instinct to seek help. Teachers can address the group's behavior." }
+          ]
+        }
+      },
+      {
+        level: 3,
+        name: "Online Space",
+        description: "Cyberbullying situation",
+        npcs: [
+          { id: 'computer', x: 400, y: 300, width: 60, height: 60, color: '#6366f1', name: 'Computer Lab', type: 'object' }
+        ],
+        interactables: [
+          { id: 'event3', x: 370, y: 270, width: 120, height: 120, type: 'cyber', triggered: false }
+        ],
+        dialog: {
+          speaker: "Scenario",
+          text: "You see a group chat where students are sharing an embarrassing photo of a classmate and making cruel comments. The victim doesn't know yet.",
+          choices: [
+            { text: "Leave the chat silently", consequence: 'negative', points: -5, message: "Staying silent makes you complicit. The harm continues." },
+            { text: "Tell them to stop and report it", consequence: 'positive', points: 20, message: "Perfect response! You stood up and took action. This is how cyberbullying stops." },
+            { text: "Screenshot it as evidence, then report", consequence: 'positive', points: 15, message: "Smart thinking! Evidence helps adults take proper action." }
+          ]
+        }
+      },
+      {
+        level: 4,
+        name: "The Locker Room",
+        description: "Physical intimidation",
+        npcs: [
+          { id: 'bully2', x: 350, y: 350, width: 45, height: 65, color: '#ef4444', name: 'Mike', type: 'bully' },
+          { id: 'victim3', x: 400, y: 360, width: 38, height: 58, color: '#f59e0b', name: 'Taylor', type: 'victim' }
+        ],
+        interactables: [
+          { id: 'event4', x: 340, y: 340, width: 120, height: 90, type: 'physical', triggered: false }
+        ],
+        dialog: {
+          speaker: "Scenario",
+          text: "Mike is physically blocking Taylor from their locker, bumping into them 'accidentally.' This has been happening for weeks.",
+          choices: [
+            { text: "Get a teacher immediately", consequence: 'positive', points: 15, message: "Right call! Physical bullying needs adult intervention for safety." },
+            { text: "Call out: 'Hey! Leave them alone!'", consequence: 'neutral', points: 10, message: "Bold move! It might help, but be careful with physical confrontations." },
+            { text: "Walk Taylor away to a safe space", consequence: 'positive', points: 15, message: "Smart! You prioritized safety and supported the target." }
+          ]
+        }
+      },
+      {
+        level: 5,
+        name: "The Final Test",
+        description: "Putting it all together",
+        npcs: [
+          { id: 'bully3', x: 300, y: 300, width: 42, height: 62, color: '#ef4444', name: 'Chris', type: 'bully' },
+          { id: 'victim4', x: 500, y: 400, width: 40, height: 60, color: '#ec4899', name: 'Riley', type: 'victim' },
+          { id: 'bystander', x: 600, y: 350, width: 40, height: 60, color: '#8b5cf6', name: 'Other Students', type: 'group' }
+        ],
+        interactables: [
+          { id: 'event5', x: 400, y: 320, width: 200, height: 150, type: 'complex', triggered: false }
+        ],
+        dialog: {
+          speaker: "Final Scenario",
+          text: "A complex situation: Chris has been spreading rumors about Riley. Riley is being ignored by former friends. Other students are uncomfortable but silent. What's your approach?",
+          choices: [
+            { text: "Organize a group to support Riley publicly", consequence: 'positive', points: 25, message: "Outstanding leadership! You created collective action against bullying. This changes culture!" },
+            { text: "Talk privately with Riley and offer support", consequence: 'positive', points: 15, message: "Compassionate approach. Private support matters, and you can still take more action." },
+            { text: "Confront Chris about the rumors", consequence: 'neutral', points: 5, message: "Direct confrontation has risks. Consider involving adults too." }
+          ]
+        }
+      }
+    ];
+
+    // ==================== INITIALIZATION ====================
+    function init() {
+      Game.canvas = document.getElementById('gameCanvas');
+      Game.ctx = Game.canvas.getContext('2d');
+      Game.miniMapCanvas = document.getElementById('miniMapCanvas');
+      Game.miniMapCtx = Game.miniMapCanvas.getContext('2d');
+      
+      resizeCanvas();
+      window.addEventListener('resize', resizeCanvas);
+      
+      setupEventListeners();
+      showScreen('menu');
+    }
+
+    function resizeCanvas() {
+      Game.width = window.innerWidth;
+      Game.height = window.innerHeight;
+      Game.canvas.width = Game.width;
+      Game.canvas.height = Game.height;
+    }
+
+    function showScreen(screen) {
+      document.querySelectorAll('.game-screen').forEach(s => s.classList.remove('active'));
+      document.getElementById(screen + 'Screen').classList.add('active');
+      Game.state.screen = screen;
+      
+      if (screen === 'game') {
+        document.getElementById('gameHUD').classList.add('active');
+        document.getElementById('miniMap').classList.add('active');
+        document.getElementById('analogContainer').classList.add('active');
+        document.getElementById('actionBtn').classList.add('active');
+      } else {
+        document.getElementById('gameHUD').classList.remove('active');
+        document.getElementById('miniMap').classList.remove('active');
+        document.getElementById('analogContainer').classList.remove('active');
+        document.getElementById('actionBtn').classList.remove('active');
+      }
+    }
+
+    // ==================== EVENT LISTENERS ====================
+    function setupEventListeners() {
+      // Play button
+      document.getElementById('playButton').addEventListener('click', () => {
+        showScreen('character');
+      });
+      
+      // Character selection
+      document.querySelectorAll('.character-card').forEach(card => {
+        card.addEventListener('click', () => {
+          document.querySelectorAll('.character-card').forEach(c => c.classList.remove('selected'));
+          card.classList.add('selected');
+          Game.state.character = card.dataset.character;
+          
+          const startBtn = document.getElementById('startGameBtn');
+          startBtn.disabled = false;
+          startBtn.classList.remove('opacity-30', 'pointer-events-none');
+          
+          // Set player color based on character
+          if (Game.state.character === 'student') Game.player.color = '#3b82f6';
+          else if (Game.state.character === 'bystander') Game.player.color = '#8b5cf6';
+          else Game.player.color = '#22c55e';
+        });
+      });
+      
+      // Start game button
+      document.getElementById('startGameBtn').addEventListener('click', startGame);
+      
+      // Action button
+      document.getElementById('actionBtn').addEventListener('click', handleInteraction);
+      
+      // Restart button
+      document.getElementById('restartBtn').addEventListener('click', () => {
+        resetGame();
+        showScreen('character');
+      });
+      
+      // Menu button
+      document.getElementById('menuBtn').addEventListener('click', () => {
+        resetGame();
+        showScreen('menu');
+      });
+      
+      // Keyboard input
+      window.addEventListener('keydown', (e) => {
+        Game.input.keys[e.key.toLowerCase()] = true;
+        
+        if (e.key === ' ' || e.key === 'Enter') {
+          handleInteraction();
+        }
+      });
+      
+      window.addEventListener('keyup', (e) => {
+        Game.input.keys[e.key.toLowerCase()] = false;
+      });
+      
+      // Analog stick
+      setupAnalogStick();
+    }
+
+    function setupAnalogStick() {
+      const stick = document.getElementById('analogStick');
+      const container = document.getElementById('analogContainer');
+      let isDragging = false;
+      
+      const handleMove = (clientX, clientY) => {
+        if (!isDragging) return;
+        
+        const rect = container.getBoundingClientRect();
+        const centerX = rect.left + 70;
+        const centerY = rect.top + 70;
+        
+        let dx = clientX - centerX;
+        let dy = clientY - centerY;
+        
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        const maxDist = 40;
+        
+        if (distance > maxDist) {
+          dx = (dx / distance) * maxDist;
+          dy = (dy / distance) * maxDist;
+        }
+        
+        stick.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
+        
+        Game.input.analogX = dx / maxDist;
+        Game.input.analogY = dy / maxDist;
+      };
+      
+      const handleEnd = () => {
+        isDragging = false;
+        stick.style.transform = 'translate(-50%, -50%)';
+        Game.input.analogX = 0;
+        Game.input.analogY = 0;
+      };
+      
+      stick.addEventListener('mousedown', () => isDragging = true);
+      stick.addEventListener('touchstart', (e) => {
+        isDragging = true;
+        e.preventDefault();
+      });
+      
+      document.addEventListener('mousemove', (e) => handleMove(e.clientX, e.clientY));
+      document.addEventListener('touchmove', (e) => {
+        if (e.touches.length > 0) {
+          handleMove(e.touches[0].clientX, e.touches[0].clientY);
+        }
+      });
+      
+      document.addEventListener('mouseup', handleEnd);
+      document.addEventListener('touchend', handleEnd);
+    }
+
+    // ==================== GAME LOGIC ====================
+    function startGame() {
+      Game.state.level = 1;
+      Game.state.empathy = 0;
+      Game.state.goodChoices = 0;
+      Game.state.badChoices = 0;
+      Game.state.interactions = 0;
+      
+      loadLevel(1);
+      showScreen('game');
+      
+      Game.running = true;
+      Game.lastTime = performance.now();
+      requestAnimationFrame(gameLoop);
+    }
+
+    function resetGame() {
+      Game.running = false;
+      Game.state = {
+        screen: 'menu',
+        character: null,
+        level: 1,
+        empathy: 0,
+        goodChoices: 0,
+        badChoices: 0,
+        interactions: 0
+      };
+      Game.currentInteraction = null;
+      document.getElementById('dialogBox').classList.remove('active');
+      
+      // Reset character selection
+      document.querySelectorAll('.character-card').forEach(c => c.classList.remove('selected'));
+      const startBtn = document.getElementById('startGameBtn');
+      startBtn.disabled = true;
+      startBtn.classList.add('opacity-30', 'pointer-events-none');
+    }
+
+    function loadLevel(levelNum) {
+      const scenario = scenarios[levelNum - 1];
+      if (!scenario) {
+        endGame();
+        return;
+      }
+      
+      // Reset player position
+      Game.player.x = 150;
+      Game.player.y = 400;
+      Game.player.vx = 0;
+      Game.player.vy = 0;
+      
+      // Load NPCs
+      Game.npcs = scenario.npcs.map(npc => ({ ...npc, origX: npc.x, origY: npc.y }));
+      
+      // Load interactables
+      Game.interactables = scenario.interactables.map(i => ({ ...i, triggered: false }));
+      
+      // Update HUD
+      document.getElementById('hudLevel').textContent = levelNum;
+      document.getElementById('hudEmpathy').textContent = Game.state.empathy;
+      document.getElementById('hudActions').textContent = Game.state.interactions;
+      
+      // Show level notification
+      showNotification(`Level ${levelNum}: ${scenario.name}`, 'neutral');
+    }
+
+    function gameLoop(timestamp) {
+      if (!Game.running) return;
+      
+      const deltaTime = (timestamp - Game.lastTime) / 1000;
+      Game.lastTime = timestamp;
+      
+      update(deltaTime);
+      render();
+      
+      requestAnimationFrame(gameLoop);
+    }
+
+    function update(dt) {
+      // Skip if dialog is open
+      if (document.getElementById('dialogBox').classList.contains('active')) {
+        return;
+      }
+      
+      // Handle input
+      let moveX = Game.input.analogX;
+      let moveY = Game.input.analogY;
+      
+      // Keyboard input
+      if (Game.input.keys['w'] || Game.input.keys['arrowup']) moveY = -1;
+      if (Game.input.keys['s'] || Game.input.keys['arrowdown']) moveY = 1;
+      if (Game.input.keys['a'] || Game.input.keys['arrowleft']) moveX = -1;
+      if (Game.input.keys['d'] || Game.input.keys['arrowright']) moveX = 1;
+      
+      // Normalize diagonal movement
+      if (moveX !== 0 && moveY !== 0) {
+        moveX *= 0.707;
+        moveY *= 0.707;
+      }
+      
+      // Update velocity
+      Game.player.vx = moveX * Game.player.speed;
+      Game.player.vy = moveY * Game.player.speed;
+      
+      // Update position
+      Game.player.x += Game.player.vx * dt;
+      Game.player.y += Game.player.vy * dt;
+      
+      // World bounds
+      Game.player.x = Math.max(20, Math.min(Game.world.width - 60, Game.player.x));
+      Game.player.y = Math.max(20, Math.min(Game.world.height - 80, Game.player.y));
+      
+      // Update direction
+      if (Math.abs(Game.player.vx) > 0.1 || Math.abs(Game.player.vy) > 0.1) {
+        if (Math.abs(Game.player.vx) > Math.abs(Game.player.vy)) {
+          Game.player.direction = Game.player.vx > 0 ? 'right' : 'left';
+        } else {
+          Game.player.direction = Game.player.vy > 0 ? 'down' : 'up';
+        }
+        Game.player.animFrame = (Game.player.animFrame + dt * 10) % 4;
+      }
+      
+      // Camera follow
+      Game.world.offsetX = Game.player.x - Game.width / 2;
+      Game.world.offsetY = Game.player.y - Game.height / 2;
+      Game.world.offsetX = Math.max(0, Math.min(Game.world.width - Game.width, Game.world.offsetX));
+      Game.world.offsetY = Math.max(0, Math.min(Game.world.height - Game.height, Game.world.offsetY));
+      
+      // Check for interactable proximity
+      checkInteractables();
+      
+      // Animate NPCs
+      Game.npcs.forEach(npc => {
+        if (npc.type === 'bully') {
+          npc.x = npc.origX + Math.sin(Date.now() / 500) * 5;
+        }
+      });
+    }
+
+    function checkInteractables() {
+      const actionBtn = document.getElementById('actionBtn');
+      let nearInteractable = false;
+      
+      Game.interactables.forEach(inter => {
+        if (!inter.triggered) {
+          const dx = Game.player.x - inter.x;
+          const dy = Game.player.y - inter.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          
+          if (dist < 80) {
+            nearInteractable = true;
+            Game.currentInteraction = inter;
+          }
+        }
+      });
+      
+      actionBtn.textContent = nearInteractable ? 'ACT' : 'MOVE';
+      actionBtn.style.opacity = nearInteractable ? '1' : '0.5';
+    }
+
+    function handleInteraction() {
+      if (!Game.currentInteraction || Game.currentInteraction.triggered) return;
+      
+      const scenario = scenarios[Game.state.level - 1];
+      if (!scenario) return;
+      
+      Game.currentInteraction.triggered = true;
+      Game.state.interactions++;
+      document.getElementById('hudActions').textContent = Game.state.interactions;
+      
+      // Show dialog
+      showDialog(scenario.dialog);
+    }
+
+    function showDialog(dialog) {
+      const dialogBox = document.getElementById('dialogBox');
+      document.getElementById('dialogSpeaker').textContent = dialog.speaker;
+      document.getElementById('dialogText').textContent = dialog.text;
+      
+      const choicesContainer = document.getElementById('dialogChoices');
+      choicesContainer.innerHTML = '';
+      
+      dialog.choices.forEach((choice, index) => {
+        const btn = document.createElement('button');
+        btn.className = 'dialog-choice';
+        btn.textContent = `${index + 1}. ${choice.text}`;
+        btn.onclick = () => handleChoice(choice);
+        choicesContainer.appendChild(btn);
+      });
+      
+      dialogBox.classList.add('active');
+    }
+
+    function handleChoice(choice) {
+      // Update score
+      Game.state.empathy += choice.points;
+      if (choice.consequence === 'positive') Game.state.goodChoices++;
+      if (choice.consequence === 'negative') Game.state.badChoices++;
+      
+      document.getElementById('hudEmpathy').textContent = Game.state.empathy;
+      
+      // Show notification
+      const type = choice.consequence === 'positive' ? 'positive' : choice.consequence === 'negative' ? 'negative' : 'neutral';
+      showNotification(choice.message, type);
+      
+      // Close dialog
+      document.getElementById('dialogBox').classList.remove('active');
+      
+      // Next level after delay
+      setTimeout(() => {
+        Game.state.level++;
+        if (Game.state.level > scenarios.length) {
+          endGame();
+        } else {
+          loadLevel(Game.state.level);
+        }
+      }, 2000);
+    }
+
+    function showNotification(text, type) {
+      const notif = document.getElementById('notification');
+      notif.textContent = text;
+      notif.className = 'show ' + type;
+      
+      setTimeout(() => {
+        notif.classList.remove('show');
+      }, 2500);
+    }
+
+    function endGame() {
+      Game.running = false;
+      
+      // Update results
+      document.getElementById('resultScore').textContent = Game.state.empathy;
+      document.getElementById('resultGood').textContent = Game.state.goodChoices;
+      document.getElementById('resultBad').textContent = Game.state.badChoices;
+      
+      // Generate message
+      let message = '';
+      if (Game.state.empathy >= 70) {
+        message = "Outstanding! You've demonstrated true upstander qualities. Your choices show you understand how to safely and effectively intervene in bullying situations.";
+      } else if (Game.state.empathy >= 40) {
+        message = "Good effort! You made several positive choices. Keep learning about effective intervention strategies.";
+      } else {
+        message = "There's room for improvement. Remember: your actions (or inaction) have real impact on others. Consider how you can better support those experiencing bullying.";
+      }
+      document.getElementById('resultMessage').textContent = message;
+      
+      showScreen('results');
+    }
+
+    // ==================== RENDERING ====================
+    function render() {
+      const ctx = Game.ctx;
+      ctx.clearRect(0, 0, Game.width, Game.height);
+      
+      // Draw world background
+      drawWorld();
+      
+      // Draw NPCs
+      Game.npcs.forEach(drawNPC);
+      
+      // Draw player
+      drawPlayer();
+      
+      // Draw interactable indicators
+      Game.interactables.forEach(inter => {
+        if (!inter.triggered) {
+          ctx.save();
+          ctx.translate(inter.x - Game.world.offsetX, inter.y - Game.world.offsetY);
+          
+          // Pulsing indicator
+          const pulse = 1 + Math.sin(Date.now() / 200) * 0.2;
+          ctx.beginPath();
+          ctx.arc(0, 0, 30 * pulse, 0, Math.PI * 2);
+          ctx.strokeStyle = 'rgba(255, 107, 53, 0.5)';
+          ctx.lineWidth = 3;
+          ctx.stroke();
+          
+          // Exclamation mark
+          ctx.fillStyle = '#ff6b35';
+          ctx.font = 'bold 24px Space Grotesk';
+          ctx.textAlign = 'center';
+          ctx.fillText('!', 0, 8);
+          
+          ctx.restore();
+        }
+      });
+      
+      // Draw mini map
+      drawMiniMap();
+    }
+
+    function drawWorld() {
+      const ctx = Game.ctx;
+      
+      // Floor
+      ctx.fillStyle = '#1a1f28';
+      ctx.fillRect(0, 0, Game.width, Game.height);
+      
+      // Grid pattern
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.03)';
+      ctx.lineWidth = 1;
+      
+      const gridSize = 50;
+      for (let x = -Game.world.offsetX % gridSize; x < Game.width; x += gridSize) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, Game.height);
+        ctx.stroke();
+      }
+      for (let y = -Game.world.offsetY % gridSize; y < Game.height; y += gridSize) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(Game.width, y);
+        ctx.stroke();
+      }
+      
+      // Walls
+      ctx.fillStyle = '#2a3441';
+      ctx.fillRect(0, 0, Game.world.width, 30);
+      ctx.fillRect(0, Game.world.height - 30, Game.world.width, 30);
+      ctx.fillRect(0, 0, 30, Game.world.height);
+      ctx.fillRect(Game.world.width - 30, 0, 30, Game.world.height);
+      
+      // Draw some furniture/obstacles based on level
+      const level = Game.state.level;
+      
+      if (level === 1) {
+        // Lockers
+        for (let i = 0; i < 5; i++) {
+          const lx = 200 + i * 100 - Game.world.offsetX;
+          const ly = 100 - Game.world.offsetY;
+          ctx.fillStyle = '#374151';
+          ctx.fillRect(lx, ly, 80, 120);
+          ctx.fillStyle = '#4b5563';
+          ctx.fillRect(lx + 5, ly + 5, 70, 110);
+        }
+      } else if (level === 2) {
+        // Tables
+        const tables = [[200, 300], [400, 300], [600, 300], [200, 500], [400, 500], [600, 500]];
+        tables.forEach(([tx, ty]) => {
+          ctx.fillStyle = '#4b5563';
+          ctx.fillRect(tx - Game.world.offsetX, ty - Game.world.offsetY, 150, 80);
+          ctx.fillStyle = '#374151';
+          ctx.fillRect(tx + 10 - Game.world.offsetX, ty + 10 - Game.world.offsetY, 130, 60);
+        });
+      } else if (level === 3) {
+        // Computer lab
+        for (let i = 0; i < 4; i++) {
+          const cx = 250 + i * 120 - Game.world.offsetX;
+          const cy = 250 - Game.world.offsetY;
+          ctx.fillStyle = '#1e293b';
+          ctx.fillRect(cx, cy, 80, 60);
+          ctx.fillStyle = '#334155';
+          ctx.fillRect(cx + 10, cy + 5, 60, 40);
+        }
+      } else if (level === 4) {
+        // Lockers room
+        for (let i = 0; i < 8; i++) {
+          const lx = 150 + i * 80 - Game.world.offsetX;
+          ctx.fillStyle = '#374151';
+          ctx.fillRect(lx, 150 - Game.world.offsetY, 60, 150);
+        }
+      } else if (level === 5) {
+        // Common area
+        ctx.fillStyle = '#374151';
+        ctx.fillRect(200 - Game.world.offsetX, 200 - Game.world.offsetY, 300, 200);
+        ctx.fillStyle = '#4b5563';
+        ctx.fillRect(210 - Game.world.offsetX, 210 - Game.world.offsetY, 280, 180);
+      }
+    }
+
+    function drawNPC(npc) {
+      const ctx = Game.ctx;
+      const x = npc.x - Game.world.offsetX;
+      const y = npc.y - Game.world.offsetY;
+      
+      // Shadow
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+      ctx.beginPath();
+      ctx.ellipse(x, y + npc.height / 2 + 5, npc.width / 2, 10, 0, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Body
+      ctx.fillStyle = npc.color;
+      ctx.fillRect(x - npc.width / 2, y - npc.height / 2, npc.width, npc.height);
+      
+      // Face direction indicator
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+      ctx.fillRect(x - npc.width / 2 + 5, y - npc.height / 2 + 5, npc.width - 10, 15);
+      
+      // Eyes
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(x - 10, y - npc.height / 2 + 10, 6, 6);
+      ctx.fillRect(x + 4, y - npc.height / 2 + 10, 6, 6);
+      
+      // Name tag
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+      ctx.fillRect(x - 30, y + npc.height / 2 + 10, 60, 18);
+      ctx.fillStyle = '#fff';
+      ctx.font = '10px Space Grotesk';
+      ctx.textAlign = 'center';
+      ctx.fillText(npc.name, x, y + npc.height / 2 + 23);
+    }
+
+    function drawPlayer() {
+      const ctx = Game.ctx;
+      const x = Game.player.x - Game.world.offsetX;
+      const y = Game.player.y - Game.world.offsetY;
+      
+      // Shadow
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+      ctx.beginPath();
+      ctx.ellipse(x, y + Game.player.height / 2 + 5, Game.player.width / 2, 10, 0, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Body with walking animation
+      const bobOffset = Math.abs(Game.player.vx) > 1 || Math.abs(Game.player.vy) > 1 
+        ? Math.sin(Game.player.animFrame * Math.PI) * 3 : 0;
+      
+      ctx.fillStyle = Game.player.color;
+      ctx.fillRect(
+        x - Game.player.width / 2, 
+        y - Game.player.height / 2 + bobOffset, 
+        Game.player.width, 
+        Game.player.height
+      );
+      
+      // Direction indicator
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+      if (Game.player.direction === 'right') {
+        ctx.fillRect(x + 5, y - 10, 15, 20);
+      } else if (Game.player.direction === 'left') {
+        ctx.fillRect(x - 20, y - 10, 15, 20);
+      } else if (Game.player.direction === 'up') {
+        ctx.fillRect(x - 10, y - 30, 20, 15);
+      } else {
+        ctx.fillRect(x - 10, y + 15, 20, 15);
+      }
+      
+      // Eyes
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(x - 12, y - Game.player.height / 2 + 15 + bobOffset, 8, 8);
+      ctx.fillRect(x + 4, y - Game.player.height / 2 + 15 + bobOffset, 8, 8);
+      
+      // Player indicator
+      ctx.fillStyle = '#ff6b35';
+      ctx.beginPath();
+      ctx.moveTo(x, y - Game.player.height / 2 - 20);
+      ctx.lineTo(x - 8, y - Game.player.height / 2 - 35);
+      ctx.lineTo(x + 8, y - Game.player.height / 2 - 35);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    function drawMiniMap() {
+      const ctx = Game.miniMapCtx;
+      const scale = 150 / Game.world.width;
+      
+      // Clear
+      ctx.fillStyle = 'rgba(10, 14, 20, 0.9)';
+      ctx.fillRect(0, 0, 150, 100);
+      
+      // Draw NPCs
+      Game.npcs.forEach(npc => {
+        ctx.fillStyle = npc.color;
+        ctx.fillRect(npc.x * scale, npc.y * scale * (100/800), 4, 4);
+      });
+      
+      // Draw player
+      ctx.fillStyle = Game.player.color;
+      ctx.fillRect(Game.player.x * scale - 2, Game.player.y * scale * (100/800) - 2, 6, 6);
+      
+      // Draw view area
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+      ctx.strokeRect(
+        Game.world.offsetX * scale,
+        Game.world.offsetY * scale * (100/800),
+        Game.width * scale,
+        Game.height * scale * (100/800)
+      );
+    }
+
+    // ==================== START ====================
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>
