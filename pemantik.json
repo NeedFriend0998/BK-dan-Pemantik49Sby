@@ -1,9 +1,8 @@
 [
- {"time":"08:06:00",
+ {"time":"08:13:00",
   "name":"Pemantik",
-  "msg":"Selamat pagi"},
- {"time":"08:07:05",
+  "message":"Selamat pagi"},
+ {"time":"08:14:05",
   "name":"Pemantik",
-  "msg":"Bagaimana perasaanmu hari ini?"}
+  "message":"Bagaimana perasaanmu hari ini?"}
 ]
-
