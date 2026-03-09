@@ -3,1213 +3,592 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Stand Up - Anti-Bullying Game</title>
+  <title>Story Game: Visual Edition</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Silkscreen&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #0a0e14;
-      --bg-alt: #121820;
-      --fg: #e6e8eb;
-      --muted: #5a6270;
-      --accent: #ff6b35;
-      --accent-glow: rgba(255, 107, 53, 0.4);
+      --bg: #0f172a;
+      --bg-alt: #1e293b;
+      --fg: #f1f5f9;
+      --accent: #f59e0b;
+      --accent-glow: rgba(245, 158, 11, 0.6);
       --positive: #22c55e;
       --negative: #ef4444;
-      --card: #1a2028;
-      --border: #2a3441;
+      --card: #334155;
+      --border: #475569;
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      -webkit-tap-highlight-color: transparent;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    html, body { height: 100%; overflow: hidden; touch-action: none; position: fixed; width: 100%; font-family: 'Space Grotesk', sans-serif; background: var(--bg); color: var(--fg); }
+    .pixel-font { font-family: 'Silkscreen', cursive; }
 
-    html, body {
-      height: 100%;
-      overflow: hidden; /* Prevent pull-to-refresh and bounce scrolling */
-      touch-action: none; /* Prevent default browser touch behaviors */
-      position: fixed;
-      width: 100%;
-    }
-
-    body {
-      font-family: 'Space Grotesk', sans-serif;
-      background: var(--bg);
-      color: var(--fg);
-    }
-
-    .pixel-font {
-      font-family: 'Silkscreen', cursive;
-    }
-
-    /* Game Container */
-    #gameContainer {
-      position: relative;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-    }
+    #gameContainer { position: relative; width: 100%; height: 100%; overflow: hidden; }
 
     /* Screens */
-    .game-screen {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      display: none;
-      overflow-y: auto; /* Allow scrolling on menus if needed */
-      overflow-x: hidden;
-    }
+    .game-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: none; overflow: hidden; background: var(--bg); }
+    .game-screen.active { display: flex; flex-direction: column; }
+    
+    #menuScreen { justify-content: center; align-items: center; text-align: center; padding: 20px; background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); }
+    #characterScreen { justify-content: flex-start; align-items: center; padding: 40px 20px 150px; overflow-y: auto; }
+    
+    /* UI Elements */
+    .play-btn { width: 120px; height: 120px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), #d97706); border: 4px solid rgba(255,255,255,0.2); box-shadow: 0 0 40px var(--accent-glow); display: flex; align-items: center; justify-content: center; transition: transform 0.2s; }
+    .play-btn:active { transform: scale(0.95); }
+    .play-btn::before { content: ''; width: 0; height: 0; margin-left: 8px; border: solid transparent; border-width: 20px 0 20px 35px; border-left-color: white; }
 
-    .game-screen.active {
-      display: flex;
-      flex-direction: column;
-    }
+    .characters-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 16px; width: 100%; max-width: 500px; margin: 20px 0; }
+    .character-card { padding: 16px; background: var(--card); border: 2px solid var(--border); border-radius: 16px; cursor: pointer; transition: all 0.2s; text-align: center; }
+    .character-card.selected { border-color: var(--accent); background: rgba(245, 158, 11, 0.1); transform: translateY(-4px); }
+    
+    /* Character Preview Image */
+    .char-preview { width: 64px; height: 64px; margin: 0 auto 8px; background-size: contain; background-repeat: no-repeat; background-position: center; }
 
-    /* Special handling for game screen to prevent scroll */
-    #gameScreen.active {
-      overflow: hidden;
-    }
+    .fixed-bottom-btn { position: fixed; bottom: 0; left: 0; right: 0; padding: 20px; background: linear-gradient(to top, var(--bg), transparent); display: flex; justify-content: center; z-index: 50; }
+    
+    /* Game View */
+    #gameCanvas { display: block; width: 100%; height: 100%; image-rendering: auto; }
+    
+    /* Controls */
+    #analogContainer { position: absolute; bottom: 30px; left: 30px; width: 140px; height: 140px; z-index: 20; display: none; touch-action: none; }
+    #analogContainer.active { display: block; }
+    .analog-base { position: absolute; width: 100%; height: 100%; background: rgba(0,0,0,0.5); border: 3px solid rgba(255,255,255,0.3); border-radius: 50%; }
+    .analog-stick { position: absolute; width: 60px; height: 60px; background: rgba(255,255,255,0.9); border-radius: 50%; top: 50%; left: 50%; transform: translate(-50%, -50%); box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
 
-    /* MENU SCREEN */
-    #menuScreen {
-      background: 
-        radial-gradient(ellipse 100% 80% at 50% 120%, rgba(255, 107, 53, 0.15) 0%, transparent 50%),
-        linear-gradient(180deg, var(--bg) 0%, var(--bg-alt) 100%);
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-      padding: 20px;
+    /* Story Box */
+    #storyBox {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      background: linear-gradient(to top, rgba(15, 23, 42, 1) 90%, transparent);
+      padding: 20px; padding-bottom: 30px;
+      display: none; flex-direction: column; justify-content: flex-end;
+      z-index: 15; height: 220px;
     }
-
-    .title-glow {
-      text-shadow: 0 0 40px var(--accent-glow);
-    }
-
-    /* Play Button */
-    .play-btn {
-      width: 100px;
-      height: 100px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, var(--accent), #ff8f66);
-      border: 4px solid rgba(255,255,255,0.2);
-      cursor: pointer;
-      transition: all 0.3s ease;
-      box-shadow: 0 10px 40px var(--accent-glow);
-      display: flex;
-      align-items: center;
-      justify-content: center;
+    #storyBox.active { display: flex; }
+    
+    .story-content {
+      background: rgba(30, 41, 59, 0.95);
+      border: 2px solid var(--border);
+      border-left: 4px solid var(--accent);
+      border-radius: 8px;
+      padding: 16px;
+      max-width: 800px;
       margin: 0 auto;
-    }
-
-    .play-btn:active {
-      transform: scale(0.95);
-    }
-
-    .play-btn::before {
-      content: '';
-      width: 0; 
-      height: 0; 
-      margin-left: 8px;
-      border-top: 15px solid transparent;
-      border-bottom: 15px solid transparent;
-      border-left: 25px solid white;
-    }
-
-    /* Character Select */
-    #characterScreen {
-      background: var(--bg);
-      justify-content: flex-start; /* Start from top for scrolling */
-      align-items: center;
-      padding: 40px 20px 120px; /* Extra bottom padding */
-    }
-
-    .characters-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-      gap: 16px;
       width: 100%;
-      max-width: 600px;
-      margin-top: 20px;
-      margin-bottom: 30px;
     }
-
-    .character-card {
-      padding: 20px 16px;
-      background: var(--card);
-      border: 3px solid var(--border);
-      border-radius: 20px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      text-align: center;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+    
+    .story-title { color: var(--accent); font-weight: bold; margin-bottom: 4px; font-size: 14px; }
+    .story-text { font-size: 15px; line-height: 1.5; margin-bottom: 12px; }
+    
+    .choice-grid { display: grid; gap: 8px; }
+    .choice-btn {
+      padding: 10px; background: var(--card); border: 1px solid var(--border); border-radius: 6px;
+      color: var(--fg); text-align: left; cursor: pointer; transition: all 0.2s; font-size: 14px;
     }
+    .choice-btn:active { background: var(--accent); color: black; }
 
-    .character-card:active {
-      transform: scale(0.98);
-    }
+    /* Loading */
+    #loadingScreen { position: absolute; inset: 0; background: var(--bg); z-index: 100; display: flex; justify-content: center; align-items: center; flex-direction: column; }
+    .spinner { width: 40px; height: 40px; border: 4px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
-    .character-card.selected {
-      border-color: var(--accent);
-      background: linear-gradient(180deg, var(--card), rgba(255, 107, 53, 0.15));
-      box-shadow: 0 0 20px var(--accent-glow);
-    }
-
-    .character-avatar {
-      width: 60px;
-      height: 60px;
-      margin-bottom: 12px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 30px;
-    }
-
-    .start-btn-container {
-      position: fixed; /* Fix button at bottom on mobile */
-      bottom: 0;
-      left: 0;
-      right: 0;
-      padding: 20px;
-      background: linear-gradient(to top, var(--bg) 80%, transparent);
-      z-index: 50;
-      display: flex;
-      justify-content: center;
-    }
-
-    /* Game World */
-    #gameWorld {
-      position: absolute;
-      inset: 0;
-      background: #1a1f28;
-      touch-action: none;
-    }
-
-    #gameCanvas {
-      display: block;
-      width: 100%;
-      height: 100%;
-    }
-
-    /* HUD */
-    #gameHUD {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      right: 10px;
-      display: none;
-      justify-content: space-between;
-      align-items: flex-start;
-      pointer-events: none;
-      z-index: 10;
-    }
-
-    #gameHUD.active {
-      display: flex;
-    }
-
-    .hud-panel {
-      background: rgba(10, 14, 20, 0.85);
-      border: 2px solid var(--border);
-      border-radius: 12px;
-      padding: 8px 12px;
-      backdrop-filter: blur(10px);
-      font-size: 14px;
-    }
-
-    /* Analog Stick */
-    #analogContainer {
-      position: absolute;
-      bottom: 30px;
-      left: 20px;
-      width: 120px;
-      height: 120px;
-      z-index: 20;
-      display: none;
-      touch-action: none;
-    }
-
-    #analogContainer.active {
-      display: block;
-    }
-
-    .analog-base {
-      position: absolute;
-      width: 120px;
-      height: 120px;
-      background: rgba(255, 255, 255, 0.08);
-      border: 3px solid rgba(255, 255, 255, 0.15);
-      border-radius: 50%;
-    }
-
-    .analog-stick {
-      position: absolute;
-      width: 50px;
-      height: 50px;
-      background: linear-gradient(135deg, #fff 0%, #ccc 100%);
-      border-radius: 50%;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      cursor: grab;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-      touch-action: none;
-    }
-
-    /* Action Button */
-    #actionBtn {
-      position: absolute;
-      bottom: 40px;
-      right: 30px;
-      width: 70px;
-      height: 70px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, var(--accent), #ff8f66);
-      border: none;
-      cursor: pointer;
-      z-index: 20;
-      display: none;
-      font-family: 'Silkscreen', cursive;
-      font-size: 14px;
-      color: white;
-      box-shadow: 0 8px 30px var(--accent-glow);
-      transition: transform 0.1s;
-      touch-action: manipulation;
-    }
-
-    #actionBtn.active {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    #actionBtn:active {
-      transform: scale(0.9);
-    }
-
-    /* Dialog Box */
-    #dialogBox {
-      position: absolute;
-      bottom: 150px; /* Up from bottom to avoid controls */
-      left: 50%;
-      transform: translateX(-50%);
-      width: 90%;
-      max-width: 500px;
-      background: rgba(10, 14, 20, 0.95);
-      border: 3px solid var(--accent);
-      border-radius: 16px;
-      padding: 16px;
-      z-index: 30;
-      display: none;
-    }
-
-    #dialogBox.active {
-      display: block;
-      animation: dialogPop 0.3s ease;
-    }
-
-    @keyframes dialogPop {
-      0% { transform: translateX(-50%) scale(0.9); opacity: 0; }
-      100% { transform: translateX(-50%) scale(1); opacity: 1; }
-    }
-
-    .dialog-speaker {
-      font-weight: 700;
-      color: var(--accent);
-      margin-bottom: 6px;
-      font-size: 14px;
-    }
-
-    .dialog-text {
-      line-height: 1.5;
-      margin-bottom: 12px;
-      font-size: 14px;
-    }
-
-    .dialog-choices {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .dialog-choice {
-      padding: 10px 12px;
-      background: var(--card);
-      border: 2px solid var(--border);
-      border-radius: 8px;
-      cursor: pointer;
-      transition: all 0.2s;
-      text-align: left;
-      color: var(--fg);
-      font-size: 13px;
-      touch-action: manipulation;
-    }
-
-    .dialog-choice:active {
-      border-color: var(--accent);
-      background: rgba(255, 107, 53, 0.2);
-    }
-
-    /* Notification */
-    #notification {
-      position: absolute;
-      top: 60px;
-      left: 50%;
-      transform: translateX(-50%);
-      padding: 10px 20px;
-      background: var(--card);
-      border: 2px solid var(--accent);
-      border-radius: 8px;
-      font-weight: 600;
-      z-index: 25;
-      opacity: 0;
-      transition: all 0.3s ease;
-      pointer-events: none;
-      font-size: 13px;
-      text-align: center;
-      max-width: 80%;
-    }
-
-    #notification.show {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
-    }
-
-    #notification.positive { border-color: var(--positive); color: var(--positive); }
-    #notification.negative { border-color: var(--negative); color: var(--negative); }
-
-    /* Mini Map */
-    #miniMap {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      width: 100px;
-      height: 70px;
-      background: rgba(10, 14, 20, 0.8);
-      border: 2px solid var(--border);
-      border-radius: 8px;
-      overflow: hidden;
-      display: none;
-      pointer-events: none;
-    }
-
-    #miniMap.active { display: block; }
-
-    /* Results Screen */
-    #resultsScreen {
-      background: var(--bg);
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-      padding: 40px 20px;
-    }
-
-    .result-stat {
-      text-align: center;
-      padding: 16px;
-      background: var(--card);
-      border: 2px solid var(--border);
-      border-radius: 12px;
-      min-width: 100px;
-    }
-
-    /* Responsive Adjustments */
-    @media (min-width: 768px) {
-      .play-btn { width: 140px; height: 140px; }
-      .play-btn::before { border-top: 20px solid transparent; border-bottom: 20px solid transparent; border-left: 30px solid white; }
-      #analogContainer { width: 140px; height: 140px; left: 40px; bottom: 40px; }
-      .analog-base { width: 140px; height: 140px; }
-      .analog-stick { width: 60px; height: 60px; }
-      #actionBtn { width: 90px; height: 90px; right: 50px; bottom: 50px; font-size: 16px; }
-      #dialogBox { padding: 20px; bottom: 180px; }
-      .dialog-text { font-size: 16px; }
-      .dialog-choice { font-size: 15px; }
-      .hud-panel { font-size: 16px; padding: 10px 16px; }
-      #miniMap { width: 150px; height: 100px; top: 20px; right: 20px; }
-      .start-btn-container { position: static; background: none; padding: 0; margin-top: 20px; }
-      #characterScreen { justify-content: center; overflow: hidden; }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after {
-        animation-duration: 0.01ms !important;
-        transition-duration: 0.01ms !important;
-      }
+    @media (max-width: 640px) {
+      .play-btn { width: 90px; height: 90px; }
+      .play-btn::before { border-width: 15px 0 15px 26px; }
+      #analogContainer { width: 120px; height: 120px; bottom: 20px; left: 20px; }
+      .analog-stick { width: 50px; height: 50px; }
+      #storyBox { height: 240px; padding: 10px; padding-bottom: 20px; }
     }
   </style>
 </head>
 <body>
-  <div id="gameContainer">
+
+<div id="gameContainer">
+  
+  <!-- Loading Screen -->
+  <div id="loadingScreen">
+    <div class="spinner"></div>
+    <p class="mt-4 text-sm opacity-60">Loading Assets...</p>
+  </div>
+
+  <!-- MENU SCREEN -->
+  <div id="menuScreen" class="game-screen">
+    <h1 class="pixel-font text-4xl md:text-6xl mb-4" style="color: var(--accent); text-shadow: 0 0 20px rgba(245, 158, 11, 0.5);">SCHOOL STORY</h1>
+    <p class="text-lg opacity-80 mb-10 max-w-md">A Visual Novel Experience</p>
     
-    <!-- MENU SCREEN -->
-    <div id="menuScreen" class="game-screen active">
-      <div class="pixel-font text-4xl md:text-7xl mb-4 title-glow" style="color: var(--accent);">
-        STAND UP
-      </div>
-      <p class="text-base md:text-xl mb-8 opacity-70 max-w-md">
-        Navigate school life and learn how to handle bullying situations
-      </p>
-      
-      <button id="playButton" class="play-btn" aria-label="Play Game"></button>
-      
-      <p class="pixel-font text-xs mt-6 opacity-50">TAP TO START</p>
-      
-      <div class="mt-8 flex gap-8 text-center text-sm opacity-60">
-        <div><div class="text-xl font-bold" style="color: var(--accent);">5</div><div>Levels</div></div>
-        <div><div class="text-xl font-bold" style="color: var(--accent);">3</div><div>Characters</div></div>
-        <div><div class="text-xl font-bold" style="color: var(--accent);">15+</div><div>Choices</div></div>
-      </div>
+    <button id="playBtn" class="play-btn" aria-label="Start Game"></button>
+    <p class="pixel-font text-xs mt-6 opacity-40">TAP TO START</p>
+  </div>
+
+  <!-- CHARACTER SELECT -->
+  <div id="characterScreen" class="game-screen">
+    <h2 class="pixel-font text-xl mt-10" style="color: var(--accent);">CHOOSE AVATAR</h2>
+    
+    <div class="characters-grid">
+      <!-- Characters will be generated by JS based on Assets -->
     </div>
 
-    <!-- CHARACTER SELECT SCREEN -->
-    <div id="characterScreen" class="game-screen">
-      <h2 class="pixel-font text-xl md:text-3xl text-center" style="color: var(--accent);">CHOOSE CHARACTER</h2>
-      <p class="mb-4 opacity-70 text-center text-sm">Select who you want to be</p>
-      
-      <div class="characters-grid">
-        <div class="character-card" data-character="student">
-          <div class="character-avatar" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8);">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
-              <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/>
-            </svg>
-          </div>
-          <h3 class="pixel-font text-sm mb-1">Student</h3>
-          <p class="text-xs opacity-70">Learn to cope as a target</p>
-        </div>
-        
-        <div class="character-card" data-character="bystander">
-          <div class="character-avatar" style="background: linear-gradient(135deg, #8b5cf6, #6d28d9);">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
-              <circle cx="12" cy="12" r="3"/><path d="M2 12c2-5 6-8 10-8s8 3 10 8c-2 5-6 8-10 8s-8-3-10-8z"/>
-            </svg>
-          </div>
-          <h3 class="pixel-font text-sm mb-1">Bystander</h3>
-          <p class="text-xs opacity-70">Witness and learn to help</p>
-        </div>
-        
-        <div class="character-card" data-character="upstander">
-          <div class="character-avatar" style="background: linear-gradient(135deg, #22c55e, #16a34a);">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
-              <path d="M12 2l3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z"/>
-            </svg>
-          </div>
-          <h3 class="pixel-font text-sm mb-1">Upstander</h3>
-          <p class="text-xs opacity-70">Master intervention</p>
-        </div>
-      </div>
-      
-      <!-- Fixed/Scroll safe button container -->
-      <div class="start-btn-container">
-        <button id="startGameBtn" class="w-full md:w-auto px-8 py-3 bg-gradient-to-r from-orange-500 to-orange-400 rounded-full pixel-font text-sm disabled:opacity-30 disabled:pointer-events-none transition-all" disabled>
-          START MISSION
-        </button>
-      </div>
-    </div>
-
-    <!-- GAME SCREEN -->
-    <div id="gameScreen" class="game-screen">
-      <div id="gameWorld">
-        <canvas id="gameCanvas"></canvas>
-      </div>
-      
-      <div id="gameHUD">
-        <div class="hud-panel">
-          <div class="pixel-font text-xs opacity-60">LVL</div>
-          <div id="hudLevel" class="pixel-font" style="color: var(--accent);">1</div>
-        </div>
-        
-        <div class="hud-panel">
-          <div class="flex items-center gap-2">
-            <span class="text-xs opacity-60">EMP:</span>
-            <span id="hudEmpathy" class="pixel-font text-xs font-bold">0</span>
-          </div>
-        </div>
-      </div>
-      
-      <div id="miniMap"><canvas id="miniMapCanvas" width="100" height="70"></canvas></div>
-      
-      <div id="analogContainer">
-        <div class="analog-base"></div>
-        <div id="analogStick" class="analog-stick"></div>
-      </div>
-      
-      <button id="actionBtn">ACT</button>
-      
-      <div id="dialogBox">
-        <div id="dialogSpeaker" class="dialog-speaker pixel-font"></div>
-        <div id="dialogText" class="dialog-text"></div>
-        <div id="dialogChoices" class="dialog-choices"></div>
-      </div>
-      
-      <div id="notification"></div>
-    </div>
-
-    <!-- RESULTS SCREEN -->
-    <div id="resultsScreen" class="game-screen">
-      <div class="pixel-font text-2xl md:text-5xl mb-2" style="color: var(--accent);">MISSION COMPLETE</div>
-      <p class="mb-6 opacity-70 text-sm md:text-base">Here's how you did</p>
-      
-      <div class="flex flex-wrap justify-center gap-3 mb-6">
-        <div class="result-stat">
-          <div id="resultScore" class="pixel-font text-2xl md:text-3xl" style="color: var(--accent);">0</div>
-          <div class="text-xs opacity-70 mt-1">Empathy</div>
-        </div>
-        <div class="result-stat">
-          <div id="resultGood" class="pixel-font text-2xl md:text-3xl" style="color: var(--positive);">0</div>
-          <div class="text-xs opacity-70 mt-1">Good</div>
-        </div>
-        <div class="result-stat">
-          <div id="resultBad" class="pixel-font text-2xl md:text-3xl" style="color: var(--negative);">0</div>
-          <div class="text-xs opacity-70 mt-1">Poor</div>
-        </div>
-      </div>
-      
-      <div id="resultMessage" class="text-center max-w-md mb-6 px-4 text-sm opacity-80"></div>
-      
-      <div class="flex gap-3 flex-wrap justify-center">
-        <button id="restartBtn" class="px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-400 rounded-full pixel-font text-xs">
-          PLAY AGAIN
-        </button>
-        <button id="menuBtn" class="px-6 py-3 bg-transparent border-2 border-gray-600 rounded-full pixel-font text-xs">
-          MENU
-        </button>
-      </div>
+    <div class="fixed-bottom-btn md:relative md:mt-4">
+      <button id="startBtn" class="px-10 py-3 bg-amber-500 text-black rounded-full font-bold pixel-font disabled:opacity-30 disabled:cursor-not-allowed" disabled>
+        START DAY
+      </button>
     </div>
   </div>
 
-  <script>
-    // ==================== GAME ENGINE ====================
-    const Game = {
-      canvas: null,
-      ctx: null,
-      miniMapCanvas: null,
-      miniMapCtx: null,
-      width: 0,
-      height: 0,
-      running: false,
-      lastTime: 0,
-      dpr: 1, // Device pixel ratio
-      
-      state: {
-        screen: 'menu',
-        character: null,
-        level: 1,
-        empathy: 0,
-        goodChoices: 0,
-        badChoices: 0
-      },
-      
-      player: {
-        x: 400, y: 300,
-        width: 32, height: 48,
-        speed: 180,
-        vx: 0, vy: 0,
-        direction: 'down',
-        animFrame: 0,
-        color: '#3b82f6'
-      },
-      
-      world: { width: 1000, height: 600, offsetX: 0, offsetY: 0 },
-      npcs: [],
-      interactables: [],
-      currentInteraction: null,
-      input: { analogX: 0, analogY: 0, keys: {} }
+  <!-- GAME SCREEN -->
+  <div id="gameScreen" class="game-screen">
+    <canvas id="gameCanvas"></canvas>
+    
+    <div id="storyBox">
+      <div class="story-content">
+        <div id="storyTitle" class="story-title">CHAPTER 1</div>
+        <div id="storyText" class="story-text">Loading...</div>
+        <div id="choiceGrid" class="choice-grid"></div>
+      </div>
+    </div>
+
+    <div id="analogContainer">
+      <div class="analog-base"></div>
+      <div id="stick" class="analog-stick"></div>
+    </div>
+  </div>
+
+  <!-- END SCREEN -->
+  <div id="endScreen" class="game-screen justify-center items-center text-center p-8">
+      <h1 class="pixel-font text-3xl mb-4" style="color: var(--accent);">THE END</h1>
+      <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 mb-8 max-w-sm w-full">
+          <div class="text-5xl font-bold mb-2" id="finalScore">0</div>
+          <div class="text-sm opacity-60">Empathy Points</div>
+      </div>
+      <button id="replayBtn" class="px-8 py-3 bg-amber-500 rounded-full font-bold">Play Again</button>
+  </div>
+
+</div>
+
+<script>
+// ==========================================
+// 1. ASSET CONFIGURATION (CHANGE URLs HERE)
+// ==========================================
+
+const CONFIG = {
+  // Backgrounds (use wide images for side scrolling)
+  backgrounds: {
+    school: "https://placehold.co/2400x800/64748b/ffffff?text=School+Background", // Example placeholder
+    park: "https://placehold.co/2400x800/228B22/ffffff?text=Park+Background"
+  },
+  
+  // Characters (Sprite Sheets or Single Images)
+  // Ideally a sprite sheet: horizontal strip of frames (e.g., Idle, Walk1, Walk2, Walk3)
+  characters: [
+    {
+      id: "alex",
+      name: "Alex",
+      // A sprite sheet with 4 frames horizontal (Idle, Walk1, Walk2, Walk3)
+      sprite: "https://placehold.co/128x32/3b82f6/ffffff?text=Alex", 
+      preview: "https://placehold.co/64x64/3b82f6/ffffff?text=A",
+      color: "#3b82f6" // Fallback color if image fails
+    },
+    {
+      id: "sam",
+      name: "Sam",
+      sprite: "https://placehold.co/128x32/22c55e/ffffff?text=Sam",
+      preview: "https://placehold.co/64x64/22c55e/ffffff?text=S",
+      color: "#22c55e"
+    }
+  ],
+  
+  // NPCs (can reuse logic)
+  npcSprite: "https://placehold.co/32x32/ef4444/ffffff?text=Bully"
+};
+
+// ==========================================
+// 2. GAME ENGINE
+// ==========================================
+
+const Game = {
+  canvas: null, ctx: null, w: 0, h: 0,
+  lastTime: 0, running: false,
+  assets: { backgrounds: {}, characters: {} }, // Loaded images stored here
+  state: { screen: 'loading', char: null, score: 0, phase: 'roam' },
+  player: { 
+    x: 100, y: 0, vx: 0, size: 32, speed: 180, 
+    color: '#3b82f6', frame: 0, facing: 1 
+  },
+  world: { x: 0, width: 2400 },
+  input: { dx: 0 },
+  currentBg: null
+};
+
+const Story = [
+  { trigger: 400, title: "Hallway", text: "You see a student being bullied by their locker.", choices: [
+    { text: "Intervene", pts: 15, result: "You stopped the bullying!" },
+    { text: "Walk away", pts: -5, result: "You walked away." }
+  ]},
+  { trigger: 1000, title: "Class", text: "A group is mocking a student's answer.", choices: [
+    { text: "Join the group", pts: -10, result: "You hurt their feelings." },
+    { text: "Support the student", pts: 20, result: "You made a new friend." }
+  ]},
+  { trigger: 1800, title: "Exit", text: "The school day ends. How did you do?", choices: [
+    { text: "Go home", pts: 0, result: "You reflect on your day." }
+  ]}
+];
+
+// --- Asset Loader ---
+
+function loadAssets() {
+  return new Promise((resolve) => {
+    let toLoad = 0;
+    let loaded = 0;
+    
+    const checkDone = () => {
+      loaded++;
+      if (loaded === toLoad) resolve();
     };
 
-    // ==================== SCENARIOS DATA ====================
-    const scenarios = [
-      {
-        level: 1, name: "The Hallway",
-        npcs: [
-          { id: 'bully1', x: 500, y: 280, w: 32, h: 48, color: '#ef4444', name: 'Alex', type: 'bully' },
-          { id: 'victim1', x: 540, y: 300, w: 32, h: 48, color: '#3b82f6', name: 'Sam', type: 'victim' }
-        ],
-        interactables: [ { id: 'event1', x: 520, y: 280, w: 80, h: 80, type: 'bullying' } ],
-        dialog: {
-          speaker: "Scene 1: Verbal Bullying",
-          text: "Alex mocks Sam's clothes. Others pass by ignoring it. What do you do?",
-          choices: [
-            { text: "Walk away quickly", consequence: 'negative', points: -5, message: "Ignoring it allows harm to continue." },
-            { text: "Approach and distract Alex", consequence: 'positive', points: 15, message: "Great! Distraction works well." }
-          ]
-        }
-      },
-      {
-        level: 2, name: "The Cafeteria",
-        npcs: [
-          { id: 'group1', x: 300, y: 300, w: 64, h: 48, color: '#a855f7', name: 'Group', type: 'group' },
-          { id: 'victim2', x: 600, y: 350, w: 32, h: 48, color: '#22c55e', name: 'Jordan', type: 'victim' }
-        ],
-        interactables: [ { id: 'event2', x: 450, y: 300, w: 200, h: 100 } ],
-        dialog: {
-          speaker: "Scene 2: Exclusion",
-          text: "Jordan sits alone after being rejected by the popular group.",
-          choices: [
-            { text: "Sit with Jordan", consequence: 'positive', points: 20, message: "You showed kindness matters!" },
-            { text: "Feel bad but do nothing", consequence: 'negative', points: 0, message: "Inaction helps no one." }
-          ]
-        }
-      },
-      {
-        level: 3, name: "Online",
-        npcs: [
-          { id: 'computer', x: 400, y: 300, w: 50, h: 50, color: '#6366f1', name: 'Phone', type: 'object' }
-        ],
-        interactables: [ { id: 'event3', x: 370, y: 270, w: 100, h: 100 } ],
-        dialog: {
-          speaker: "Scene 3: Cyberbullying",
-          text: "You see a cruel group chat about a classmate who doesn't know yet.",
-          choices: [
-            { text: "Report and tell them to stop", consequence: 'positive', points: 20, message: "Perfect response!" },
-            { text: "Leave the chat silently", consequence: 'negative', points: -5, message: "Silence implies consent." }
-          ]
-        }
-      },
-      {
-        level: 4, name: "Locker Room",
-        npcs: [
-          { id: 'bully2', x: 350, y: 280, w: 36, h: 52, color: '#ef4444', name: 'Mike', type: 'bully' },
-          { id: 'victim3', x: 380, y: 300, w: 30, h: 46, color: '#f59e0b', name: 'Taylor', type: 'victim' }
-        ],
-        interactables: [ { id: 'event4', x: 340, y: 270, w: 100, h: 80 } ],
-        dialog: {
-          speaker: "Scene 4: Physical Intimidation",
-          text: "Mike blocks Taylor's locker, bumping them 'accidentally'.",
-          choices: [
-            { text: "Get a teacher immediately", consequence: 'positive', points: 15, message: "Safety first! Right call." },
-            { text: "Walk Taylor away safely", consequence: 'positive', points: 15, message: "Smart move supporting the target." }
-          ]
-        }
-      },
-      {
-        level: 5, name: "Final Test",
-        npcs: [
-          { id: 'bully3', x: 300, y: 280, w: 34, h: 50, color: '#ef4444', name: 'Chris', type: 'bully' },
-          { id: 'victim4', x: 500, y: 350, w: 32, h: 48, color: '#ec4899', name: 'Riley', type: 'victim' }
-        ],
-        interactables: [ { id: 'event5', x: 400, y: 300, w: 150, h: 100 } ],
-        dialog: {
-          speaker: "Scene 5: Rumors",
-          text: "Chris spread rumors. Riley is isolated. Others are silent.",
-          choices: [
-            { text: "Organize support for Riley", consequence: 'positive', points: 25, message: "Outstanding leadership!" },
-            { text: "Confront Chris alone", consequence: 'neutral', points: 5, message: "Risky. Involve adults too." }
-          ]
-        }
-      }
-    ];
+    // Load Backgrounds
+    Object.keys(CONFIG.backgrounds).forEach(key => {
+      toLoad++;
+      const img = new Image();
+      img.src = CONFIG.backgrounds[key];
+      img.onload = () => {
+        Game.assets.backgrounds[key] = img;
+        checkDone();
+      };
+      img.onerror = checkDone; // Skip if error
+    });
 
-    // ==================== INITIALIZATION ====================
-    function init() {
-      Game.canvas = document.getElementById('gameCanvas');
-      Game.ctx = Game.canvas.getContext('2d');
-      Game.miniMapCanvas = document.getElementById('miniMapCanvas');
-      Game.miniMapCtx = Game.miniMapCanvas.getContext('2d');
+    // Load Characters
+    CONFIG.characters.forEach(c => {
+      toLoad++;
+      const img = new Image();
+      img.src = c.sprite;
+      img.onload = () => {
+        Game.assets.characters[c.id] = img;
+        checkDone();
+      };
+      img.onerror = checkDone;
       
-      // Handle High DPI screens
-      Game.dpr = window.devicePixelRatio || 1;
-      
-      resizeCanvas();
-      window.addEventListener('resize', resizeCanvas);
-      window.addEventListener('orientationchange', resizeCanvas);
-      
-      setupEventListeners();
-      showScreen('menu');
+      // Load Preview
+      const pImg = new Image();
+      pImg.src = c.preview;
+      pImg.onload = () => { c.previewImg = pImg; };
+    });
+    
+    // Load NPC
+    toLoad++;
+    const npcImg = new Image();
+    npcImg.src = CONFIG.npcSprite;
+    npcImg.onload = () => { Game.assets.npc = npcImg; checkDone(); };
+    npcImg.onerror = checkDone;
+    
+    // Fallback if no assets
+    if (toLoad === 0) resolve();
+  });
+}
+
+// --- SYSTEM ---
+
+function $(id) { return document.getElementById(id); }
+
+async function init() {
+  Game.canvas = $('gameCanvas');
+  Game.ctx = Game.canvas.getContext('2d');
+  
+  resize();
+  window.addEventListener('resize', resize);
+  
+  // Load Images
+  await loadAssets();
+  
+  // Setup Menu
+  setupCharacterSelect();
+  
+  $('playBtn').onclick = () => switchScreen('characterScreen');
+  $('replayBtn').onclick = () => { Game.state.score = 0; switchScreen('characterScreen'); };
+  
+  $('loadingScreen').style.display = 'none';
+  switchScreen('menuScreen');
+  
+  setupControls();
+}
+
+function setupCharacterSelect() {
+  const grid = $('characterScreen').querySelector('.characters-grid');
+  grid.innerHTML = '';
+  
+  CONFIG.characters.forEach(c => {
+    const div = document.createElement('div');
+    div.className = 'character-card';
+    div.dataset.char = c.id;
+    
+    // Use image or fallback to colored circle
+    const previewHtml = c.previewImg 
+      ? `<img src="${c.preview}" class="char-preview" style="background-image:url(${c.preview})">`
+      : `<div class="char-preview" style="background-color:${c.color}"></div>`;
+    
+    div.innerHTML = `
+      ${previewHtml}
+      <h3 class="font-bold">${c.name}</h3>
+    `;
+    
+    div.onclick = () => {
+      document.querySelectorAll('.character-card').forEach(e => e.classList.remove('selected'));
+      div.classList.add('selected');
+      Game.state.char = c.id;
+      Game.player.color = c.color; // Fallback
+      $('startBtn').disabled = false;
+    };
+    grid.appendChild(div);
+  });
+}
+
+function resize() {
+  Game.w = window.innerWidth;
+  Game.h = window.innerHeight;
+  Game.canvas.width = Game.w;
+  Game.canvas.height = Game.h;
+  // Ground position
+  Game.player.y = Game.h * 0.75;
+}
+
+function switchScreen(id) {
+  document.querySelectorAll('.game-screen').forEach(s => s.classList.remove('active'));
+  $('gameScreen').classList.remove('active'); // special handling
+  
+  if(id === 'gameScreen') {
+    $('gameScreen').classList.add('active');
+    $('analogContainer').classList.add('active');
+    if(!Game.running) {
+      Game.running = true;
+      loop(performance.now());
     }
+  } else {
+    Game.running = false;
+    $('analogContainer').classList.remove('active');
+    $(id).classList.add('active');
+  }
+  Game.state.screen = id;
+}
 
-    function resizeCanvas() {
-      // CSS size
-      Game.width = window.innerWidth;
-      Game.height = window.innerHeight;
-      
-      // Actual pixel size (for sharpness)
-      Game.canvas.width = Game.width * Game.dpr;
-      Game.canvas.height = Game.height * Game.dpr;
-      Game.canvas.style.width = Game.width + 'px';
-      Game.canvas.style.height = Game.height + 'px';
-      
-      // Scale context for DPR
-      Game.ctx.scale(Game.dpr, Game.dpr);
-      
-      // Adjust world bounds if needed, or keep fixed
-      Game.world.width = Math.max(1000, Game.width * 1.2);
-      Game.world.height = Math.max(600, Game.height * 1.2);
+// --- GAME LOGIC ---
+
+function startGame() {
+  Game.state.score = 0;
+  Game.state.phase = 'roam';
+  Game.world.x = 0;
+  Game.player.x = 100;
+  Game.player.vx = 0;
+  Game.currentBg = Game.assets.backgrounds.school || null; // Set default BG
+  
+  Story.forEach(e => e.fired = false);
+  showDialog(false);
+  switchScreen('gameScreen');
+}
+
+function update(dt) {
+  if(Game.state.phase === 'story') return;
+
+  // Movement
+  Game.player.vx = Game.input.dx * Game.player.speed;
+  Game.player.x += Game.player.vx * dt;
+  Game.player.x = Math.max(50, Math.min(Game.world.width - 50, Game.player.x));
+  
+  // Animation logic
+  if(Game.player.vx !== 0) {
+    Game.player.facing = Game.player.vx > 0 ? 1 : -1;
+    Game.player.frame += dt * 12; // Animation speed
+  } else {
+    Game.player.frame = 0; // Idle frame
+  }
+
+  // Camera
+  let targetCam = Game.player.x - Game.w / 2;
+  targetCam = Math.max(0, Math.min(Game.world.width - Game.w, targetCam));
+  Game.world.x += (targetCam - Game.world.x) * 0.1;
+
+  // Triggers
+  Story.forEach(event => {
+    if(!event.fired && Game.player.x > event.trigger) {
+      triggerEvent(event);
     }
+  });
+}
 
-    function showScreen(screen) {
-      document.querySelectorAll('.game-screen').forEach(s => s.classList.remove('active'));
-      document.getElementById(screen + 'Screen').classList.add('active');
-      Game.state.screen = screen;
+function render() {
+  const ctx = Game.ctx;
+  ctx.clearRect(0, 0, Game.w, Game.h);
+  
+  ctx.save();
+  ctx.translate(-Game.world.x, 0);
+
+  // --- DRAW BACKGROUND ---
+  if(Game.currentBg && Game.currentBg.complete) {
+    // Parallax / Tiling Logic:
+    // Since our level is 2400px wide, we draw the bg starting at 0
+    // We can draw it fixed to camera (parallax) or fixed to world.
+    // Fixed to world (moves with player):
+    ctx.drawImage(Game.currentBg, 0, 0, Game.world.width, Game.h);
+  } else {
+    // Fallback Gradient
+    let grd = ctx.createLinearGradient(0, 0, 0, Game.h);
+    grd.addColorStop(0, "#94a3b8");
+    grd.addColorStop(1, "#475569");
+    ctx.fillStyle = grd;
+    ctx.fillRect(0, 0, Game.world.width, Game.h);
+    
+    // Draw simple floor
+    ctx.fillStyle = '#334155';
+    ctx.fillRect(0, Game.h * 0.8, Game.world.width, Game.h * 0.3);
+  }
+
+  // --- DRAW NPCs ---
+  Story.forEach(event => {
+    if(!event.fired && Math.abs(event.trigger - Game.player.x) < 200) {
+      const npcX = event.trigger + 50;
       
-      // Toggle controls visibility
-      const isGame = screen === 'game';
-      document.getElementById('gameHUD').classList.toggle('active', isGame);
-      document.getElementById('miniMap').classList.toggle('active', isGame);
-      document.getElementById('analogContainer').classList.toggle('active', isGame);
-      document.getElementById('actionBtn').classList.toggle('active', isGame);
-      
-      if (isGame) {
-        resizeCanvas(); // Ensure canvas fits perfectly when shown
-        if (!Game.running) {
-            Game.running = true;
-            Game.lastTime = performance.now();
-            requestAnimationFrame(gameLoop);
-        }
+      // Draw NPC using Asset or Fallback
+      if(Game.assets.npc && Game.assets.npc.complete) {
+        ctx.drawImage(Game.assets.npc, npcX - 16, Game.player.y - 32, 32, 32);
       } else {
-        Game.running = false;
+        ctx.fillStyle = '#ef4444';
+        ctx.beginPath(); ctx.arc(npcX, Game.player.y, 16, 0, 7); ctx.fill();
       }
     }
+  });
 
-    // ==================== EVENT LISTENERS ====================
-    function setupEventListeners() {
-      document.getElementById('playButton').addEventListener('click', () => showScreen('character'));
-      
-      document.querySelectorAll('.character-card').forEach(card => {
-        // Touch friendlier
-        const select = () => {
-          document.querySelectorAll('.character-card').forEach(c => c.classList.remove('selected'));
-          card.classList.add('selected');
-          Game.state.character = card.dataset.character;
-          
-          const btn = document.getElementById('startGameBtn');
-          btn.disabled = false;
-          
-          // Set player color
-          if (Game.state.character === 'student') Game.player.color = '#3b82f6';
-          else if (Game.state.character === 'bystander') Game.player.color = '#8b5cf6';
-          else Game.player.color = '#22c55e';
-        };
-        card.addEventListener('click', select);
-        card.addEventListener('touchend', (e) => { e.preventDefault(); select(); });
-      });
-      
-      document.getElementById('startGameBtn').addEventListener('click', startGame);
-      document.getElementById('actionBtn').addEventListener('click', handleInteraction);
-      document.getElementById('restartBtn').addEventListener('click', () => { resetGame(); showScreen('character'); });
-      document.getElementById('menuBtn').addEventListener('click', () => { resetGame(); showScreen('menu'); });
-      
-      // Keyboard
-      window.addEventListener('keydown', (e) => {
-        Game.input.keys[e.key.toLowerCase()] = true;
-        if (e.key === ' ' || e.key === 'Enter') handleInteraction();
-      });
-      window.addEventListener('keyup', (e) => Game.input.keys[e.key.toLowerCase()] = false);
-      
-      setupAnalogStick();
-    }
+  // --- DRAW PLAYER ---
+  const p = Game.player;
+  const charAsset = Game.assets.characters[p.charId || Game.state.char];
+  
+  let drawSuccess = false;
+  
+  // Try to draw Sprite Sheet (assuming 4 frames horizontal)
+  // Width of one frame is totalWidth / 4
+  if(charAsset && charAsset.complete && charAsset.naturalWidth > 0) {
+    const frameWidth = charAsset.width / 4; 
+    const frameHeight = charAsset.height;
+    
+    // Calculate animation frame index (0, 1, 2, 3)
+    let frameIndex = Math.floor(p.frame) % 4;
+    
+    // Draw the sprite
+    ctx.save();
+    ctx.translate(p.x, p.y);
+    if(p.facing === -1) ctx.scale(-1, 1); // Flip horizontally
+    
+    ctx.drawImage(
+      charAsset, 
+      frameIndex * frameWidth, 0, frameWidth, frameHeight, // Source Rect
+      -p.size/2, -p.size/2, p.size, p.size // Dest Rect (centered)
+    );
+    ctx.restore();
+    drawSuccess = true;
+  } 
+  
+  // Fallback if no image
+  if (!drawSuccess) {
+    ctx.fillStyle = p.color;
+    ctx.beginPath(); ctx.arc(p.x, p.y, p.size/2, 0, 7); ctx.fill();
+    
+    // Simple eyes
+    ctx.fillStyle = 'white';
+    ctx.beginPath(); ctx.arc(p.x + (p.facing*4), p.y - 4, 3, 0, 7); ctx.fill();
+  }
 
-    function setupAnalogStick() {
-      const stick = document.getElementById('analogStick');
-      const container = document.getElementById('analogContainer');
-      let isDragging = false;
-      let identifier = null;
+  ctx.restore();
+}
 
-      const handleStart = (e) => {
-        if (isDragging) return;
-        const touch = e.changedTouches ? e.changedTouches[0] : e;
-        isDragging = true;
-        identifier = touch.identifier || 'mouse';
-        e.preventDefault();
-      };
+function triggerEvent(event) {
+  event.fired = true;
+  Game.state.phase = 'story';
+  
+  $('storyTitle').textContent = event.title;
+  $('storyText').textContent = event.text;
+  
+  const grid = $('choiceGrid');
+  grid.innerHTML = '';
+  
+  event.choices.forEach(c => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.textContent = c.text;
+    btn.onclick = () => resolveChoice(event, c);
+    grid.appendChild(btn);
+  });
+  
+  showDialog(true);
+}
 
-      const handleMove = (e) => {
-        if (!isDragging) return;
-        e.preventDefault();
-        
-        const rect = container.getBoundingClientRect();
-        const touch = e.changedTouches ? 
-          Array.from(e.changedTouches).find(t => t.identifier === identifier) || e.changedTouches[0] 
-          : e;
-        
-        if(!touch) return;
+function resolveChoice(event, choice) {
+  Game.state.score += choice.pts;
+  $('storyText').textContent = choice.result;
+  
+  const grid = $('choiceGrid');
+  grid.innerHTML = '';
+  
+  const btn = document.createElement('button');
+  btn.className = 'choice-btn';
+  btn.textContent = "Continue...";
+  btn.onclick = () => {
+    showDialog(false);
+    Game.state.phase = 'roam';
+    if(event === Story[Story.length - 1]) endGame();
+  };
+  grid.appendChild(btn);
+}
 
-        const centerX = rect.left + rect.width / 2;
-        const centerY = rect.top + rect.height / 2;
-        
-        let dx = touch.clientX - centerX;
-        let dy = touch.clientY - centerY;
-        
-        const maxDist = 40;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        
-        if (dist > maxDist) {
-          dx = (dx / dist) * maxDist;
-          dy = (dy / dist) * maxDist;
-        }
-        
-        stick.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
-        Game.input.analogX = dx / maxDist;
-        Game.input.analogY = dy / maxDist;
-      };
+function showDialog(show) { $('storyBox').classList.toggle('active', show); }
 
-      const handleEnd = (e) => {
-        if (e.changedTouches && !Array.from(e.changedTouches).some(t => t.identifier === identifier) && identifier !== 'mouse') return;
-        isDragging = false;
-        identifier = null;
-        stick.style.transform = 'translate(-50%, -50%)';
-        Game.input.analogX = 0;
-        Game.input.analogY = 0;
-      };
+function endGame() {
+  $('finalScore').textContent = Game.state.score;
+  switchScreen('endScreen');
+}
 
-      // Mouse events
-      container.addEventListener('mousedown', handleStart);
-      window.addEventListener('mousemove', handleMove);
-      window.addEventListener('mouseup', handleEnd);
+function loop(time) {
+  if(!Game.running) return;
+  const dt = Math.min((time - Game.lastTime) / 1000, 0.2);
+  Game.lastTime = time;
+  update(dt); render();
+  requestAnimationFrame(loop);
+}
 
-      // Touch events
-      container.addEventListener('touchstart', handleStart, { passive: false });
-      window.addEventListener('touchmove', handleMove, { passive: false });
-      window.addEventListener('touchend', handleEnd);
-      window.addEventListener('touchcancel', handleEnd);
-    }
+// --- CONTROLS ---
+function setupControls() {
+  const stick = $('stick');
+  const base = $('analogContainer');
+  let dragging = false;
 
-    // ==================== GAME LOGIC ====================
-    function startGame() {
-      Game.state.level = 1;
-      Game.state.empathy = 0;
-      Game.state.goodChoices = 0;
-      Game.state.badChoices = 0;
-      
-      loadLevel(1);
-      showScreen('game');
-    }
+  const move = (ex, ey) => {
+    if(!dragging) return;
+    const rect = base.getBoundingClientRect();
+    const cx = rect.left + rect.width/2;
+    let dx = ex - cx;
+    const dist = Math.abs(dx);
+    const max = 60;
+    if(dist > max) dx = (dx/dist) * max;
+    stick.style.transform = `translate(calc(-50% + ${dx}px), -50%)`;
+    Game.input.dx = dx / max;
+  };
 
-    function resetGame() {
-      Game.running = false;
-      Game.state = { screen: 'menu', character: null, level: 1, empathy: 0, goodChoices: 0, badChoices: 0 };
-      Game.currentInteraction = null;
-      document.getElementById('dialogBox').classList.remove('active');
-      document.querySelectorAll('.character-card').forEach(c => c.classList.remove('selected'));
-      const btn = document.getElementById('startGameBtn');
-      btn.disabled = true;
-    }
+  const end = () => {
+    dragging = false;
+    stick.style.transform = `translate(-50%, -50%)`;
+    Game.input.dx = 0;
+  };
 
-    function loadLevel(levelNum) {
-      const scenario = scenarios[levelNum - 1];
-      if (!scenario) { endGame(); return; }
+  base.addEventListener('touchstart', e => { e.preventDefault(); dragging = true; move(e.touches[0].clientX, e.touches[0].clientY); }, {passive:false});
+  window.addEventListener('touchmove', e => { if(dragging) move(e.touches[0].clientX, e.touches[0].clientY); }, {passive:false});
+  window.addEventListener('touchend', end);
+  
+  base.addEventListener('mousedown', e => { dragging = true; move(e.clientX, e.clientY); });
+  window.addEventListener('mousemove', e => { if(dragging) move(e.clientX, e.clientY); });
+  window.addEventListener('mouseup', end);
+  
+  // Start button
+  $('startBtn').onclick = startGame;
+}
 
-      // Reset Player
-      Game.player.x = 100;
-      Game.player.y = 300;
-      Game.player.vx = 0; Game.player.vy = 0;
-      
-      // Load data
-      Game.npcs = scenario.npcs.map(n => ({ ...n, origX: n.x, origY: n.y }));
-      Game.interactables = scenario.interactables.map(i => ({ ...i, triggered: false }));
-      
-      // UI
-      document.getElementById('hudLevel').textContent = levelNum;
-      document.getElementById('hudEmpathy').textContent = Game.state.empathy;
-      
-      showNotification(`Level ${levelNum}: ${scenario.name}`, 'neutral');
-    }
-
-    function gameLoop(timestamp) {
-      if (!Game.running) return;
-      
-      const dt = (timestamp - Game.lastTime) / 1000;
-      Game.lastTime = timestamp;
-      
-      update(Math.min(dt, 0.1)); // Cap delta time
-      render();
-      
-      requestAnimationFrame(gameLoop);
-    }
-
-    function update(dt) {
-      if (document.getElementById('dialogBox').classList.contains('active')) return;
-
-      // Input
-      let mx = Game.input.analogX;
-      let my = Game.input.analogY;
-      
-      // Keyboard overrides
-      if (Game.input.keys['w'] || Game.input.keys['arrowup']) my = -1;
-      if (Game.input.keys['s'] || Game.input.keys['arrowdown']) my = 1;
-      if (Game.input.keys['a'] || Game.input.keys['arrowleft']) mx = -1;
-      if (Game.input.keys['d'] || Game.input.keys['arrowright']) mx = 1;
-      
-      if (mx !== 0 && my !== 0) { mx *= 0.707; my *= 0.707; }
-      
-      Game.player.vx = mx * Game.player.speed;
-      Game.player.vy = my * Game.player.speed;
-      
-      Game.player.x += Game.player.vx * dt;
-      Game.player.y += Game.player.vy * dt;
-      
-      // Bounds
-      Game.player.x = Math.max(20, Math.min(Game.world.width - 40, Game.player.x));
-      Game.player.y = Math.max(20, Math.min(Game.world.height - 60, Game.player.y));
-      
-      // Anim
-      if (Math.abs(Game.player.vx) > 1 || Math.abs(Game.player.vy) > 1) {
-        Game.player.animFrame = (Game.player.animFrame + dt * 8) % 4;
-        Game.player.direction = Math.abs(Game.player.vx) > Math.abs(Game.player.vy) 
-          ? (Game.player.vx > 0 ? 'right' : 'left')
-          : (Game.player.vy > 0 ? 'down' : 'up');
-      }
-      
-      // Camera
-      Game.world.offsetX = Game.player.x - Game.width / 2;
-      Game.world.offsetY = Game.player.y - Game.height / 2;
-      Game.world.offsetX = Math.max(0, Math.min(Game.world.width - Game.width, Game.world.offsetX));
-      Game.world.offsetY = Math.max(0, Math.min(Game.world.height - Game.height, Game.world.offsetY));
-      
-      checkInteractables();
-      
-      // NPC idle move
-      Game.npcs.forEach(n => {
-        if (n.type === 'bully') n.x = n.origX + Math.sin(Date.now() / 400) * 4;
-      });
-    }
-
-    function checkInteractables() {
-      const btn = document.getElementById('actionBtn');
-      let near = false;
-      
-      Game.interactables.forEach(inter => {
-        if (!inter.triggered) {
-          const dx = Game.player.x - inter.x;
-          const dy = Game.player.y - inter.y;
-          if (Math.sqrt(dx*dx + dy*dy) < 80) {
-            near = true;
-            Game.currentInteraction = inter;
-          }
-        }
-      });
-      
-      btn.textContent = near ? 'ACT' : 'MOVE';
-      btn.style.opacity = near ? '1' : '0.5';
-    }
-
-    function handleInteraction() {
-      if (!Game.currentInteraction || Game.currentInteraction.triggered) return;
-      
-      const s = scenarios[Game.state.level - 1];
-      if (!s) return;
-      
-      Game.currentInteraction.triggered = true;
-      showDialog(s.dialog);
-    }
-
-    function showDialog(d) {
-      const box = document.getElementById('dialogBox');
-      document.getElementById('dialogSpeaker').textContent = d.speaker;
-      document.getElementById('dialogText').textContent = d.text;
-      
-      const cont = document.getElementById('dialogChoices');
-      cont.innerHTML = '';
-      
-      d.choices.forEach(c => {
-        const btn = document.createElement('button');
-        btn.className = 'dialog-choice';
-        btn.textContent = c.text;
-        btn.onclick = () => handleChoice(c);
-        cont.appendChild(btn);
-      });
-      
-      box.classList.add('active');
-    }
-
-    function handleChoice(c) {
-      Game.state.empathy += c.points;
-      if (c.consequence === 'positive') Game.state.goodChoices++;
-      if (c.consequence === 'negative') Game.state.badChoices++;
-      
-      document.getElementById('hudEmpathy').textContent = Game.state.empathy;
-      showNotification(c.message, c.consequence === 'positive' ? 'positive' : c.consequence === 'negative' ? 'negative' : 'neutral');
-      document.getElementById('dialogBox').classList.remove('active');
-      
-      setTimeout(() => {
-        Game.state.level++;
-        if (Game.state.level > scenarios.length) endGame();
-        else loadLevel(Game.state.level);
-      }, 2000);
-    }
-
-    function showNotification(text, type) {
-      const n = document.getElementById('notification');
-      n.textContent = text;
-      n.className = 'show ' + type;
-      setTimeout(() => n.classList.remove('show'), 2000);
-    }
-
-    function endGame() {
-      Game.running = false;
-      document.getElementById('resultScore').textContent = Game.state.empathy;
-      document.getElementById('resultGood').textContent = Game.state.goodChoices;
-      document.getElementById('resultBad').textContent = Game.state.badChoices;
-      
-      let msg = Game.state.empathy >= 70 
-        ? "Outstanding! You understand how to safely intervene."
-        : Game.state.empathy >= 40 
-        ? "Good effort! Keep learning intervention strategies."
-        : "Keep learning. Your actions have real impact.";
-        
-      document.getElementById('resultMessage').textContent = msg;
-      showScreen('results');
-    }
-
-    // ==================== RENDERING ====================
-    function render() {
-      const ctx = Game.ctx;
-      ctx.clearRect(0, 0, Game.width, Game.height);
-      
-      ctx.save();
-      ctx.translate(-Game.world.offsetX, -Game.world.offsetY);
-      
-      drawWorld();
-      Game.npcs.forEach(drawNPC);
-      drawPlayer();
-      
-      // Interaction Indicators
-      Game.interactables.forEach(inter => {
-        if (!inter.triggered) {
-          const pulse = 1 + Math.sin(Date.now() / 200) * 0.2;
-          ctx.beginPath();
-          ctx.arc(inter.x, inter.y, 25 * pulse, 0, Math.PI * 2);
-          ctx.strokeStyle = 'rgba(255, 107, 53, 0.6)';
-          ctx.lineWidth = 2;
-          ctx.stroke();
-          
-          ctx.fillStyle = '#ff6b35';
-          ctx.font = 'bold 20px sans-serif';
-          ctx.textAlign = 'center';
-          ctx.fillText('!', inter.x, inter.y + 7);
-        }
-      });
-      
-      ctx.restore();
-      
-      drawMiniMap();
-    }
-
-    function drawWorld() {
-      const ctx = Game.ctx;
-      // Floor
-      ctx.fillStyle = '#1a1f28';
-      ctx.fillRect(0, 0, Game.world.width, Game.world.height);
-      
-      // Grid
-      ctx.strokeStyle = 'rgba(255,255,255,0.03)';
-      ctx.lineWidth = 1;
-      for(let x=0; x<Game.world.width; x+=60) {
-        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, Game.world.height); ctx.stroke();
-      }
-      for(let y=0; y<Game.world.height; y+=60) {
-        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(Game.world.width, y); ctx.stroke();
-      }
-      
-      // Walls
-      ctx.fillStyle = '#2a3441';
-      ctx.fillRect(0, 0, Game.world.width, 20);
-      ctx.fillRect(0, Game.world.height-20, Game.world.width, 20);
-      ctx.fillRect(0, 0, 20, Game.world.height);
-      ctx.fillRect(Game.world.width-20, 0, 20, Game.world.height);
-    }
-
-    function drawNPC(n) {
-      const ctx = Game.ctx;
-      // Shadow
-      ctx.fillStyle = 'rgba(0,0,0,0.2)';
-      ctx.beginPath();
-      ctx.ellipse(n.x, n.y + n.h/2 + 2, n.w/2, 6, 0, 0, Math.PI*2);
-      ctx.fill();
-      
-      // Body
-      ctx.fillStyle = n.color;
-      ctx.fillRect(n.x - n.w/2, n.y - n.h/2, n.w, n.h);
-      
-      // Eyes
-      ctx.fillStyle = '#fff';
-      ctx.fillRect(n.x - 6, n.y - n.h/2 + 8, 4, 4);
-      ctx.fillRect(n.x + 2, n.y - n.h/2 + 8, 4, 4);
-      
-      // Name
-      ctx.fillStyle = 'rgba(0,0,0,0.6)';
-      ctx.fillRect(n.x - 25, n.y + n.h/2 + 6, 50, 14);
-      ctx.fillStyle = '#fff';
-      ctx.font = '9px Space Grotesk';
-      ctx.textAlign = 'center';
-      ctx.fillText(n.name, n.x, n.y + n.h/2 + 16);
-    }
-
-    function drawPlayer() {
-      const ctx = Game.ctx;
-      const p = Game.player;
-      const bob = (Math.abs(p.vx) > 1 || Math.abs(p.vy) > 1) ? Math.sin(p.animFrame * Math.PI) * 2 : 0;
-      
-      // Shadow
-      ctx.fillStyle = 'rgba(0,0,0,0.3)';
-      ctx.beginPath();
-      ctx.ellipse(p.x, p.y + p.height/2 + 3, p.width/2, 6, 0, 0, Math.PI*2);
-      ctx.fill();
-      
-      // Body
-      ctx.fillStyle = p.color;
-      ctx.fillRect(p.x - p.width/2, p.y - p.height/2 + bob, p.width, p.height);
-      
-      // Direction indicator
-      ctx.fillStyle = 'rgba(255,255,255,0.3)';
-      if (p.direction === 'right') ctx.fillRect(p.x + 4, p.y - 8, 12, 16);
-      else if (p.direction === 'left') ctx.fillRect(p.x - 16, p.y - 8, 12, 16);
-      else if (p.direction === 'up') ctx.fillRect(p.x - 8, p.y - p.height/2, 16, 12);
-      else ctx.fillRect(p.x - 8, p.y + 12, 16, 12);
-      
-      // Eyes
-      ctx.fillStyle = '#fff';
-      ctx.fillRect(p.x - 8, p.y - p.height/2 + 12 + bob, 5, 5);
-      ctx.fillRect(p.x + 3, p.y - p.height/2 + 12 + bob, 5, 5);
-      
-      // Arrow
-      ctx.fillStyle = '#ff6b35';
-      ctx.beginPath();
-      ctx.moveTo(p.x, p.y - p.height/2 - 15);
-      ctx.lineTo(p.x - 6, p.y - p.height/2 - 25);
-      ctx.lineTo(p.x + 6, p.y - p.height/2 - 25);
-      ctx.fill();
-    }
-
-    function drawMiniMap() {
-      const ctx = Game.miniMapCtx;
-      const w = Game.miniMapCanvas.width;
-      const h = Game.miniMapCanvas.height;
-      
-      ctx.fillStyle = 'rgba(10, 14, 20, 0.9)';
-      ctx.fillRect(0, 0, w, h);
-      
-      const scaleX = w / Game.world.width;
-      const scaleY = h / Game.world.height;
-      
-      // NPCs
-      Game.npcs.forEach(n => {
-        ctx.fillStyle = n.color;
-        ctx.fillRect(n.x * scaleX, n.y * scaleY, 4, 4);
-      });
-      
-      // Player
-      ctx.fillStyle = Game.player.color;
-      ctx.fillRect(Game.player.x * scaleX - 2, Game.player.y * scaleY - 2, 6, 6);
-      
-      // View
-      ctx.strokeStyle = 'rgba(255,255,255,0.3)';
-      ctx.strokeRect(
-        Game.world.offsetX * scaleX,
-        Game.world.offsetY * scaleY,
-        Game.width * scaleX,
-        Game.height * scaleY
-      );
-    }
-
-    // Start
-    document.addEventListener('DOMContentLoaded', init);
-  </script>
+// Start
+init();
+</script>
 </body>
 </html>
