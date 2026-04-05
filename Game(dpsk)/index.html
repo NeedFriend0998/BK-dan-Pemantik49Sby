@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Lawan Bullying - Cerita Pemantik</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: linear-gradient(145deg, #1a472a 0%, #0e2a1a 100%);
+            font-family: 'Segoe UI', 'Poppins', system-ui, -apple-system, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 16px;
+        }
+
+        /* Game Container */
+        .game-wrapper {
+            max-width: 650px;
+            width: 100%;
+            background: #fef9e6;
+            border-radius: 56px 56px 48px 48px;
+            box-shadow: 0 20px 35px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255,255,255,0.3);
+            overflow: hidden;
+            backdrop-filter: blur(2px);
+            transition: all 0.2s;
+        }
+
+        /* Area Kanvas (Sekolah & Pergerakan) */
+        .canvas-area {
+            background: #8cb56e;
+            padding: 20px 12px 12px 12px;
+            border-bottom: 6px solid #6f4f2e;
+            position: relative;
+        }
+
+        canvas {
+            display: block;
+            margin: 0 auto;
+            background: #aacc88;
+            border-radius: 32px;
+            box-shadow: inset 0 0 0 3px #ebc28e, 0 8px 18px rgba(0,0,0,0.2);
+            width: 100%;
+            height: auto;
+            cursor: pointer;
+        }
+
+        /* Tombol navigasi kiri/kanan */
+        .move-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 35px;
+            margin-top: 15px;
+            margin-bottom: 8px;
+        }
+
+        .move-btn {
+            background: #2c2c2c;
+            border: none;
+            font-size: 2.2rem;
+            font-weight: bold;
+            color: white;
+            padding: 10px 28px;
+            border-radius: 60px;
+            box-shadow: 0 5px 0 #121212;
+            transition: 0.07s linear;
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+        .move-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 #121212;
+        }
+
+        /* Panel cerita & status */
+        .story-panel {
+            padding: 20px 20px 16px;
+            background: #fffaf0;
+        }
+
+        .status-bar {
+            background: #ffedd5;
+            border-radius: 40px;
+            padding: 8px 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 20px;
+            font-weight: bold;
+            border: 1px solid #f3c89a;
+        }
+
+        .trauma-meter {
+            background: #c2410c;
+            border-radius: 30px;
+            padding: 4px 12px;
+            color: white;
+            font-size: 0.9rem;
+        }
+
+        .message-box {
+            background: #f1e7d3;
+            border-radius: 36px;
+            padding: 18px 20px;
+            min-height: 130px;
+            box-shadow: inset 0 0 0 1px #fff8e7, 0 6px 12px rgba(0,0,0,0.05);
+            font-size: 1rem;
+            line-height: 1.45;
+            color: #2d2418;
+            margin-bottom: 18px;
+            overflow-y: auto;
+        }
+
+        .action-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+            margin: 10px 0 8px;
+        }
+
+        .btn {
+            background: #f5bc70;
+            border: none;
+            font-weight: bold;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            color: #2c1a0c;
+            cursor: pointer;
+            transition: 0.1s;
+            box-shadow: 0 3px 0 #b97f3a;
+            font-family: inherit;
+        }
+        .btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 #b97f3a;
+        }
+        .btn-primary {
+            background: #2b7a4b;
+            color: white;
+            box-shadow: 0 3px 0 #175a36;
+        }
+        .btn-danger {
+            background: #9e2d2d;
+            color: white;
+            box-shadow: 0 3px 0 #631b1b;
+        }
+
+        select {
+            background: #fff2e0;
+            border-radius: 50px;
+            padding: 8px 14px;
+            font-weight: bold;
+            border: 1px solid #c9aa7b;
+        }
+
+        hr {
+            margin: 12px 0;
+            border-color: #edd7b0;
+        }
+
+        footer {
+            font-size: 0.7rem;
+            text-align: center;
+            padding: 10px;
+            background: #e9dccd;
+            color: #5a3e28;
+        }
+
+        @media (max-width: 550px) {
+            .move-btn {
+                font-size: 1.8rem;
+                padding: 6px 22px;
+            }
+            .message-box {
+                font-size: 0.9rem;
+                padding: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="game-wrapper" id="gameRoot">
+    <div class="canvas-area">
+        <canvas id="gameCanvas" width="560" height="180" style="width:100%; height:auto; max-width:560px; aspect-ratio:560/180"></canvas>
+        <div class="move-buttons">
+            <button class="move-btn" id="leftBtn">◀ KIRI</button>
+            <button class="move-btn" id="rightBtn">KANAN ▶</button>
+        </div>
+    </div>
+    <div class="story-panel">
+        <div class="status-bar">
+            <span>📖 Pikiran: <strong id="mentalState">Tenang</strong></span>
+            <span class="trauma-meter">💔 Dendam / Trauma: <span id="traumaCount">0</span>/3</span>
+        </div>
+        <div class="message-box" id="dialogBox">
+            👋 Hai, kamu adalah siswa baru. Bergeraklah ke kiri/kanan di halaman sekolah.<br>
+            Hati-hati dengan BULLY! Jika terlalu dekat dengannya, kamu akan terus dibully.
+        </div>
+        <div id="choicesArea" class="action-buttons">
+            <!-- Dynamic choices appear here -->
+        </div>
+        <footer>🎮 Game pendukung kesehatan mental | Jangan pendam sendiri, laporkan!</footer>
+    </div>
+</div>
+
+<script>
+    // ---------- GAME STATE ----------
+    let gamePhase = "SCHOOL";   // SCHOOL, HOME, SCHOOL_MEET_FRIEND, CHOOSE_ACTION, REPORTING, ENDING
+    let trauma = 0;            // 0-3 -> penuh pindah ke HOME
+    let bullyCooldown = false;
+    let bullyTimer = null;
+    
+    // Pergerakan kanvas (koordinat X player, bully tetap di tengah)
+    let canvas = document.getElementById('gameCanvas');
+    let ctx = canvas.getContext('2d');
+    let playerX = 280;   // tengah area (0-560)
+    const bullyX = 420;   // bully di kanan (jahat)
+    const minX = 30;
+    const maxX = 530;
+    
+    // Data pilihan & story
+    let selectedAgent = null;      // menyimpan nama agent Pemantik
+    let reportMethod = null;       // 'app' or 'face'
+    
+    // Daftar anggota Pemantik yang direkomendasi sahabat
+    const pemantikMembers = [
+        { name: "Bu Ratna (konselor handal)", desc: "Sangat berpengalaman, tegas namun lembut." },
+        { name: "Pak Hendra (advokat siswa)", desc: "Berani, sudah banyak menangani kasus bullying." },
+        { name: "Kak Maya (relawan pemantik)", desc: "Muda, mudah didekati, fast response." }
+    ];
+    
+    // DOM elements
+    const mentalStateSpan = document.getElementById('mentalState');
+    const traumaSpan = document.getElementById('traumaCount');
+    const dialogBox = document.getElementById('dialogBox');
+    const choicesArea = document.getElementById('choicesArea');
+    
+    // Helper update UI
+    function updateStatusUI() {
+        traumaSpan.innerText = trauma;
+        if (trauma === 0) mentalStateSpan.innerText = "😌 Tenang";
+        else if (trauma === 1) mentalStateSpan.innerText = "😖 Kesal";
+        else if (trauma === 2) mentalStateSpan.innerText = "😤 Dendam";
+        else mentalStateSpan.innerText = "💢 Hancur (kritis)";
+    }
+    
+    // Resize canvas draw
+    function drawGame() {
+        if (!ctx) return;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        // latar sekolah
+        ctx.fillStyle = "#9bc46e";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        // garis lapangan
+        ctx.fillStyle = "#c99e6f";
+        ctx.fillRect(0, canvas.height-25, canvas.width, 25);
+        // bangunan sekolah (sederhana)
+        ctx.fillStyle = "#cd9771";
+        ctx.fillRect(20, 30, 90, 70);
+        ctx.fillStyle = "#b57c48";
+        ctx.fillRect(30, 50, 30, 30);
+        ctx.fillStyle = "#e6c394";
+        ctx.fillRect(canvas.width-110, 30, 90, 70);
+        ctx.fillStyle = "#886633";
+        ctx.fillText("📚", canvas.width-85, 65);
+        ctx.font = "bold 18px 'Segoe UI'";
+        ctx.fillStyle = "#3c2a1f";
+        ctx.fillText("🏫", 45, 65);
+        
+        // GAMBAR BULLY (merah, jahat)
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = "#c0392b";
+        ctx.beginPath();
+        ctx.arc(bullyX, canvas.height-45, 20, 0, Math.PI*2);
+        ctx.fill();
+        ctx.fillStyle = "#2d2d2d";
+        ctx.font = "20px sans-serif";
+        ctx.fillText("😈", bullyX-12, canvas.height-38);
+        ctx.fillStyle = "white";
+        ctx.font = "bold 12px monospace";
+        ctx.fillText("BULLY", bullyX-18, canvas.height-58);
+        
+        // GAMBAR PLAYER (pahlawan)
+        ctx.fillStyle = "#2c6e49";
+        ctx.beginPath();
+        ctx.arc(playerX, canvas.height-45, 20, 0, Math.PI*2);
+        ctx.fill();
+        ctx.fillStyle = "#f5e6d3";
+        ctx.font = "22px sans-serif";
+        ctx.fillText("😊", playerX-12, canvas.height-38);
+        ctx.fillStyle = "#1f4f2d";
+        ctx.font = "bold 11px";
+        ctx.fillText("Kamu", playerX-14, canvas.height-65);
+        
+        // bubble jarak dekat (warning jika jarak dekat)
+        let distance = Math.abs(playerX - bullyX);
+        if (distance < 50 && gamePhase === "SCHOOL") {
+            ctx.fillStyle = "#d35400aa";
+            ctx.font = "bold 14px";
+            ctx.fillText("⚠️ DEKAT BULLY!", 20, 30);
+        }
+        ctx.shadowBlur = 0;
+    }
+    
+    // Fungsi bully action (pembullyan terjadi)
+    function triggerBully() {
+        if (gamePhase !== "SCHOOL") return;
+        if (bullyCooldown) return;
+        let distance = Math.abs(playerX - bullyX);
+        if (distance < 55) {
+            bullyCooldown = true;
+            // tambah trauma / dendam
+            if (trauma < 3) {
+                trauma++;
+                updateStatusUI();
+                let bullyMsg = "😤 BULLY: 'Hei dasar cupu! Lo ga ada gunanya!' 💢 Dendammu meningkat...";
+                dialogBox.innerHTML = `<span style="color:#b33;">💥 PEMBULLYAN!</span> ${bullyMsg}<br> Tekanan batin bertambah. (Trauma: ${trauma}/3)`;
+                if (trauma === 3) {
+                    dialogBox.innerHTML += "<br><strong>⚠️ Dendam dan keputusasaan memuncak... kamu pulang dengan perasaan hancur.</strong>";
+                    // pindah ke fase HOME setelah sedikit delay
+                    setTimeout(() => {
+                        if (gamePhase === "SCHOOL") {
+                            goToHomePhase();
+                        }
+                    }, 1200);
+                }
+            } else {
+                dialogBox.innerHTML = "💀 Kamu sudah sangat tertekan, tidak bisa berpikir jernih... segera pulang!";
+                setTimeout(() => {
+                    if (gamePhase === "SCHOOL") goToHomePhase();
+                }, 1000);
+            }
+            setTimeout(() => { bullyCooldown = false; }, 1800);
+            drawGame();
+        }
+    }
+    
+    // Bergerak kiri-kanan
+    function movePlayer(dx) {
+        if (gamePhase !== "SCHOOL") return;
+        let newX = playerX + dx;
+        if (newX >= minX && newX <= maxX) {
+            playerX = newX;
+            drawGame();
+            triggerBully();   // cek bully setelah gerak
+        }
+    }
+    
+    // ---- PHASE TRANSITIONS ----
+    function clearChoices() {
+        choicesArea.innerHTML = "";
+    }
+    
+    function setChoices(buttonsArray) {
+        clearChoices();
+        buttonsArray.forEach(btn => {
+            let button = document.createElement('button');
+            button.className = `btn ${btn.type === 'primary' ? 'btn-primary' : (btn.type === 'danger' ? 'btn-danger' : '')}`;
+            button.innerText = btn.label;
+            button.onclick = () => {
+                if (btn.action) btn.action();
+            };
+            choicesArea.appendChild(button);
+        });
+    }
+    
+    // Fase 2: RUMAH (setelah trauma penuh)
+    function goToHomePhase() {
+        gamePhase = "HOME";
+        drawGame(); // canvas masih ada tapi gerakan nonaktif
+        dialogBox.innerHTML = "🏠 <strong>Di rumah, sepinya menusuk hati.</strong><br>Kamu ingin membalas dendam pada pembully, tapi bayangan hukuman membuatmu takut. <br><span style='color:#9b2c1d;'>'Di negeri ini, korban sering dipersalahkan, pelaku dilindungi...'</span><br>Kamu terduduk lemas. Tapi secercah harapan muncul: cari organisasi yang bekerja sama dengan BK!";
+        setChoices([
+            { label: "📢 Cari tahu organisasi perlindungan siswa", type: "primary", action: () => {
+                dialogBox.innerHTML = "Kamu ingat sahabat karibmu di sekolah, Raka. Dia tahu banyak soal layanan konseling dan organisasi Pemantik. Besok pagi kamu menemuinya di sekolah.";
+                setTimeout(() => {
+                    goToSchoolMeetFriend();
+                }, 1500);
+            }},
+            { label: "😞 Menyerah & memendam sendiri", type: "danger", action: () => {
+                badEndingBySuicide();
+            }}
+        ]);
+    }
+    
+    // Fase 3: bertemu sahabat di sekolah (tanpa bully aktif)
+    function goToSchoolMeetFriend() {
+        gamePhase = "SCHOOL_MEET_FRIEND";
+        drawGame(); // tetap tampilkan sekolah tapi gerakan nonaktif
+        dialogBox.innerHTML = "📚 <strong>Di sudut belakang sekolah, kamu bertemu sahabatmu, Raka.</strong><br>Dengan mata berkaca-kaca kamu ceritakan semua pembullyan dan rasa takutmu. Raka menggenggam pundakmu:<br>'Kamu tidak sendirian! Ada <strong>Pemantik</strong>, organisasi yang bekerja sama dengan BK. Mereka pro-korban!'<br>Raka memberikan dua pilihan untuk melapor:";
+        setChoices([
+            { label: "📱 Laporkan via APLIKASI Pemantik (HP)", type: "primary", action: () => {
+                reportMethod = "app";
+                askAgentSelection();
+            }},
+            { label: "🤝 Temui langsung ANGGOTA Pemantik", type: "primary", action: () => {
+                reportMethod = "face";
+                askAgentSelection();
+            }},
+            { label: "❌ Tidak jadi melapor (takut)", type: "danger", action: () => {
+                badEndingBySuicide();
+            }}
+        ]);
+    }
+    
+    // memilih anggota Pemantik (dari info sahabat)
+    function askAgentSelection() {
+        gamePhase = "CHOOSE_ACTION";
+        let memberOptions = pemantikMembers.map((member, idx) => {
+            return { label: `👤 ${member.name}`, desc: member.desc, action: () => {
+                selectedAgent = member.name;
+                dialogBox.innerHTML = `✅ Kamu memilih <strong>${selectedAgent}</strong>. ${member.desc}<br>Sahabatmu memberi semangat: "Dia orang tepat!" Sekarang lanjutkan pelaporan.`;
+                setTimeout(() => {
+                    proceedToReport();
+                }, 1200);
+            }};
+        });
+        let backButton = { label: "🔙 Kembali ke pilihan metode", type: "", action: () => goToSchoolMeetFriend() };
+        setChoices([...memberOptions, backButton]);
+    }
+    
+    // Fase pelaporan (sesuai metode)
+    function proceedToReport() {
+        if (reportMethod === "app") {
+            gamePhase = "REPORTING";
+            dialogBox.innerHTML = `📱 <strong>Mengunduh Aplikasi Pemantik...</strong><br>Kamu bisa download dari website resmi atau GitHub Pemantik. Pilih sumber terpercaya:<br><br>🔗 <a href="#" id="fakeGitLink" style="color:#2b7a4b; font-weight:bold;">GitHub Pemantik (Official)</a> &nbsp;|&nbsp; 
+            🔗 <a href="#" id="fakeWebLink" style="color:#2b7a4b; font-weight:bold;">Website Resmi Pemantik</a><br><br>Klik salah satu untuk melanjutkan curhat.`;
+            // Tambahkan event setelah render
+            setTimeout(() => {
+                const gitLink = document.getElementById('fakeGitLink');
+                const webLink = document.getElementById('fakeWebLink');
+                if (gitLink) {
+                    gitLink.onclick = (e) => {
+                        e.preventDefault();
+                        startCounselingProcess();
+                    };
+                }
+                if (webLink) {
+                    webLink.onclick = (e) => {
+                        e.preventDefault();
+                        startCounselingProcess();
+                    };
+                }
+            }, 50);
+            setChoices([{ label: "⬅️ Batal, kembali", action: () => askAgentSelection() }]);
+        } 
+        else if (reportMethod === "face") {
+            gamePhase = "REPORTING";
+            dialogBox.innerHTML = `🤝 Kamu memutuskan menemui <strong>${selectedAgent || "anggota Pemantik"}</strong> secara langsung.<br>Di ruangan yang nyaman, kamu menceritakan semua penderitaan, ejekan, dan ancaman dari pembully. Petugas Pemantik mendengarkan dengan seksama dan mencatat bukti.`;
+            setChoices([
+                { label: "✨ Curhatkan semua & minta bantuan", type: "primary", action: () => startCounselingProcess() },
+                { label: "😔 Mundur, tidak jadi cerita", type: "danger", action: () => badEndingBySuicide() }
+            ]);
+        }
+    }
+    
+    // Proses curhat -> pemantik bertindak ke BK
+    function startCounselingProcess() {
+        if (gamePhase !== "REPORTING") return;
+        dialogBox.innerHTML = "💬 <strong>Kamu menceritakan semuanya dengan jujur, air mata jatuh...</strong><br>Anggota Pemantik mengusap bahumu: 'Kamu hebat sudah berani bicara. Kami akan segera koordinasi dengan BK dan pihak sekolah. Pelaku tidak akan lolos.'<br><br>✨ Beberapa hari kemudian... ✨";
+        setTimeout(() => {
+            goodEnding();
+        }, 2000);
+    }
+    
+    // GOOD ENDING
+    function goodEnding() {
+        gamePhase = "ENDING";
+        dialogBox.innerHTML = "🎉 <strong>HAPPY ENDING 🎉</strong><br>Berkat laporanmu melalui Pemantik, BK dan pihak sekolah mengusut tuntas kasus bullying. Si pembully dikeluarkan dari sekolah! Kamu mendapat pendampingan psikologis dan sekarang bersinar lagi.<br><br>⭐ Kamu tidak sendiri. Melapor adalah tindakan berani. Ingat, hidupmu berharga! ⭐";
+        setChoices([
+            { label: "🔄 Main Lagi", type: "primary", action: () => resetGame() }
+        ]);
+        drawGame();
+    }
+    
+    // BAD ENDING : bunuh diri karena depresi & tidak melapor
+    function badEndingBySuicide() {
+        gamePhase = "ENDING";
+        dialogBox.innerHTML = "💔 <strong>SELESAI TRAGIS</strong> 💔<br>Karena takut dan tidak ada yang membantu, kamu memendam sendiri luka. Bullying terus terjadi setiap hari. Suatu malam, keputusasaan merenggutmu...<br><br>⚠️ <span style='color:#a1220a'>Kamu memilih diam, dan dunia kehilangan seseorang yang berharga.</span><br><br>Pesan: Jangan pernah pendam sendiri. Selalu ada Pemantik, sahabat, dan orang yang peduli padamu. Laporkan!";
+        setChoices([
+            { label: "🔄 Coba lagi, laporkan sekarang", type: "primary", action: () => resetGame() }
+        ]);
+        drawGame();
+    }
+    
+    // Reset game full
+    function resetGame() {
+        trauma = 0;
+        playerX = 280;
+        gamePhase = "SCHOOL";
+        reportMethod = null;
+        selectedAgent = null;
+        bullyCooldown = false;
+        updateStatusUI();
+        drawGame();
+        dialogBox.innerHTML = "🔄 Game direset! Sekarang kamu punya kesempatan baru.<br>Bergeraklah, hindari bully jika bisa, tapi ingat solusi terbaik adalah melapor ke Pemantik!";
+        setChoices([]); // kosongkan pilihan, kembali ke mode gerak
+        // pastikan tidak ada timer mengganggu
+        if (bullyTimer) clearInterval(bullyTimer);
+        // aktifkan cek jarak periodic juga (opsional)
+    }
+    
+    // periodic bully check tambahan (biar lebih responsif walau diam)
+    function startPeriodicBullyCheck() {
+        setInterval(() => {
+            if (gamePhase === "SCHOOL") {
+                let dist = Math.abs(playerX - bullyX);
+                if (dist < 55 && !bullyCooldown && trauma < 3) {
+                    triggerBully();
+                }
+            }
+        }, 800);
+    }
+    
+    // Event listeners untuk tombol gerak & touch
+    function bindControls() {
+        const left = document.getElementById('leftBtn');
+        const right = document.getElementById('rightBtn');
+        if (left) left.addEventListener('click', () => movePlayer(-22));
+        if (right) right.addEventListener('click', () => movePlayer(22));
+        // support touch
+        left.addEventListener('touchstart', (e) => { e.preventDefault(); movePlayer(-22); });
+        right.addEventListener('touchstart', (e) => { e.preventDefault(); movePlayer(22); });
+    }
+    
+    // Inisialisasi & draw
+    function init() {
+        bindControls();
+        drawGame();
+        updateStatusUI();
+        startPeriodicBullyCheck();
+        // set default dialog
+        dialogBox.innerHTML = "👋 Selamat datang di SMA Pelangi. Kamu bisa bergerak bebas (←/→). Hati-hati dengan BULLY! Jika trauma penuh, kamu akan pulang. Pilihlah jalan untuk melapor dan selamatkan dirimu!";
+        setChoices([]);
+    }
+    
+    // Resize canvas menjaga rasio
+    function handleCanvasResize() {
+        // Canvas sudah fixed width 560 via atribut, cukup draw ulang
+        drawGame();
+    }
+    window.addEventListener('resize', () => { drawGame(); });
+    
+    init();
+</script>
+</body>
+</html>
