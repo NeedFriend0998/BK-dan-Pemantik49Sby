@@ -2,15 +2,18 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>3D HTML Game Template</title>
+  <title>Story Game 3D - Berani Bercerita</title>
   <style>
     :root {
-      --bg: #08111f;
+      --bg: #07111f;
       --panel: rgba(15, 23, 42, 0.78);
+      --panel2: rgba(2, 6, 23, 0.75);
       --text: #e5eefc;
+      --muted: #b8c6dd;
       --accent: #60a5fa;
       --accent2: #34d399;
-      --danger: #f87171;
+      --danger: #fb7185;
+      --warn: #fbbf24;
     }html, body {
   margin: 0;
   width: 100%;
@@ -59,7 +62,7 @@ canvas {
 
 .title {
   font-size: 16px;
-  font-weight: 700;
+  font-weight: 800;
   margin: 0 0 4px;
 }
 
@@ -67,16 +70,76 @@ canvas {
   font-size: 12px;
   opacity: 0.88;
   margin: 0;
-  line-height: 1.45;
+  line-height: 1.5;
+  color: var(--muted);
 }
 
 .stats {
   text-align: right;
-  min-width: 132px;
+  min-width: 148px;
 }
 
 .stats b {
   color: #fff;
+}
+
+.storyBox {
+  position: absolute;
+  left: 50%;
+  bottom: 130px;
+  transform: translateX(-50%);
+  width: min(92vw, 760px);
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.9), rgba(2, 6, 23, 0.88));
+  border: 1px solid rgba(255,255,255,0.14);
+  border-radius: 20px;
+  padding: 14px 16px 12px;
+  box-shadow: 0 16px 40px rgba(0,0,0,0.34);
+  pointer-events: auto;
+  display: none;
+}
+
+.storyBox.show { display: block; }
+
+.storyName {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+  font-weight: 800;
+  font-size: 14px;
+}
+
+.storyText {
+  font-size: 15px;
+  line-height: 1.6;
+  color: #eef4ff;
+  margin-bottom: 12px;
+  min-height: 48px;
+  white-space: pre-wrap;
+}
+
+.choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.choiceBtn {
+  pointer-events: auto;
+  border: 1px solid rgba(255,255,255,0.14);
+  background: rgba(96, 165, 250, 0.16);
+  color: var(--text);
+  border-radius: 14px;
+  padding: 10px 12px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.choiceBtn:hover,
+.choiceBtn:active {
+  background: rgba(96, 165, 250, 0.26);
 }
 
 .centerMsg {
@@ -86,8 +149,8 @@ canvas {
   transform: translateX(-50%);
   padding: 10px 14px;
   border-radius: 999px;
-  background: rgba(96, 165, 250, 0.16);
-  border: 1px solid rgba(96, 165, 250, 0.25);
+  background: rgba(52, 211, 153, 0.14);
+  border: 1px solid rgba(52, 211, 153, 0.25);
   font-size: 13px;
   opacity: 0;
   transition: opacity 0.25s ease;
@@ -124,7 +187,7 @@ canvas {
   color: var(--text);
   border-radius: 16px;
   font-size: 18px;
-  font-weight: 700;
+  font-weight: 800;
   box-shadow: 0 8px 20px rgba(0,0,0,0.25);
   touch-action: none;
 }
@@ -144,7 +207,7 @@ canvas {
 }
 
 .actionBtn {
-  width: 104px;
+  width: 112px;
   height: 58px;
   font-size: 16px;
 }
@@ -167,15 +230,24 @@ canvas {
   transform-origin: left center;
 }
 
-.hiddenMobileHint {
-  display: none;
+.hintTag {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(96, 165, 250, 0.14);
+  border: 1px solid rgba(96, 165, 250, 0.18);
+  color: #dbeafe;
+  font-size: 11px;
+  font-weight: 700;
 }
 
 @media (max-width: 720px) {
+  .storyBox { bottom: 126px; width: min(94vw, 760px); padding: 12px 13px 11px; }
   .pad { grid-template-columns: 54px 54px 54px; grid-template-rows: 54px 54px 54px; gap: 7px; }
   .btn { border-radius: 14px; }
-  .actionBtn { width: 96px; height: 54px; }
-  .stats { min-width: 116px; }
+  .actionBtn { width: 98px; height: 54px; }
+  .stats { min-width: 120px; }
+  .storyText { font-size: 14px; }
 }
 
   </style>
@@ -184,15 +256,24 @@ canvas {
   <div class="hud">
     <div class="topbar">
       <div class="card">
-        <p class="title">3D HTML Game Template</p>
-        <p class="sub">Gerak: WASD / panah<br>HP: tombol layar</p>
+        <p class="title">Story Game 3D: Berani Bercerita</p>
+        <p class="sub">Gerak: WASD / panah<br>HP: tombol layar<br>Masuk ke area bercahaya untuk lanjut cerita</p>
       </div>
       <div class="card stats">
-        <p class="sub">Skor: <b id="score">0</b></p>
-        <p class="sub">Nyawa: <b id="lives">3</b></p>
-        <p class="sub">Kecepatan: <b id="speed">0</b></p>
+        <p class="sub">Bab: <b id="chapter">0</b></p>
+        <p class="sub">Keberanian: <b id="bravery">0</b></p>
+        <p class="sub">Petunjuk: <b id="clues">0</b></p>
       </div>
-    </div><div id="msg" class="centerMsg">Kumpulkan semua orb hijau!</div>
+    </div><div id="msg" class="centerMsg">Datangi titik cahaya untuk memulai cerita.</div>
+
+<div id="storyBox" class="storyBox">
+  <div class="storyName">
+    <span id="speaker">Narator</span>
+    <span class="hintTag" id="sceneTag">Bab 1</span>
+  </div>
+  <div id="storyText" class="storyText"></div>
+  <div id="choices" class="choices"></div>
+</div>
 
 <div class="controls">
   <div class="pad" aria-label="Kontrol arah">
@@ -208,25 +289,30 @@ canvas {
   </div>
 
   <div class="actionPanel">
-    <button class="btn actionBtn" id="jumpBtn">Lompat</button>
-    <button class="btn actionBtn" id="resetBtn">Reset</button>
-    <div class="barWrap" aria-label="Health bar"><div id="hpBar" class="bar"></div></div>
+    <button class="btn actionBtn" id="interactBtn">Interaksi</button>
+    <button class="btn actionBtn" id="resetBtn">Ulang</button>
+    <div class="barWrap" aria-label="Bar keberanian"><div id="hpBar" class="bar"></div></div>
   </div>
 </div>
 
   </div>  <script type="module">
     import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
 
-    const scoreEl = document.getElementById('score');
-    const livesEl = document.getElementById('lives');
-    const speedEl = document.getElementById('speed');
+    const chapterEl = document.getElementById('chapter');
+    const braveryEl = document.getElementById('bravery');
+    const cluesEl = document.getElementById('clues');
     const msgEl = document.getElementById('msg');
+    const storyBox = document.getElementById('storyBox');
+    const speakerEl = document.getElementById('speaker');
+    const storyTextEl = document.getElementById('storyText');
+    const choicesEl = document.getElementById('choices');
+    const sceneTagEl = document.getElementById('sceneTag');
     const hpBar = document.getElementById('hpBar');
     const resetBtn = document.getElementById('resetBtn');
-    const jumpBtn = document.getElementById('jumpBtn');
+    const interactBtn = document.getElementById('interactBtn');
 
     const scene = new THREE.Scene();
-    scene.fog = new THREE.Fog(0x09111f, 20, 120);
+    scene.fog = new THREE.Fog(0x09111f, 18, 120);
 
     const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 1000);
     const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -238,7 +324,7 @@ canvas {
     const hemi = new THREE.HemisphereLight(0xbcdcff, 0x0a1020, 1.2);
     scene.add(hemi);
 
-    const sun = new THREE.DirectionalLight(0xffffff, 1.8);
+    const sun = new THREE.DirectionalLight(0xffffff, 1.7);
     sun.position.set(20, 30, 12);
     sun.castShadow = true;
     sun.shadow.mapSize.set(2048, 2048);
@@ -248,16 +334,68 @@ canvas {
     sun.shadow.camera.bottom = -40;
     scene.add(sun);
 
-    const groundGeo = new THREE.PlaneGeometry(200, 200, 20, 20);
+    const groundGeo = new THREE.PlaneGeometry(240, 240, 20, 20);
     const groundMat = new THREE.MeshStandardMaterial({ color: 0x15314d, roughness: 1, metalness: 0 });
     const ground = new THREE.Mesh(groundGeo, groundMat);
     ground.rotation.x = -Math.PI / 2;
     ground.receiveShadow = true;
     scene.add(ground);
 
-    const grid = new THREE.GridHelper(200, 40, 0x335577, 0x1a3550);
+    const grid = new THREE.GridHelper(240, 48, 0x335577, 0x1a3550);
     grid.position.y = 0.02;
     scene.add(grid);
+
+    function makeBuilding(w, h, d, x, z, color) {
+      const mesh = new THREE.Mesh(
+        new THREE.BoxGeometry(w, h, d),
+        new THREE.MeshStandardMaterial({ color, roughness: 0.85 })
+      );
+      mesh.position.set(x, h / 2, z);
+      mesh.castShadow = true;
+      mesh.receiveShadow = true;
+      scene.add(mesh);
+      return mesh;
+    }
+
+    // Scene props
+    makeBuilding(10, 4, 8, -18, -12, 0x8b5cf6);
+    makeBuilding(12, 6, 9, 16, -14, 0x38bdf8);
+    makeBuilding(8, 5, 8, -16, 14, 0xf97316);
+    makeBuilding(9, 7, 10, 18, 16, 0x22c55e);
+
+    const school = new THREE.Group();
+    const schoolBase = new THREE.Mesh(
+      new THREE.BoxGeometry(16, 7, 10),
+      new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.8 })
+    );
+    schoolBase.castShadow = true;
+    schoolBase.receiveShadow = true;
+    schoolBase.position.set(0, 3.5, -22);
+    school.add(schoolBase);
+
+    const schoolRoof = new THREE.Mesh(
+      new THREE.BoxGeometry(17, 1, 11),
+      new THREE.MeshStandardMaterial({ color: 0x1f2937, roughness: 0.8 })
+    );
+    schoolRoof.position.set(0, 7.2, -22);
+    schoolRoof.castShadow = true;
+    school.add(schoolRoof);
+
+    const schoolSign = new THREE.Mesh(
+      new THREE.BoxGeometry(8, 1.2, 0.4),
+      new THREE.MeshStandardMaterial({ color: 0xfbbf24, roughness: 0.6 })
+    );
+    schoolSign.position.set(0, 5.3, -16.8);
+    school.add(schoolSign);
+    scene.add(school);
+
+    const fountain = new THREE.Mesh(
+      new THREE.CylinderGeometry(2.4, 2.8, 1, 24),
+      new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.9 })
+    );
+    fountain.position.set(10, 0.5, 4);
+    fountain.receiveShadow = true;
+    scene.add(fountain);
 
     const player = new THREE.Group();
     const body = new THREE.Mesh(
@@ -275,55 +413,83 @@ canvas {
     head.castShadow = true;
     head.position.y = 2.0;
     player.add(head);
-    player.position.set(0, 0, 0);
     scene.add(player);
 
-    const obstacles = [];
-    const obstaclePositions = [
-      [-8, 0, -6], [10, 0, -8], [7, 0, 9], [-12, 0, 8], [0, 0, 14], [15, 0, 2], [-16, 0, -14]
-    ];
-
-    obstaclePositions.forEach((p, i) => {
-      const mesh = new THREE.Mesh(
-        new THREE.BoxGeometry(2.4, 2.4 + (i % 3), 2.4),
-        new THREE.MeshStandardMaterial({ color: i % 2 ? 0xf87171 : 0x94a3b8, roughness: 0.8 })
-      );
-      mesh.position.set(p[0], p[1] + mesh.geometry.parameters.height / 2, p[2]);
+    const npcGeo = new THREE.BoxGeometry(1.1, 1.6, 1.1);
+    function makeNpc(x, z, color, name) {
+      const group = new THREE.Group();
+      const mesh = new THREE.Mesh(npcGeo, new THREE.MeshStandardMaterial({ color, roughness: 0.75 }));
       mesh.castShadow = true;
-      mesh.receiveShadow = true;
-      scene.add(mesh);
-      obstacles.push(mesh);
+      mesh.position.y = 0.8;
+      group.add(mesh);
+      const head = new THREE.Mesh(
+        new THREE.SphereGeometry(0.42, 18, 18),
+        new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.8 })
+      );
+      head.position.y = 1.95;
+      head.castShadow = true;
+      group.add(head);
+      group.position.set(x, 0, z);
+      group.userData.name = name;
+      scene.add(group);
+      return group;
+    }
+
+    const bully = makeNpc(-2, -18.5, 0xef4444, 'Pembully');
+    const friend = makeNpc(7, -19, 0x22c55e, 'Teman');
+    const teacher = makeNpc(-9, -16, 0x60a5fa, 'Guru BK');
+
+    const glowPoint = new THREE.Mesh(
+      new THREE.SphereGeometry(0.55, 20, 20),
+      new THREE.MeshStandardMaterial({ color: 0x34d399, emissive: 0x1fa66d, emissiveIntensity: 1.8 })
+    );
+    glowPoint.position.set(0, 0.55, 10);
+    scene.add(glowPoint);
+
+    const clueMarkers = [
+      new THREE.Vector3(-8, 0.5, -8),
+      new THREE.Vector3(8, 0.5, -6),
+      new THREE.Vector3(0, 0.5, -14)
+    ].map((p, i) => {
+      const m = new THREE.Mesh(
+        new THREE.TorusGeometry(0.8, 0.18, 10, 24),
+        new THREE.MeshStandardMaterial({ color: i === 0 ? 0xfbbf24 : i === 1 ? 0x60a5fa : 0x34d399, emissive: 0x111827, roughness: 0.5 })
+      );
+      m.position.copy(p);
+      m.rotation.x = Math.PI / 2;
+      m.castShadow = true;
+      scene.add(m);
+      return m;
     });
 
-    const coins = [];
-    const coinPositions = [
-      [-14, 1.2, 0], [-4, 1.2, 11], [6, 1.2, -13], [14, 1.2, 13], [-10, 1.2, -16], [18, 1.2, -2]
-    ];
+    const zones = {
+      start: new THREE.Vector3(0, 0, 10),
+      bully: new THREE.Vector3(-2, 0, -18.5),
+      friend: new THREE.Vector3(7, 0, -19),
+      teacher: new THREE.Vector3(-9, 0, -16),
+      school: new THREE.Vector3(0, 0, -22)
+    };
 
-    const coinGeo = new THREE.TorusGeometry(0.7, 0.22, 12, 24);
-    const coinMat = new THREE.MeshStandardMaterial({ color: 0x34d399, roughness: 0.35, metalness: 0.2 });
+    const state = {
+      scene: 'intro',
+      chapter: 1,
+      bravery: 0,
+      clues: 0,
+      storyOpen: false,
+      moveSpeed: 0.17,
+      interactCooldown: 0,
+      lastChoice: '',
+    };
 
-    coinPositions.forEach((p) => {
-      const coin = new THREE.Mesh(coinGeo, coinMat.clone());
-      coin.position.set(...p);
-      coin.rotation.x = Math.PI / 2;
-      coin.castShadow = true;
-      scene.add(coin);
-      coins.push(coin);
-    });
+    const startPos = new THREE.Vector3(0, 0, 10);
+    player.position.copy(startPos);
 
-    const boundary = 28;
     let keys = { up: false, down: false, left: false, right: false, jump: false };
-    let score = 0;
-    let lives = 3;
     let velocityY = 0;
     let grounded = true;
-    let moveSpeed = 0.18;
     let targetCam = new THREE.Vector3();
     let camPos = new THREE.Vector3(0, 7, 12);
     let messageTimer = 0;
-
-    const startPos = new THREE.Vector3(0, 0, 0);
 
     function setMessage(text, seconds = 1.5) {
       msgEl.textContent = text;
@@ -332,10 +498,182 @@ canvas {
     }
 
     function updateStats() {
-      scoreEl.textContent = score;
-      livesEl.textContent = lives;
-      speedEl.textContent = moveSpeed.toFixed(2);
-      hpBar.style.transform = `scaleX(${Math.max(0, lives / 3)})`;
+      chapterEl.textContent = state.chapter;
+      braveryEl.textContent = state.bravery;
+      cluesEl.textContent = state.clues;
+      hpBar.style.transform = `scaleX(${Math.max(0.1, Math.min(1, 0.25 + state.bravery / 6))})`;
+    }
+
+    function openStory(speaker, text, choices, tag = '') {
+      storyBox.classList.add('show');
+      speakerEl.textContent = speaker;
+      storyTextEl.textContent = text;
+      sceneTagEl.textContent = tag || `Bab ${state.chapter}`;
+      choicesEl.innerHTML = '';
+      choices.forEach((choice) => {
+        const btn = document.createElement('button');
+        btn.className = 'choiceBtn';
+        btn.textContent = choice.label;
+        btn.addEventListener('click', () => choice.action());
+        choicesEl.appendChild(btn);
+      });
+      state.storyOpen = true;
+    }
+
+    function closeStory() {
+      storyBox.classList.remove('show');
+      choicesEl.innerHTML = '';
+      state.storyOpen = false;
+    }
+
+    function beginIntro() {
+      state.scene = 'intro';
+      openStory(
+        'Narator',
+        'Pagi itu, kamu berangkat ke sekolah dengan hati yang agak berat.
+Di halaman sekolah, ada dua titik yang bisa kamu dekati: cerita utama dan petunjuk kecil yang akan membantumu melewati hari ini.',
+        [
+          { label: 'Mulai petualangan', action: () => { closeStory(); setMessage('Arahkan karakter ke titik cahaya hijau.', 2); } },
+          { label: 'Lihat tujuan cerita', action: () => { state.lastChoice = 'tujuan'; storyTextEl.textContent = 'Tujuanmu sederhana: tetap tenang, cari dukungan yang aman, dan buktikan bahwa kamu tidak sendirian.'; } }
+        ],
+        'Pembuka'
+      );
+      updateStats();
+    }
+
+    function startBullyScene() {
+      state.scene = 'bully';
+      state.chapter = 2;
+      updateStats();
+      openStory(
+        bully.userData.name,
+        'Pembully itu menatapmu dan melontarkan kata-kata yang menyakitkan.
+Kamu diberi 3 pilihan respons. Tidak ada yang harus kamu lakukan sendirian.',
+        [
+          {
+            label: 'Tetap tenang',
+            action: () => {
+              state.bravery += 1;
+              state.clues += 1;
+              state.lastChoice = 'tenang';
+              closeStory();
+              setMessage('Kamu memilih tenang. Itu langkah pertama yang bagus.', 2);
+              updateStats();
+            }
+          },
+          {
+            label: 'Cari teman',
+            action: () => {
+              state.bravery += 1;
+              state.clues += 1;
+              state.lastChoice = 'teman';
+              closeStory();
+              setMessage('Kamu bergerak ke arah teman untuk cari dukungan.', 2);
+              updateStats();
+            }
+          },
+          {
+            label: 'Cari guru BK',
+            action: () => {
+              state.bravery += 2;
+              state.clues += 1;
+              state.lastChoice = 'guru';
+              closeStory();
+              setMessage('Kamu memilih meminta bantuan orang dewasa yang tepat.', 2);
+              updateStats();
+            }
+          }
+        ],
+        'Bab 2'
+      );
+    }
+
+    function startFriendScene() {
+      state.scene = 'friend';
+      state.chapter = 3;
+      updateStats();
+      openStory(
+        friend.userData.name,
+        'Temanmu berkata, “Kamu tidak perlu menahan semuanya sendiri. Yuk, kita cari cara yang aman.”
+Apa yang mau kamu lakukan?',
+        [
+          {
+            label: 'Ceritakan perasaan',
+            action: () => {
+              state.bravery += 1;
+              state.clues += 1;
+              closeStory();
+              setMessage('Bercerita bisa membuat beban terasa lebih ringan.', 2);
+              updateStats();
+            }
+          },
+          {
+            label: 'Pergi ke guru BK',
+            action: () => {
+              state.bravery += 2;
+              state.clues += 1;
+              closeStory();
+              setMessage('Kamu dan temanmu pergi mencari bantuan yang aman.', 2);
+              updateStats();
+            }
+          }
+        ],
+        'Bab 3'
+      );
+    }
+
+    function startTeacherScene() {
+      state.scene = 'teacher';
+      state.chapter = 4;
+      updateStats();
+      openStory(
+        teacher.userData.name,
+        'Guru BK mendengarkan tanpa menghakimi.
+Beliau bilang: “Kamu sudah melakukan hal yang benar dengan datang ke sini.”
+Sekarang kamu bisa memilih langkah lanjut yang sehat.',
+        [
+          {
+            label: 'Minta pendampingan',
+            action: () => {
+              state.bravery += 2;
+              state.clues += 1;
+              closeStory();
+              setMessage('Kamu mendapat dukungan dan rencana aman.', 2);
+              updateStats();
+            }
+          },
+          {
+            label: 'Selesaikan cerita',
+            action: () => {
+              state.bravery += 1;
+              closeStory();
+              endGame();
+            }
+          }
+        ],
+        'Bab 4'
+      );
+    }
+
+    function endGame() {
+      state.scene = 'ending';
+      state.chapter = 5;
+      updateStats();
+      openStory(
+        'Narator',
+        'Hari itu memang tidak mudah, tetapi kamu berhasil mengambil langkah yang aman.
+Kamu tidak harus menunggu sampai semuanya berat untuk minta bantuan.
+Berani bercerita adalah kekuatan.',
+        [
+          {
+            label: 'Main lagi',
+            action: () => {
+              resetGame();
+            }
+          }
+        ],
+        'Ending'
+      );
     }
 
     function resetGame() {
@@ -343,36 +681,30 @@ canvas {
       player.rotation.y = 0;
       velocityY = 0;
       grounded = true;
-      score = 0;
-      lives = 3;
-      moveSpeed = 0.18;
-      coins.forEach((c, i) => {
-        c.visible = true;
-        c.position.set(...coinPositions[i]);
-      });
-      setMessage('Mulai lagi! Kumpulkan semua orb hijau!', 2);
+      state.scene = 'intro';
+      state.chapter = 1;
+      state.bravery = 0;
+      state.clues = 0;
+      state.moveSpeed = 0.17;
+      state.interactCooldown = 0;
+      state.lastChoice = '';
+      closeStory();
       updateStats();
+      setMessage('Datangi titik cahaya hijau untuk memulai cerita.', 2.5);
+      beginIntro();
     }
 
-    function damagePlayer() {
-      lives -= 1;
-      updateStats();
-      setMessage('Kena! Hindari balok merah.', 1.2);
-      if (lives <= 0) {
-        setMessage('Game Over. Tekan Reset.', 999);
-        moveSpeed = 0;
-      } else {
-        player.position.copy(startPos);
-        velocityY = 0;
-        grounded = true;
-      }
+    function distanceTo(v) {
+      return player.position.distanceTo(v);
     }
 
-    function intersectsXZ(a, b, radius = 1.3) {
-      return Math.abs(a.x - b.x) < radius && Math.abs(a.z - b.z) < radius;
+    function canInteractWith(zone) {
+      return distanceTo(zone) < 2.2;
     }
 
     function handleMovement(delta) {
+      if (state.storyOpen) return;
+
       const dir = new THREE.Vector3();
       if (keys.up) dir.z -= 1;
       if (keys.down) dir.z += 1;
@@ -384,11 +716,11 @@ canvas {
         const angle = Math.atan2(dir.x, dir.z);
         player.rotation.y = angle;
         const forward = new THREE.Vector3(Math.sin(angle), 0, Math.cos(angle));
-        player.position.addScaledVector(forward, moveSpeed * delta * 60);
+        player.position.addScaledVector(forward, state.moveSpeed * delta * 60);
       }
 
       if (keys.jump && grounded) {
-        velocityY = 0.32;
+        velocityY = 0.28;
         grounded = false;
       }
 
@@ -400,32 +732,55 @@ canvas {
         grounded = true;
       }
 
-      player.position.x = THREE.MathUtils.clamp(player.position.x, -boundary, boundary);
-      player.position.z = THREE.MathUtils.clamp(player.position.z, -boundary, boundary);
+      player.position.x = THREE.MathUtils.clamp(player.position.x, -34, 34);
+      player.position.z = THREE.MathUtils.clamp(player.position.z, -34, 34);
 
-      // Collision with obstacles
-      for (const obs of obstacles) {
-        if (Math.abs(player.position.x - obs.position.x) < 1.4 && Math.abs(player.position.z - obs.position.z) < 1.4) {
-          player.position.x -= Math.sign(player.position.x - obs.position.x || 1) * 0.08;
-          player.position.z -= Math.sign(player.position.z - obs.position.z || 1) * 0.08;
-          if (Math.random() < 0.01) damagePlayer();
-        }
+      // Animation and story triggers
+      if (state.scene === 'intro' && canInteractWith(zones.start)) {
+        setMessage('Tekan Interaksi untuk memulai cerita.', 0.4);
       }
 
-      // Collect coins
-      for (const coin of coins) {
-        if (coin.visible && player.position.distanceTo(coin.position) < 1.5) {
-          coin.visible = false;
-          score += 10;
-          moveSpeed = Math.min(0.32, moveSpeed + 0.01);
-          updateStats();
-          setMessage('Orb terkumpul! +10', 0.8);
-        }
+      if (state.scene === 'intro' && canInteractWith(glowPoint.position)) {
+        openStory(
+          'Narator',
+          'Sebuah cahaya hijau muncul di depan sekolah.
+Itu tanda bahwa kamu sudah siap memulai langkah pertama.',
+          [
+            { label: 'Lanjut ke sekolah', action: () => { closeStory(); state.scene = 'walk'; state.chapter = 1; updateStats(); setMessage('Pergi ke area sekolah untuk melanjutkan.', 2); } }
+          ],
+          'Bab 1'
+        );
       }
 
-      if (score === coins.length * 10) {
-        setMessage('Menang! Semua orb sudah dikumpulkan.', 999);
+      if (state.scene === 'walk' && canInteractWith(zones.bully)) {
+        startBullyScene();
       }
+
+      if (state.scene === 'walk' && canInteractWith(zones.friend)) {
+        startFriendScene();
+      }
+
+      if (state.scene === 'walk' && canInteractWith(zones.teacher)) {
+        startTeacherScene();
+      }
+
+      if (state.scene === 'walk' && canInteractWith(zones.school)) {
+        setMessage('Kamu sudah dekat dengan sekolah. Cari karakter yang bercahaya.', 0.5);
+      }
+    }
+
+    function showNearestHint() {
+      if (state.storyOpen) return;
+      const dIntro = distanceTo(glowPoint.position);
+      const dBully = distanceTo(zones.bully);
+      const dFriend = distanceTo(zones.friend);
+      const dTeacher = distanceTo(zones.teacher);
+      const min = Math.min(dIntro, dBully, dFriend, dTeacher);
+
+      if (min === dIntro && state.scene === 'intro') setMessage('Dekati cahaya hijau untuk membuka bab awal.', 0.7);
+      else if (min === dBully && state.scene === 'walk') setMessage('Ada pembully di dekat halaman sekolah. Interaksi untuk dialog.', 0.7);
+      else if (min === dFriend && state.scene === 'walk') setMessage('Temanmu ada di sini. Interaksi untuk ngobrol.', 0.7);
+      else if (min === dTeacher && state.scene === 'walk') setMessage('Guru BK ada di dekat bangunan sekolah.', 0.7);
     }
 
     function animate(t = 0) {
@@ -434,18 +789,19 @@ canvas {
 
       handleMovement(delta);
 
-      coins.forEach((coin, idx) => {
-        if (coin.visible) {
-          coin.rotation.z += 0.03;
-          coin.position.y = coinPositions[idx][1] + Math.sin(t * 0.003 + idx) * 0.12;
-        }
+      [bully, friend, teacher].forEach((npc, i) => {
+        npc.rotation.y = Math.sin(t * 0.001 + i) * 0.12;
       });
 
-      player.children.forEach((part, idx) => {
-        if (idx === 1) part.position.y = 2.0 + Math.sin(t * 0.008) * 0.05;
+      glowPoint.rotation.y += 0.03;
+      glowPoint.position.y = 0.55 + Math.sin(t * 0.002) * 0.12;
+
+      clueMarkers.forEach((m, i) => {
+        m.rotation.z += 0.02 + i * 0.003;
+        m.position.y = 0.5 + Math.sin(t * 0.002 + i) * 0.09;
       });
 
-      targetCam.set(player.position.x, player.position.y + 4.5, player.position.z + 10);
+      targetCam.set(player.position.x, player.position.y + 4.8, player.position.z + 10.5);
       camPos.lerp(targetCam, 0.08);
       camera.position.copy(camPos);
       camera.lookAt(player.position.x, player.position.y + 1.2, player.position.z);
@@ -455,23 +811,47 @@ canvas {
         if (messageTimer <= 0) msgEl.classList.remove('show');
       }
 
+      // gentle reminder when nothing is open
+      if (!state.storyOpen && Math.random() < 0.01) showNearestHint();
+
       renderer.render(scene, camera);
       requestAnimationFrame(animate);
     }
 
-    function setKey(name, state) {
+    function interact() {
+      if (state.scene === 'intro' && distanceTo(glowPoint.position) < 2.2) {
+        openStory(
+          'Narator',
+          'Kamu berdiri di halaman sekolah. Hari ini bukan soal menang atau kalah, tapi soal memilih langkah yang aman dan sehat.',
+          [
+            { label: 'Masuk bab berikutnya', action: () => { closeStory(); state.scene = 'walk'; setMessage('Jelajahi halaman sekolah.', 2); } }
+          ],
+          'Bab 1'
+        );
+        return;
+      }
+
+      if (state.scene === 'walk') {
+        if (canInteractWith(zones.bully)) return startBullyScene();
+        if (canInteractWith(zones.friend)) return startFriendScene();
+        if (canInteractWith(zones.teacher)) return startTeacherScene();
+      }
+    }
+
+    function setKey(name, stateOn) {
       switch (name) {
-        case 'ArrowUp': case 'w': case 'W': keys.up = state; break;
-        case 'ArrowDown': case 's': case 'S': keys.down = state; break;
-        case 'ArrowLeft': case 'a': case 'A': keys.left = state; break;
-        case 'ArrowRight': case 'd': case 'D': keys.right = state; break;
-        case ' ': keys.jump = state; break;
+        case 'ArrowUp': case 'w': case 'W': keys.up = stateOn; break;
+        case 'ArrowDown': case 's': case 'S': keys.down = stateOn; break;
+        case 'ArrowLeft': case 'a': case 'A': keys.left = stateOn; break;
+        case 'ArrowRight': case 'd': case 'D': keys.right = stateOn; break;
+        case ' ': keys.jump = stateOn; break;
       }
     }
 
     window.addEventListener('keydown', (e) => {
       setKey(e.key, true);
-      if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key)) e.preventDefault();
+      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) e.preventDefault();
+      if (e.key === 'Enter') interact();
     }, { passive: false });
 
     window.addEventListener('keyup', (e) => setKey(e.key, false));
@@ -487,10 +867,7 @@ canvas {
       btn.addEventListener('contextmenu', (e) => e.preventDefault());
     });
 
-    jumpBtn.addEventListener('pointerdown', () => { keys.jump = true; jumpBtn.classList.add('active'); });
-    jumpBtn.addEventListener('pointerup', () => { keys.jump = false; jumpBtn.classList.remove('active'); });
-    jumpBtn.addEventListener('pointercancel', () => { keys.jump = false; jumpBtn.classList.remove('active'); });
-    jumpBtn.addEventListener('pointerleave', () => { keys.jump = false; jumpBtn.classList.remove('active'); });
+    interactBtn.addEventListener('click', interact);
     resetBtn.addEventListener('click', resetGame);
 
     window.addEventListener('resize', () => {
@@ -500,7 +877,8 @@ canvas {
     });
 
     updateStats();
-    setMessage('Kumpulkan semua orb hijau!', 2.5);
+    setMessage('Datangi cahaya hijau untuk memulai cerita.', 2.5);
+    beginIntro();
     animate();
   </script></body>
 </html>
