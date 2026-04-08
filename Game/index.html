@@ -1,594 +1,378 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Story Game: Visual Edition</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Silkscreen&display=swap" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Story Game 2D</title>
   <style>
-    :root {
-      --bg: #0f172a;
-      --bg-alt: #1e293b;
-      --fg: #f1f5f9;
-      --accent: #f59e0b;
-      --accent-glow: rgba(245, 158, 11, 0.6);
-      --positive: #22c55e;
-      --negative: #ef4444;
-      --card: #334155;
-      --border: #475569;
+    :root{
+      --bg:#0f172a;
+      --panel:rgba(15, 23, 42, .78);
+      --text:#e2e8f0;
+      --muted:#94a3b8;
+      --accent:#38bdf8;
+      --accent2:#22c55e;
+      --danger:#ef4444;
+      --border:rgba(255,255,255,.12);
+      --shadow:0 20px 60px rgba(0,0,0,.35);
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-    html, body { height: 100%; overflow: hidden; touch-action: none; position: fixed; width: 100%; font-family: 'Space Grotesk', sans-serif; background: var(--bg); color: var(--fg); }
-    .pixel-font { font-family: 'Silkscreen', cursive; }
-
-    #gameContainer { position: relative; width: 100%; height: 100%; overflow: hidden; }
-
-    /* Screens */
-    .game-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: none; overflow: hidden; background: var(--bg); }
-    .game-screen.active { display: flex; flex-direction: column; }
-    
-    #menuScreen { justify-content: center; align-items: center; text-align: center; padding: 20px; background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); }
-    #characterScreen { justify-content: flex-start; align-items: center; padding: 40px 20px 150px; overflow-y: auto; }
-    
-    /* UI Elements */
-    .play-btn { width: 120px; height: 120px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), #d97706); border: 4px solid rgba(255,255,255,0.2); box-shadow: 0 0 40px var(--accent-glow); display: flex; align-items: center; justify-content: center; transition: transform 0.2s; }
-    .play-btn:active { transform: scale(0.95); }
-    .play-btn::before { content: ''; width: 0; height: 0; margin-left: 8px; border: solid transparent; border-width: 20px 0 20px 35px; border-left-color: white; }
-
-    .characters-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 16px; width: 100%; max-width: 500px; margin: 20px 0; }
-    .character-card { padding: 16px; background: var(--card); border: 2px solid var(--border); border-radius: 16px; cursor: pointer; transition: all 0.2s; text-align: center; }
-    .character-card.selected { border-color: var(--accent); background: rgba(245, 158, 11, 0.1); transform: translateY(-4px); }
-    
-    /* Character Preview Image */
-    .char-preview { width: 64px; height: 64px; margin: 0 auto 8px; background-size: contain; background-repeat: no-repeat; background-position: center; }
-
-    .fixed-bottom-btn { position: fixed; bottom: 0; left: 0; right: 0; padding: 20px; background: linear-gradient(to top, var(--bg), transparent); display: flex; justify-content: center; z-index: 50; }
-    
-    /* Game View */
-    #gameCanvas { display: block; width: 100%; height: 100%; image-rendering: auto; }
-    
-    /* Controls */
-    #analogContainer { position: absolute; bottom: 30px; left: 30px; width: 140px; height: 140px; z-index: 20; display: none; touch-action: none; }
-    #analogContainer.active { display: block; }
-    .analog-base { position: absolute; width: 100%; height: 100%; background: rgba(0,0,0,0.5); border: 3px solid rgba(255,255,255,0.3); border-radius: 50%; }
-    .analog-stick { position: absolute; width: 60px; height: 60px; background: rgba(255,255,255,0.9); border-radius: 50%; top: 50%; left: 50%; transform: translate(-50%, -50%); box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
-
-    /* Story Box */
-    #storyBox {
-      position: absolute; bottom: 0; left: 0; right: 0;
-      background: linear-gradient(to top, rgba(15, 23, 42, 1) 90%, transparent);
-      padding: 20px; padding-bottom: 30px;
-      display: none; flex-direction: column; justify-content: flex-end;
-      z-index: 15; height: 220px;
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Arial, Helvetica, sans-serif;
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:
+        radial-gradient(circle at top, #1e293b 0%, #0f172a 45%, #020617 100%);
+      color:var(--text);
+      padding:16px;
     }
-    #storyBox.active { display: flex; }
-    
-    .story-content {
-      background: rgba(30, 41, 59, 0.95);
-      border: 2px solid var(--border);
-      border-left: 4px solid var(--accent);
-      border-radius: 8px;
-      padding: 16px;
-      max-width: 800px;
-      margin: 0 auto;
-      width: 100%;
-    }
-    
-    .story-title { color: var(--accent); font-weight: bold; margin-bottom: 4px; font-size: 14px; }
-    .story-text { font-size: 15px; line-height: 1.5; margin-bottom: 12px; }
-    
-    .choice-grid { display: grid; gap: 8px; }
-    .choice-btn {
-      padding: 10px; background: var(--card); border: 1px solid var(--border); border-radius: 6px;
-      color: var(--fg); text-align: left; cursor: pointer; transition: all 0.2s; font-size: 14px;
-    }
-    .choice-btn:active { background: var(--accent); color: black; }
 
-    /* Loading */
-    #loadingScreen { position: absolute; inset: 0; background: var(--bg); z-index: 100; display: flex; justify-content: center; align-items: center; flex-direction: column; }
-    .spinner { width: 40px; height: 40px; border: 4px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; }
-    @keyframes spin { to { transform: rotate(360deg); } }
+    .game{
+      width:min(920px, 100%);
+      min-height:92vh;
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+    }
 
-    @media (max-width: 640px) {
-      .play-btn { width: 90px; height: 90px; }
-      .play-btn::before { border-width: 15px 0 15px 26px; }
-      #analogContainer { width: 120px; height: 120px; bottom: 20px; left: 20px; }
-      .analog-stick { width: 50px; height: 50px; }
-      #storyBox { height: 240px; padding: 10px; padding-bottom: 20px; }
+    .topbar{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+
+    .badge{
+      padding:10px 14px;
+      border:1px solid var(--border);
+      background:rgba(255,255,255,.05);
+      border-radius:999px;
+      font-size:14px;
+      color:var(--muted);
+      backdrop-filter:blur(10px);
+    }
+
+    .stage{
+      flex:1;
+      border-radius:24px;
+      overflow:hidden;
+      position:relative;
+      box-shadow:var(--shadow);
+      border:1px solid var(--border);
+      background:
+        linear-gradient(to top, rgba(2,6,23,.9), rgba(2,6,23,.15)),
+        radial-gradient(circle at center, #334155 0%, #0f172a 60%, #020617 100%);
+      min-height:520px;
+      display:flex;
+      align-items:flex-end;
+    }
+
+    .stage::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background-size:cover;
+      background-position:center;
+      opacity:.22;
+      transition:.35s ease;
+      z-index:0;
+    }
+
+    .overlay{
+      position:absolute;
+      inset:0;
+      z-index:1;
+      display:flex;
+      align-items:flex-end;
+      padding:18px;
+    }
+
+    .panel{
+      width:100%;
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:22px;
+      padding:18px;
+      backdrop-filter:blur(12px);
+    }
+
+    h1{
+      margin:0 0 8px;
+      font-size:clamp(22px, 4vw, 34px);
+      line-height:1.2;
+    }
+
+    .story{
+      margin:0;
+      font-size:clamp(16px, 2.2vw, 19px);
+      line-height:1.65;
+      color:var(--text);
+      min-height:90px;
+      white-space:pre-wrap;
+    }
+
+    .choices{
+      margin-top:16px;
+      display:grid;
+      grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));
+      gap:10px;
+    }
+
+    button{
+      border:none;
+      border-radius:16px;
+      padding:14px 16px;
+      font-size:15px;
+      font-weight:700;
+      cursor:pointer;
+      transition:.2s ease;
+    }
+
+    button:hover{transform:translateY(-1px)}
+    button:active{transform:translateY(1px)}
+
+    .choice{
+      background:linear-gradient(135deg, var(--accent), #2563eb);
+      color:white;
+      box-shadow:0 10px 24px rgba(37,99,235,.3);
+    }
+
+    .secondary{
+      background:rgba(255,255,255,.08);
+      color:var(--text);
+      border:1px solid var(--border);
+    }
+
+    .danger{
+      background:linear-gradient(135deg, var(--danger), #b91c1c);
+      color:white;
+      box-shadow:0 10px 24px rgba(239,68,68,.22);
+    }
+
+    .footer{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .mini{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .hint{
+      color:var(--muted);
+      font-size:13px;
+      margin-top:10px;
+    }
+
+    @media (max-width: 640px){
+      .stage{min-height:72vh}
+      .panel{padding:16px}
+      button{width:100%}
+      .choices{grid-template-columns:1fr}
     }
   </style>
 </head>
 <body>
-
-<div id="gameContainer">
-  
-  <!-- Loading Screen -->
-  <div id="loadingScreen">
-    <div class="spinner"></div>
-    <p class="mt-4 text-sm opacity-60">Loading Assets...</p>
-  </div>
-
-  <!-- MENU SCREEN -->
-  <div id="menuScreen" class="game-screen">
-    <h1 class="pixel-font text-4xl md:text-6xl mb-4" style="color: var(--accent); text-shadow: 0 0 20px rgba(245, 158, 11, 0.5);">SCHOOL STORY</h1>
-    <p class="text-lg opacity-80 mb-10 max-w-md">A Visual Novel Experience</p>
-    
-    <button id="playBtn" class="play-btn" aria-label="Start Game"></button>
-    <p class="pixel-font text-xs mt-6 opacity-40">TAP TO START</p>
-  </div>
-
-  <!-- CHARACTER SELECT -->
-  <div id="characterScreen" class="game-screen">
-    <h2 class="pixel-font text-xl mt-10" style="color: var(--accent);">CHOOSE AVATAR</h2>
-    
-    <div class="characters-grid">
-      <!-- Characters will be generated by JS based on Assets -->
+  <div class="game">
+    <div class="topbar">
+      <div class="badge" id="sceneLabel">Scene: mulai</div>
+      <div class="badge" id="progressLabel">0/0 pilihan</div>
     </div>
 
-    <div class="fixed-bottom-btn md:relative md:mt-4">
-      <button id="startBtn" class="px-10 py-3 bg-amber-500 text-black rounded-full font-bold pixel-font disabled:opacity-30 disabled:cursor-not-allowed" disabled>
-        START DAY
-      </button>
-    </div>
-  </div>
+    <div class="stage" id="stage">
+      <div class="overlay">
+        <div class="panel">
+          <h1 id="title">Judul Game</h1>
+          <p class="story" id="story">Klik mulai untuk memulai cerita.</p>
 
-  <!-- GAME SCREEN -->
-  <div id="gameScreen" class="game-screen">
-    <canvas id="gameCanvas"></canvas>
-    
-    <div id="storyBox">
-      <div class="story-content">
-        <div id="storyTitle" class="story-title">CHAPTER 1</div>
-        <div id="storyText" class="story-text">Loading...</div>
-        <div id="choiceGrid" class="choice-grid"></div>
+          <div class="choices" id="choices"></div>
+
+          <div class="footer" style="margin-top:14px;">
+            <div class="mini">
+              <button class="secondary" onclick="restartGame()">Restart</button>
+              <button class="secondary" onclick="saveGame()">Save</button>
+              <button class="secondary" onclick="loadGame()">Load</button>
+            </div>
+            <div class="mini">
+              <button class="danger" onclick="clearSave()">Hapus Save</button>
+            </div>
+          </div>
+
+          <div class="hint">
+            Kamu bisa edit isi cerita di bagian JavaScript, tepatnya di objek <b>scenes</b>.
+          </div>
+        </div>
       </div>
     </div>
-
-    <div id="analogContainer">
-      <div class="analog-base"></div>
-      <div id="stick" class="analog-stick"></div>
-    </div>
   </div>
 
-  <!-- END SCREEN -->
-  <div id="endScreen" class="game-screen justify-center items-center text-center p-8">
-      <h1 class="pixel-font text-3xl mb-4" style="color: var(--accent);">THE END</h1>
-      <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 mb-8 max-w-sm w-full">
-          <div class="text-5xl font-bold mb-2" id="finalScore">0</div>
-          <div class="text-sm opacity-60">Empathy Points</div>
-      </div>
-      <button id="replayBtn" class="px-8 py-3 bg-amber-500 rounded-full font-bold">Play Again</button>
-  </div>
+  <script>
+    const scenes = {
+      start: {
+        title: "Petualangan di Kota Lama",
+        text: "Kamu terbangun di sebuah kota tua yang penuh lampu kuning dan jalan sempit. Di depanmu ada dua arah: gang kecil yang sunyi, atau jalan utama yang ramai.",
+        bg: "radial-gradient(circle at center, #475569 0%, #0f172a 65%, #020617 100%)",
+        choices: [
+          { text: "Masuk ke gang kecil", next: "alley" },
+          { text: "Ikuti jalan utama", next: "mainroad" }
+        ]
+      },
 
-</div>
+      alley: {
+        title: "Gang Kecil",
+        text: "Gang itu tenang, tapi kamu melihat sebuah pintu kayu kecil dengan cahaya samar dari celahnya. Ada juga jalan keluar ke taman.",
+        bg: "radial-gradient(circle at center, #1f2937 0%, #0f172a 70%, #020617 100%)",
+        choices: [
+          { text: "Buka pintu kayu", next: "room" },
+          { text: "Pergi ke taman", next: "garden" }
+        ]
+      },
 
-<script>
-// ==========================================
-// 1. ASSET CONFIGURATION (CHANGE URLs HERE)
-// ==========================================
+      mainroad: {
+        title: "Jalan Utama",
+        text: "Di jalan utama, kamu melihat papan petunjuk menuju perpustakaan tua dan jembatan kota. Angin malam terasa sejuk.",
+        bg: "radial-gradient(circle at center, #334155 0%, #0f172a 70%, #020617 100%)",
+        choices: [
+          { text: "Ke perpustakaan", next: "library" },
+          { text: "Ke jembatan", next: "bridge" }
+        ]
+      },
 
-const CONFIG = {
-  // Backgrounds (use wide images for side scrolling)
-  backgrounds: {
-    school: "https://placehold.co/2400x800/64748b/ffffff?text=School+Background", // Example placeholder
-    park: "https://placehold.co/2400x800/228B22/ffffff?text=Park+Background"
-  },
-  
-  // Characters (Sprite Sheets or Single Images)
-  // Ideally a sprite sheet: horizontal strip of frames (e.g., Idle, Walk1, Walk2, Walk3)
-  characters: [
-    {
-      id: "alex",
-      name: "Alex",
-      // A sprite sheet with 4 frames horizontal (Idle, Walk1, Walk2, Walk3)
-      sprite: "https://placehold.co/128x32/3b82f6/ffffff?text=Alex", 
-      preview: "https://placehold.co/64x64/3b82f6/ffffff?text=A",
-      color: "Red" // Fallback color if image fails
-    },
-    {
-      id: "sam",
-      name: "Sam",
-      sprite: "https://placehold.co/128x32/22c55e/ffffff?text=Sam",
-      preview: "https://placehold.co/64x64/22c55e/ffffff?text=S",
-      color: "#22c55e"
-    }
-  ],
-  
-  // NPCs (can reuse logic)
-  npcSprite: "https://placehold.co/32x32/ef4444/ffffff?text=Bully"
-};
+      room: {
+        title: "Ruangan Rahasia",
+        text: "Di dalam ruangan, ada meja kecil dengan peta kota dan sebuah kunci emas. Kamu berhasil menemukan petunjuk penting.",
+        bg: "radial-gradient(circle at center, #3b2f5a 0%, #0f172a 70%, #020617 100%)",
+        choices: [
+          { text: "Ambil kunci dan lanjut", next: "ending1" },
+          { text: "Kembali", next: "start" }
+        ]
+      },
 
-// ==========================================
-// 2. GAME ENGINE
-// ==========================================
+      garden: {
+        title: "Taman Sunyi",
+        text: "Taman itu penuh bunga dan lampu taman. Di tengahnya ada bangku kosong dan suara air mancur yang tenang.",
+        bg: "radial-gradient(circle at center, #14532d 0%, #0f172a 70%, #020617 100%)",
+        choices: [
+          { text: "Duduk sejenak", next: "ending2" },
+          { text: "Kembali", next: "start" }
+        ]
+      },
 
-const Game = {
-  canvas: null, ctx: null, w: 0, h: 0,
-  lastTime: 0, running: false,
-  assets: { backgrounds: {}, characters: {} }, // Loaded images stored here
-  state: { screen: 'loading', char: null, score: 0, phase: 'roam' },
-  player: { 
-    x: 100, y: 0, vx: 0, size: 32, speed: 180, 
-    color: '#3b82f6', frame: 0, facing: 1 
-  },
-  world: { x: 0, width: 2400 },
-  input: { dx: 0 },
-  currentBg: null
-};
+      library: {
+        title: "Perpustakaan Tua",
+        text: "Rak buku tinggi menjulang. Kamu menemukan buku yang halaman pertamanya berisi peta rahasia kota.",
+        bg: "radial-gradient(circle at center, #4c1d95 0%, #0f172a 70%, #020617 100%)",
+        choices: [
+          { text: "Baca lebih lanjut", next: "ending1" },
+          { text: "Keluar", next: "start" }
+        ]
+      },
 
-const Story = [
-  { trigger: 400, title: "Hallway", text: "You see a student being bullied by their locker.", choices: [
-    { text: "Intervene", pts: 15, result: "You stopped the bullying!" },
-    { text: "Walk away", pts: -5, result: "Why?", result: "Why did you do that?" }
-  ]},
-  { trigger: 1000, title: "Class", text: "A group is mocking a student's answer.", choices: [
-    { text: "Join the group", pts: -10000000000, result: "You hurt their feelings." },
-    { text: "Support the student", pts: 20, result: "You made a new friend." }
-  ]},
-  { trigger: 1800, title: "Exit", text: "The school day ends. How did you do?", choices: [
-    { text: "Go home", pts: 0, result: "You reflect on your day." }
-  ]}
-];
+      bridge: {
+        title: "Jembatan Kota",
+        text: "Dari jembatan, kamu melihat seluruh kota menyala. Perjalananmu terasa seperti baru saja dimulai.",
+        bg: "radial-gradient(circle at center, #0f766e 0%, #0f172a 70%, #020617 100%)",
+        choices: [
+          { text: "Lanjutkan petualangan", next: "ending2" },
+          { text: "Kembali", next: "start" }
+        ]
+      },
 
-// --- Asset Loader ---
+      ending1: {
+        title: "Ending Rahasia",
+        text: "Kamu menemukan rahasia kota lama dan membuka jalan baru untuk petualangan berikutnya. Tamat.",
+        bg: "radial-gradient(circle at center, #f59e0b 0%, #0f172a 70%, #020617 100%)",
+        choices: [
+          { text: "Main lagi", next: "start" }
+        ]
+      },
 
-function loadAssets() {
-  return new Promise((resolve) => {
-    let toLoad = 0;
-    let loaded = 0;
-    
-    const checkDone = () => {
-      loaded++;
-      if (loaded === toLoad) resolve();
-    };
-
-    // Load Backgrounds
-    Object.keys(CONFIG.backgrounds).forEach(key => {
-      toLoad++;
-      const img = new Image();
-      img.src = CONFIG.backgrounds[key];
-      img.onload = () => {
-        Game.assets.backgrounds[key] = img;
-        checkDone();
-      };
-      img.onerror = checkDone; // Skip if error
-    });
-
-    // Load Characters
-    CONFIG.characters.forEach(c => {
-      toLoad++;
-      const img = new Image();
-      img.src = c.sprite;
-      img.onload = () => {
-        Game.assets.characters[c.id] = img;
-        checkDone();
-      };
-      img.onerror = checkDone;
-      
-      // Load Preview
-      const pImg = new Image();
-      pImg.src = c.preview;
-      pImg.onload = () => { c.previewImg = pImg; };
-    });
-    
-    // Load NPC
-    toLoad++;
-    const npcImg = new Image();
-    npcImg.src = CONFIG.npcSprite;
-    npcImg.onload = () => { Game.assets.npc = npcImg; checkDone(); };
-    npcImg.onerror = checkDone;
-    
-    // Fallback if no assets
-    if (toLoad === 0) resolve();
-  });
-}
-
-// --- SYSTEM ---
-
-function $(id) { return document.getElementById(id); }
-
-async function init() {
-  Game.canvas = $('gameCanvas');
-  Game.ctx = Game.canvas.getContext('2d');
-  
-  resize();
-  window.addEventListener('resize', resize);
-  
-  // Load Images
-  await loadAssets();
-  
-  // Setup Menu
-  setupCharacterSelect();
-  
-  $('playBtn').onclick = () => switchScreen('characterScreen');
-  $('replayBtn').onclick = () => { Game.state.score = 0; switchScreen('characterScreen'); };
-  
-  $('loadingScreen').style.display = 'none';
-  switchScreen('menuScreen');
-  
-  setupControls();
-}
-
-function setupCharacterSelect() {
-  const grid = $('characterScreen').querySelector('.characters-grid');
-  grid.innerHTML = '';
-  
-  CONFIG.characters.forEach(c => {
-    const div = document.createElement('div');
-    div.className = 'character-card';
-    div.dataset.char = c.id;
-    
-    // Use image or fallback to colored circle
-    const previewHtml = c.previewImg 
-      ? `<img src="${c.preview}" class="char-preview" style="background-image:url(${c.preview})">`
-      : `<div class="char-preview" style="background-color:${c.color}"></div>`;
-    
-    div.innerHTML = `
-      ${previewHtml}
-      <h3 class="font-bold">${c.name}</h3>
-    `;
-    
-    div.onclick = () => {
-      document.querySelectorAll('.character-card').forEach(e => e.classList.remove('selected'));
-      div.classList.add('selected');
-      Game.state.char = c.id;
-      Game.player.color = c.color; // Fallback
-      $('startBtn').disabled = false;
-    };
-    grid.appendChild(div);
-  });
-}
-
-function resize() {
-  Game.w = window.innerWidth;
-  Game.h = window.innerHeight;
-  Game.canvas.width = Game.w;
-  Game.canvas.height = Game.h;
-  // Ground position
-  Game.player.y = Game.h * 0.75;
-}
-
-function switchScreen(id) {
-  document.querySelectorAll('.game-screen').forEach(s => s.classList.remove('active'));
-  $('gameScreen').classList.remove('active'); // special handling
-  
-  if(id === 'gameScreen') {
-    $('gameScreen').classList.add('active');
-    $('analogContainer').classList.add('active');
-    if(!Game.running) {
-      Game.running = true;
-      loop(performance.now());
-    }
-  } else {
-    Game.running = false;
-    $('analogContainer').classList.remove('active');
-    $(id).classList.add('active');
-  }
-  Game.state.screen = id;
-}
-
-// --- GAME LOGIC ---
-
-function startGame() {
-  Game.state.score = 0;
-  Game.state.phase = 'roam';
-  Game.world.x = 0;
-  Game.player.x = 100;
-  Game.player.vx = 0;
-  Game.currentBg = Game.assets.backgrounds.school || null; // Set default BG
-  
-  Story.forEach(e => e.fired = false);
-  showDialog(false);
-  switchScreen('gameScreen');
-}
-
-function update(dt) {
-  if(Game.state.phase === 'story') return;
-
-  // Movement
-  Game.player.vx = Game.input.dx * Game.player.speed;
-  Game.player.x += Game.player.vx * dt;
-  Game.player.x = Math.max(50, Math.min(Game.world.width - 50, Game.player.x));
-  
-  // Animation logic
-  if(Game.player.vx !== 0) {
-    Game.player.facing = Game.player.vx > 0 ? 1 : -1;
-    Game.player.frame += dt * 12; // Animation speed
-  } else {
-    Game.player.frame = 0; // Idle frame
-  }
-
-  // Camera
-  let targetCam = Game.player.x - Game.w / 2;
-  targetCam = Math.max(0, Math.min(Game.world.width - Game.w, targetCam));
-  Game.world.x += (targetCam - Game.world.x) * 0.1;
-
-  // Triggers
-  Story.forEach(event => {
-    if(!event.fired && Game.player.x > event.trigger) {
-      triggerEvent(event);
-    }
-  });
-}
-
-function render() {
-  const ctx = Game.ctx;
-  ctx.clearRect(0, 0, Game.w, Game.h);
-  
-  ctx.save();
-  ctx.translate(-Game.world.x, 0);
-
-  // --- DRAW BACKGROUND ---
-  if(Game.currentBg && Game.currentBg.complete) {
-    // Parallax / Tiling Logic:
-    // Since our level is 2400px wide, we draw the bg starting at 0
-    // We can draw it fixed to camera (parallax) or fixed to world.
-    // Fixed to world (moves with player):
-    ctx.drawImage(Game.currentBg, 0, 0, Game.world.width, Game.h);
-  } else {
-    // Fallback Gradient
-    let grd = ctx.createLinearGradient(0, 0, 0, Game.h);
-    grd.addColorStop(0, "#94a3b8");
-    grd.addColorStop(1, "#475569");
-    ctx.fillStyle = grd;
-    ctx.fillRect(0, 0, Game.world.width, Game.h);
-    
-    // Draw simple floor
-    ctx.fillStyle = '#334155';
-    ctx.fillRect(0, Game.h * 0.8, Game.world.width, Game.h * 0.3);
-  }
-
-  // --- DRAW NPCs ---
-  Story.forEach(event => {
-    if(!event.fired && Math.abs(event.trigger - Game.player.x) < 200) {
-      const npcX = event.trigger + 50;
-      
-      // Draw NPC using Asset or Fallback
-      if(Game.assets.npc && Game.assets.npc.complete) {
-        ctx.drawImage(Game.assets.npc, npcX - 16, Game.player.y - 32, 32, 32);
-      } else {
-        ctx.fillStyle = '#ef4444';
-        ctx.beginPath(); ctx.arc(npcX, Game.player.y, 16, 0, 7); ctx.fill();
+      ending2: {
+        title: "Ending Tenang",
+        text: "Kamu memilih jalan yang damai. Malam terasa hangat dan petualangan berakhir dengan tenang. Tamat.",
+        bg: "radial-gradient(circle at center, #14b8a6 0%, #0f172a 70%, #020617 100%)",
+        choices: [
+          { text: "Main lagi", next: "start" }
+        ]
       }
+    };
+
+    let currentScene = "start";
+    let choiceCount = 0;
+
+    const titleEl = document.getElementById("title");
+    const storyEl = document.getElementById("story");
+    const choicesEl = document.getElementById("choices");
+    const stageEl = document.getElementById("stage");
+    const sceneLabelEl = document.getElementById("sceneLabel");
+    const progressLabelEl = document.getElementById("progressLabel");
+
+    function renderScene(id){
+      const scene = scenes[id];
+      if(!scene) return;
+
+      currentScene = id;
+      titleEl.textContent = scene.title;
+      storyEl.textContent = scene.text;
+      sceneLabelEl.textContent = "Scene: " + id;
+      stageEl.style.background = scene.bg;
+
+      choicesEl.innerHTML = "";
+      scene.choices.forEach(choice => {
+        const btn = document.createElement("button");
+        btn.className = "choice";
+        btn.textContent = choice.text;
+        btn.onclick = () => {
+          choiceCount++;
+          progressLabelEl.textContent = `${choiceCount} pilihan`;
+          renderScene(choice.next);
+        };
+        choicesEl.appendChild(btn);
+      });
     }
-  });
 
-  // --- DRAW PLAYER ---
-  const p = Game.player;
-  const charAsset = Game.assets.characters[p.charId || Game.state.char];
-  
-  let drawSuccess = false;
-  
-  // Try to draw Sprite Sheet (assuming 4 frames horizontal)
-  // Width of one frame is totalWidth / 4
-  if(charAsset && charAsset.complete && charAsset.naturalWidth > 0) {
-    const frameWidth = charAsset.width / 4; 
-    const frameHeight = charAsset.height;
-    
-    // Calculate animation frame index (0, 1, 2, 3)
-    let frameIndex = Math.floor(p.frame) % 4;
-    
-    // Draw the sprite
-    ctx.save();
-    ctx.translate(p.x, p.y);
-    if(p.facing === -1) ctx.scale(-1, 1); // Flip horizontally
-    
-    ctx.drawImage(
-      charAsset, 
-      frameIndex * frameWidth, 0, frameWidth, frameHeight, // Source Rect
-      -p.size/2, -p.size/2, p.size, p.size // Dest Rect (centered)
-    );
-    ctx.restore();
-    drawSuccess = true;
-  } 
-  
-  // Fallback if no image
-  if (!drawSuccess) {
-    ctx.fillStyle = p.color;
-    ctx.beginPath(); ctx.arc(p.x, p.y, p.size/2, 0, 7); ctx.fill();
-    
-    // Simple eyes
-    ctx.fillStyle = 'white';
-    ctx.beginPath(); ctx.arc(p.x + (p.facing*4), p.y - 4, 3, 0, 7); ctx.fill();
-  }
+    function restartGame(){
+      choiceCount = 0;
+      progressLabelEl.textContent = "0 pilihan";
+      renderScene("start");
+    }
 
-  ctx.restore();
-}
+    function saveGame(){
+      localStorage.setItem("storyGameSave", JSON.stringify({
+        currentScene,
+        choiceCount
+      }));
+      alert("Game tersimpan.");
+    }
 
-function triggerEvent(event) {
-  event.fired = true;
-  Game.state.phase = 'story';
-  
-  $('storyTitle').textContent = event.title;
-  $('storyText').textContent = event.text;
-  
-  const grid = $('choiceGrid');
-  grid.innerHTML = '';
-  
-  event.choices.forEach(c => {
-    const btn = document.createElement('button');
-    btn.className = 'choice-btn';
-    btn.textContent = c.text;
-    btn.onclick = () => resolveChoice(event, c);
-    grid.appendChild(btn);
-  });
-  
-  showDialog(true);
-}
+    function loadGame(){
+      const saved = localStorage.getItem("storyGameSave");
+      if(!saved){
+        alert("Belum ada save.");
+        return;
+      }
+      const data = JSON.parse(saved);
+      currentScene = data.currentScene || "start";
+      choiceCount = data.choiceCount || 0;
+      progressLabelEl.textContent = `${choiceCount} pilihan`;
+      renderScene(currentScene);
+    }
 
-function resolveChoice(event, choice) {
-  Game.state.score += choice.pts;
-  $('storyText').textContent = choice.result;
-  
-  const grid = $('choiceGrid');
-  grid.innerHTML = '';
-  
-  const btn = document.createElement('button');
-  btn.className = 'choice-btn';
-  btn.textContent = "Continue...";
-  btn.onclick = () => {
-    showDialog(false);
-    Game.state.phase = 'roam';
-    if(event === Story[Story.length - 1]) endGame();
-  };
-  grid.appendChild(btn);
-}
+    function clearSave(){
+      localStorage.removeItem("storyGameSave");
+      alert("Save dihapus.");
+    }
 
-function showDialog(show) { $('storyBox').classList.toggle('active', show); }
-
-function endGame() {
-  $('finalScore').textContent = Game.state.score;
-  switchScreen('endScreen');
-}
-
-function loop(time) {
-  if(!Game.running) return;
-  const dt = Math.min((time - Game.lastTime) / 1000, 0.2);
-  Game.lastTime = time;
-  update(dt); render();
-  requestAnimationFrame(loop);
-}
-
-// --- CONTROLS ---
-function setupControls() {
-  const stick = $('stick');
-  const base = $('analogContainer');
-  let dragging = false;
-
-  const move = (ex, ey) => {
-    if(!dragging) return;
-    const rect = base.getBoundingClientRect();
-    const cx = rect.left + rect.width/2;
-    let dx = ex - cx;
-    const dist = Math.abs(dx);
-    const max = 60;
-    if(dist > max) dx = (dx/dist) * max;
-    stick.style.transform = `translate(calc(-50% + ${dx}px), -50%)`;
-    Game.input.dx = dx / max;
-  };
-
-  const end = () => {
-    dragging = false;
-    stick.style.transform = `translate(-50%, -50%)`;
-    Game.input.dx = 0;
-  };
-
-  base.addEventListener('touchstart', e => { e.preventDefault(); dragging = true; move(e.touches[0].clientX, e.touches[0].clientY); }, {passive:false});
-  window.addEventListener('touchmove', e => { if(dragging) move(e.touches[0].clientX, e.touches[0].clientY); }, {passive:false});
-  window.addEventListener('touchend', end);
-  
-  base.addEventListener('mousedown', e => { dragging = true; move(e.clientX, e.clientY); });
-  window.addEventListener('mousemove', e => { if(dragging) move(e.clientX, e.clientY); });
-  window.addEventListener('mouseup', end);
-  
-  // Start button
-  $('startBtn').onclick = startGame;
-}
-
-// Start
-init();
-</script>
+    renderScene("start");
+  </script>
 </body>
 </html>
