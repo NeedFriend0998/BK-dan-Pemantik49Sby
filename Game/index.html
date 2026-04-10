@@ -191,9 +191,243 @@
 
 <!-- Nanti JavaScript akan ditambahkan di sini -->
 <script>
-    // Untuk saat ini kosong dulu. 
-    // Kita fahamkan dulu struktur HTML/CSS untuk HP.
-    console.log('🎮 Layout mobile siap. Joystick masih visual.');
+    (function() {
+        "use strict";
+
+        // ==================== AMBIL ELEMEN ====================
+        const gameArea = document.getElementById('gameArea');
+        const player = document.getElementById('player');
+        const joystickBase = document.getElementById('joystickBase');
+        const joystickKnob = document.getElementById('joystickKnob');
+        const directionLabel = document.getElementById('directionLabel');
+
+        // ==================== DATA KARAKTER ====================
+        const playerState = {
+            x: gameArea.clientWidth / 2,    // Posisi X (px) relatif terhadap gameArea
+            y: gameArea.clientHeight / 2,   // Posisi Y (px)
+            speed: 5,                       // Kecepatan gerak per frame
+            size: 56                        // Sama dengan width/height CSS
+        };
+
+        // ==================== DATA JOYSTICK ====================
+        const joystick = {
+            active: false,
+            baseRect: null,         // Posisi dan ukuran base (DOMRect)
+            baseRadius: 0,          // Setengah lebar base
+            maxDistance: 0,         // Jarak maksimum knob dari pusat
+            centerX: 0,             // Koordinat X pusat base (client)
+            centerY: 0,             // Koordinat Y pusat base (client)
+            vector: { x: 0, y: 0 }, // Vektor arah (-1..1)
+            knob: joystickKnob
+        };
+
+        // ==================== FUNGSI UPDATE UKURAN JOYSTICK ====================
+        function updateJoystickMetrics() {
+            const rect = joystickBase.getBoundingClientRect();
+            joystick.baseRect = rect;
+            joystick.baseRadius = rect.width / 2;
+            // Knob bisa ditarik sampai 70% radius base (biar gak keluar total)
+            joystick.maxDistance = joystick.baseRadius * 0.7;
+            joystick.centerX = rect.left + rect.width / 2;
+            joystick.centerY = rect.top + rect.height / 2;
+        }
+
+        // Panggil sekali di awal
+        updateJoystickMetrics();
+        // Update jika layar berubah orientasi atau resize
+        window.addEventListener('resize', () => {
+            updateJoystickMetrics();
+            // Jika joystick tidak aktif, pastikan knob di tengah
+            if (!joystick.active) {
+                resetKnobPosition();
+            }
+        });
+
+        // ==================== FUNGSI RESET KNOB KE TENGAH ====================
+        function resetKnobPosition() {
+            const knobSize = joystickKnob.offsetWidth;
+            const baseSize = joystick.baseRadius * 2;
+            // Posisikan tepat di tengah base
+            joystickKnob.style.left = (baseSize / 2 - knobSize / 2) + 'px';
+            joystickKnob.style.top = (baseSize / 2 - knobSize / 2) + 'px';
+            joystick.vector.x = 0;
+            joystick.vector.y = 0;
+            directionLabel.textContent = '⚫ Diam';
+        }
+
+        // ==================== FUNGSI MENGATUR POSISI KNOB & VEKTOR ====================
+        function setJoystickFromEvent(clientX, clientY) {
+            if (!joystick.active) return;
+
+            // Hitung selisih dari pusat base
+            let dx = clientX - joystick.centerX;
+            let dy = clientY - joystick.centerY;
+
+            // Jarak dari pusat
+            let distance = Math.sqrt(dx * dx + dy * dy);
+
+            // Jika melebihi batas maksimal, normalisasi
+            if (distance > joystick.maxDistance) {
+                const angle = Math.atan2(dy, dx);
+                dx = Math.cos(angle) * joystick.maxDistance;
+                dy = Math.sin(angle) * joystick.maxDistance;
+                distance = joystick.maxDistance;
+            }
+
+            // Posisi knob (relatif terhadap base)
+            const knobSize = joystickKnob.offsetWidth;
+            const knobX = (joystick.baseRadius + dx) - knobSize / 2;
+            const knobY = (joystick.baseRadius + dy) - knobSize / 2;
+            joystickKnob.style.left = knobX + 'px';
+            joystickKnob.style.top = knobY + 'px';
+
+            // Hitung vektor ternormalisasi (0..1)
+            if (distance > 1) {
+                joystick.vector.x = dx / joystick.maxDistance;
+                joystick.vector.y = dy / joystick.maxDistance;
+            } else {
+                joystick.vector.x = 0;
+                joystick.vector.y = 0;
+            }
+
+            // Update label arah
+            updateDirectionLabel();
+        }
+
+        function updateDirectionLabel() {
+            const v = joystick.vector;
+            if (v.x === 0 && v.y === 0) {
+                directionLabel.textContent = '⚫ Diam';
+                return;
+            }
+
+            // Tentukan arah dominan berdasarkan sudut
+            let angle = Math.atan2(v.y, v.x) * (180 / Math.PI);
+            let direction = '';
+            if (angle >= -22.5 && angle < 22.5) direction = '➡️ Kanan';
+            else if (angle >= 22.5 && angle < 67.5) direction = '↗️ Kanan Atas';
+            else if (angle >= 67.5 && angle < 112.5) direction = '⬆️ Atas';
+            else if (angle >= 112.5 && angle < 157.5) direction = '↖️ Kiri Atas';
+            else if (angle >= 157.5 || angle < -157.5) direction = '⬅️ Kiri';
+            else if (angle >= -157.5 && angle < -112.5) direction = '↙️ Kiri Bawah';
+            else if (angle >= -112.5 && angle < -67.5) direction = '⬇️ Bawah';
+            else if (angle >= -67.5 && angle < -22.5) direction = '↘️ Kanan Bawah';
+
+            const power = Math.round(Math.hypot(v.x, v.y) * 100);
+            directionLabel.textContent = `${direction} ${power}%`;
+        }
+
+        // ==================== EVENT HANDLER (TOUCH & MOUSE) ====================
+        function handleStart(e) {
+            e.preventDefault(); // Mencegah scroll/zoom
+            joystick.active = true;
+            updateJoystickMetrics(); // Pastikan ukuran terbaru
+
+            // Ambil koordinat (touch atau mouse)
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+            setJoystickFromEvent(clientX, clientY);
+        }
+
+        function handleMove(e) {
+            if (!joystick.active) return;
+            e.preventDefault();
+
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+            setJoystickFromEvent(clientX, clientY);
+        }
+
+        function handleEnd(e) {
+            e.preventDefault();
+            joystick.active = false;
+            resetKnobPosition();
+        }
+
+        // Pasang event listener di joystick base
+        joystickBase.addEventListener('touchstart', handleStart, { passive: false });
+        joystickBase.addEventListener('touchmove', handleMove, { passive: false });
+        joystickBase.addEventListener('touchend', handleEnd);
+        joystickBase.addEventListener('touchcancel', handleEnd);
+
+        joystickBase.addEventListener('mousedown', handleStart);
+        
+        // Untuk mouse move dan up, kita pasang di window supaya tetap berfungsi jika kursor keluar area base
+        window.addEventListener('mousemove', (e) => {
+            if (joystick.active) {
+                e.preventDefault();
+                handleMove(e);
+            }
+        });
+        window.addEventListener('mouseup', (e) => {
+            if (joystick.active) {
+                e.preventDefault();
+                handleEnd(e);
+            }
+        });
+
+        // Cegah drag default gambar/base
+        joystickBase.addEventListener('dragstart', (e) => e.preventDefault());
+
+        // ==================== FUNGSI UPDATE POSISI KARAKTER ====================
+        function updatePlayerPosition() {
+            if (joystick.vector.x !== 0 || joystick.vector.y !== 0) {
+                // Gerakkan karakter sesuai vektor
+                playerState.x += joystick.vector.x * playerState.speed;
+                playerState.y += joystick.vector.y * playerState.speed;
+
+                // Batasi agar karakter tidak keluar dari gameArea
+                const halfSize = playerState.size / 2;
+                const minX = halfSize;
+                const maxX = gameArea.clientWidth - halfSize;
+                const minY = halfSize;
+                const maxY = gameArea.clientHeight - halfSize;
+
+                playerState.x = Math.max(minX, Math.min(maxX, playerState.x));
+                playerState.y = Math.max(minY, Math.min(maxY, playerState.y));
+
+                // Terapkan posisi ke elemen CSS
+                player.style.left = playerState.x + 'px';
+                player.style.top = playerState.y + 'px';
+                // transform tidak diperlukan lagi karena kita set left/top langsung
+                player.style.transform = 'none';
+            }
+        }
+
+        // ==================== INIT POSISI AWAL KARAKTER ====================
+        function initPlayerPosition() {
+            playerState.x = gameArea.clientWidth / 2;
+            playerState.y = gameArea.clientHeight / 2;
+            player.style.left = playerState.x + 'px';
+            player.style.top = playerState.y + 'px';
+            player.style.transform = 'none';
+        }
+
+        // Panggil saat pertama kali dan saat resize
+        initPlayerPosition();
+        window.addEventListener('resize', () => {
+            // Saat resize, pastikan karakter tetap dalam batas
+            const halfSize = playerState.size / 2;
+            playerState.x = Math.max(halfSize, Math.min(gameArea.clientWidth - halfSize, playerState.x));
+            playerState.y = Math.max(halfSize, Math.min(gameArea.clientHeight - halfSize, playerState.y));
+            player.style.left = playerState.x + 'px';
+            player.style.top = playerState.y + 'px';
+        });
+
+        // ==================== GAME LOOP (ANIMASI) ====================
+        function gameLoop() {
+            updatePlayerPosition();
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Mulai loop
+        gameLoop();
+
+        // ==================== TAMPILKAN PESAN SIAP ====================
+        console.log('✅ Joystick virtual siap! Seret lingkaran kiri bawah.');
+    })();
 </script>
 </body>
 </html>
