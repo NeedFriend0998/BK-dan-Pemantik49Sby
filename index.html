@@ -760,7 +760,7 @@
       target.classList.add('active');
       allNavLinks.forEach(l=>{l.classList.remove('active');if(l.getAttribute('data-page')===pageId)l.classList.add('active')});
       navLinksContainer.classList.remove('open');mobileToggle.classList.remove('open');
-      window.scrollTo({top:0,behavior:'smooth'});
+      window.scrollTo({top:0,bhavior:'smooth'});
       setTimeout(observeElements,100);
       
     }
@@ -928,14 +928,7 @@
 
     renderCurhatPosts();
 
-    /* CommentBox init */
-    let commentBoxInit = false;
-    function initCommentBox() {
-      if (!commentBoxInit && typeof commentBox === 'function') {
-        commentBox('5700396886523904-proj');
-        commentBoxInit = true;
-      }
-    }
+    
 
     /* ==================== CONTACT FORM ==================== */
     document.getElementById('cf-submit').addEventListener('click',()=>{
