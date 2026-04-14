@@ -1,520 +1,637 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PEMANTIK - Dashboard</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg: #FDF8F3;
-            --sidebar: #FFFFFF;
-            --card: #FFFFFF;
-            --text: #2D2A26;
-            --muted: #6B635B;
-            --accent: #D4663C;
-            --accent-light: #E8A089;
-            --sage: #7A9E7E;
-            --sage-light: #C5DBC7;
-            --border: #E5DDD5;
-        }
+  <meta charset="UTF-8">
+  <title>Pemantik Sekolah | Wadah Kreativitas Siswa</title>
+  <meta name="description" content="Pemantik Sekolah — ekstrakurikuler media kreatif yang mewadahi bakat siswa di bidang fotografi, videografi, desain, jurnalistik, dan media sosial.">
+  <meta property="og:title" content="Pemantik Sekolah | Media Kreatif Siswa">
+  <meta property="og:description" content="Tempat siswa berkarya, berkolaborasi, dan mengembangkan keterampilan media untuk kegiatan sekolah.">
+  <meta property="og:url" content="https://pemantiksekolah.netlify.app">
+  <base href="/">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    /* ===== GLOBAL STYLES (sama seperti sebelumnya, hanya ubah variabel jika perlu) ===== */
+    :root {
+        --bg: #0a0a0a;
+        --bg-secondary: #111111;
+        --fg: #f0f0f0;
+        --muted: #7a7a7a;
+        --accent: #CDFF00;
+        --accent-glow: rgba(205, 255, 0, 0.25);
+        --accent-dim: rgba(205, 255, 0, 0.08);
+        --card: #161616;
+        --border: #262626;
+        --danger: #ff4757;
+        --warning: #ffa502;
+        --warm: #FF8C42;
+        --coral: #FF6B6B;
+        --teal: #00cec9;
+        --purple: #a29bfe;
+    }
+    *{margin:0;padding:0;box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--fg);min-height:100vh;overflow-x:hidden;line-height:1.6}
+    .bg-canvas{position:fixed;inset:0;z-index:-1;background:radial-gradient(ellipse at 15% 15%,rgba(205,255,0,.06) 0%,transparent 50%),radial-gradient(ellipse at 85% 80%,rgba(255,140,66,.04) 0%,transparent 50%),var(--bg)}
+    .bg-canvas::after{content:'';position:fixed;inset:0;z-index:-1;opacity:.025;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");pointer-events:none}
+    #particles{position:fixed;inset:0;z-index:-1;pointer-events:none}
 
-        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body {
-            font-family: 'DM Sans', sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            display: flex;
-            height: 100vh;
-            overflow: hidden;
-        }
-        h1, h2, h3, h4, button { font-family: 'Space Grotesk', sans-serif; }
+    /* NAV */
+    .nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:1rem 2rem;background:rgba(10,10,10,.88);backdrop-filter:blur(24px);border-bottom:1px solid var(--border);transition:all .3s ease}
+    .nav.scrolled{padding:.7rem 2rem}
+    .nav-inner{max-width:1400px;margin:0 auto;display:flex;justify-content:space-between;align-items:center}
+    .logo{font-size:1.4rem;font-weight:900;color:var(--fg);text-decoration:none;display:flex;align-items:center;gap:.6rem}
+    .logo-icon{width:36px;height:36px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center}
+    .logo-icon svg{width:22px;height:22px;fill:var(--bg)}
+    .logo-text-sub{font-weight:400;font-size:.7rem;color:var(--muted);letter-spacing:.5px;text-transform:uppercase}
+    .nav-links{display:flex;gap:.35rem}
+    .nav-link{padding:.55rem 1rem;color:var(--muted);text-decoration:none;font-weight:500;font-size:.9rem;border-radius:8px;transition:all .25s ease;position:relative}
+    .nav-link:hover,.nav-link.active{color:var(--fg);background:rgba(255,255,255,.04)}
+    .nav-link.active::after{content:'';position:absolute;bottom:3px;left:50%;transform:translateX(-50%);width:18px;height:2px;background:var(--accent);border-radius:2px}
+    .mobile-toggle{display:none;background:none;border:none;cursor:pointer;padding:.5rem}
+    .mobile-toggle span{display:block;width:24px;height:2px;background:var(--fg);margin:5px 0;transition:all .3s ease;border-radius:2px}
 
-        /* --- SIDEBAR AREA --- */
-        .sidebar {
-            width: 260px;
-            height: 100%;
-            background: var(--sidebar);
-            border-right: 1px solid var(--border);
-            display: flex;
-            flex-direction: column;
-            position: fixed;
-            left: 0; top: 0;
-            z-index: 100;
-            transition: transform 0.3s ease;
-        }
-        
-        /* Responsive Sidebar */
-        @media (max-width: 768px) {
-            .sidebar { transform: translateX(-100%); }
-            .sidebar.active { transform: translateX(0); }
-            .overlay-bg { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.2); z-index:99; }
-            .overlay-bg.active { display: block; }
-        }
+    /* PAGES */
+    .pages{padding-top:76px}
+    .page{display:none;opacity:0;transform:translateY(20px);transition:opacity .4s ease,transform .4s ease}
+    .page.active{display:block;opacity:1;transform:translateY(0)}
 
-        .sidebar-header {
-            padding: 20px;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        .logo-img { width: 36px; height: 36px; background: linear-gradient(135deg, var(--accent), var(--accent-light)); border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-        .logo-img svg { stroke: white; width: 20px; height: 20px; }
-        .logo-text { font-weight: 700; font-size: 18px; }
+    /* HERO */
+    .hero{min-height:calc(100vh - 76px);display:flex;align-items:center;padding:2rem;position:relative}
+    .hero-content{max-width:1400px;margin:0 auto;width:100%;display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center}
+    .hero-text{animation:fadeInUp .8s ease forwards}
+    .hero-badge{display:inline-flex;align-items:center;gap:.5rem;padding:.4rem 1rem;background:var(--accent-dim);border:1px solid rgba(205,255,0,.2);border-radius:50px;font-size:.85rem;color:var(--accent);margin-bottom:1.5rem}
+    .badge-dot{width:8px;height:8px;background:var(--accent);border-radius:50%;animation:pulse 2s infinite}
+    .hero-title{font-size:clamp(2.5rem,6vw,4.5rem);font-weight:900;line-height:1.08;margin-bottom:1.5rem;letter-spacing:-.02em}
+    .hero-title span{background:linear-gradient(135deg,var(--accent),var(--warm));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .hero-desc{font-size:1.15rem;color:var(--muted);margin-bottom:2rem;max-width:500px}
+    .hero-actions{display:flex;gap:1rem;flex-wrap:wrap}
+    .btn{display:inline-flex;align-items:center;gap:.5rem;padding:.9rem 1.8rem;font-family:inherit;font-size:.95rem;font-weight:600;text-decoration:none;border-radius:10px;cursor:pointer;transition:all .25s ease;border:none}
+    .btn-primary{background:var(--accent);color:var(--bg)}
+    .btn-primary:hover{transform:translateY(-2px);box-shadow:0 10px 30px var(--accent-glow)}
+    .btn-secondary{background:var(--card);color:var(--fg);border:1px solid var(--border)}
+    .btn-secondary:hover{background:var(--bg-secondary);border-color:var(--accent)}
+    .btn svg{width:18px;height:18px}
 
-        .nav-menu { flex: 1; padding: 20px 15px; overflow-y: auto; }
-        .nav-section-title { font-size: 11px; text-transform: uppercase; color: var(--muted); letter-spacing: 1px; margin-bottom: 10px; padding-left: 10px; }
-        
-        .nav-link {
-            display: flex; align-items: center; gap: 12px;
-            padding: 12px 15px; border-radius: 10px;
-            color: var(--muted); text-decoration: none;
-            font-weight: 500; font-size: 14px;
-            transition: all 0.2s; margin-bottom: 5px;
-            cursor: pointer;
-        }
-        .nav-link:hover { background: var(--bg); color: var(--text); }
-        .nav-link.active { background: rgba(212, 102, 60, 0.1); color: var(--accent); font-weight: 600; }
-        .nav-link svg { width: 18px; height: 18px; }
+    /* STATS */
+    .hero-visual{animation:fadeInUp .8s ease .2s forwards;opacity:0}
+    .stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1.5rem}
+    .stat-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:1.5rem;transition:all .3s ease}
+    .stat-card:hover{transform:translateY(-4px);border-color:var(--accent);box-shadow:0 20px 40px rgba(0,0,0,.3)}
+    .stat-card.featured{grid-column:span 2;background:linear-gradient(135deg,rgba(205,255,0,.06),rgba(255,140,66,.04));border-color:rgba(205,255,0,.2)}
+    .stat-icon{width:48px;height:48px;background:var(--accent-dim);border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:1rem}
+    .stat-icon svg{width:24px;height:24px;stroke:var(--accent)}
+    .stat-value{font-size:2rem;font-weight:800;margin-bottom:.25rem}
+    .stat-label{font-size:.9rem;color:var(--muted)}
 
-        /* --- MAIN CONTENT AREA --- */
-        .main-content {
-            flex: 1; margin-left: 260px; 
-            height: 100%; overflow-y: auto; 
-            position: relative; z-index: 1;
-        }
-        @media (max-width: 768px) {
-            .main-content { margin-left: 0; }
-        }
+    /* SECTION HEADERS */
+    .section-header{text-align:center;margin-bottom:4rem}
+    .section-title{font-size:clamp(2rem,4vw,3rem);font-weight:800;margin-bottom:1rem;letter-spacing:-.01em}
+    .section-subtitle{color:var(--muted);font-size:1.1rem;max-width:600px;margin:0 auto}
 
-        /* Mobile Top Bar */
-        .top-bar {
-            display: none; padding: 15px 20px; background: var(--bg); border-bottom: 1px solid var(--border); justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 50;
-        }
-        @media (max-width: 768px) {
-            .top-bar { display: flex; }
-        }
-        .hamburger { background: none; border: none; cursor: pointer; padding: 5px; }
-        .hamburger svg { width: 24px; height: 24px; stroke: var(--text); }
+    /* FEATURES / DIVISI */
+    .features{padding:6rem 2rem;background:var(--bg-secondary)}
+    .features-grid{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem}
+    .feature-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:2rem;transition:all .3s ease}
+    .feature-card:hover{transform:translateY(-4px);border-color:var(--accent)}
+    .feature-icon{width:56px;height:56px;background:linear-gradient(135deg,rgba(205,255,0,.12),rgba(255,140,66,.08));border-radius:14px;display:flex;align-items:center;justify-content:center;margin-bottom:1.5rem}
+    .feature-icon svg{width:28px;height:28px;stroke:var(--accent)}
+    .feature-title{font-size:1.2rem;font-weight:700;margin-bottom:.7rem}
+    .feature-desc{color:var(--muted);font-size:.95rem}
 
-        /* Page Container */
-        .page-container { display: none; animation: fadeIn 0.4s ease; }
-        .page-container.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    /* DIVISI CARDS (ex-services) */
+    .divisi-page{padding:4rem 2rem;max-width:1400px;margin:0 auto}
+    .divisi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:2rem}
+    .divisi-card{background:var(--card);border:1px solid var(--border);border-radius:20px;overflow:hidden;transition:all .3s ease}
+    .divisi-card:hover{transform:translateY(-8px);box-shadow:0 20px 40px rgba(0,0,0,.4)}
+    .divisi-image{height:180px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;background:linear-gradient(135deg,rgba(205,255,0,.08),rgba(255,140,66,.04))}
+    .divisi-icon-box{width:80px;height:80px;position:relative;z-index:1}
+    .divisi-icon-box svg{width:100%;height:100%;stroke:var(--fg);stroke-width:1.5}
+    .divisi-content{padding:1.5rem 2rem 2rem}
+    .divisi-tag{display:inline-block;padding:.3rem .8rem;background:var(--accent-dim);color:var(--accent);border-radius:50px;font-size:.75rem;font-weight:600;margin-bottom:1rem}
+    .divisi-title{font-size:1.4rem;font-weight:800;margin-bottom:.7rem}
+    .divisi-desc{color:var(--muted);font-size:.95rem;margin-bottom:1.5rem;min-height:50px}
+    .divisi-features{display:flex;flex-wrap:wrap;gap:.5rem}
+    .divisi-feat{padding:.4rem .8rem;background:var(--bg);border-radius:6px;font-size:.8rem;color:var(--fg);border:1px solid var(--border)}
 
-        /* --- STYLES FROM YOUR CODE (HOMEPAGE) --- */
-        .container { width: 100%; max-width: 800px; margin: 0 auto; padding: 0 20px; }
-        
-        /* Hero Section */
-        .hero { padding: 100px 0 60px; position: relative; }
-        .hero-content { position: relative; z-index: 2; }
-        .badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 50px; font-size: 12px; font-weight: 500; color: var(--accent); background: rgba(212, 102, 60, 0.1); margin-bottom: 20px; }
-        .badge::before { content: ''; width: 6px; height: 6px; background: var(--accent); border-radius: 50%; }
-        
-        h1 { font-size: 32px; font-weight: 700; line-height: 1.2; margin-bottom: 16px; }
-        h1 span { color: var(--accent); }
-        .desc { font-size: 16px; color: var(--muted); margin-bottom: 24px; max-width: 400px; }
-        
-        /* Tombol */
-        .btn {
-            display: inline-flex; align-items: center; gap: 8px;
-            padding: 12px 24px; border-radius: 50px; font-weight: 600;
-            font-size: 14px; border: none; cursor: pointer; transition: transform 0.2s;
-            text-decoration-color: none;
-        }
-        .btn:active { transform: scale(0.98); }
-        .btn-primary { background: var(--accent);
-        color: white; 
-          text-decoration: none;
-        }
-        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); margin-top: 10px; }
-        
-        /* Ilustrasi Sederhana */
-        .hero-img { margin-top: 40px; background: var(--card); border-radius: 20px; padding: 20px; border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0,0,0,0.03); }
-        .chat-bubble { padding: 12px; border-radius: 12px; margin-bottom: 10px; font-size: 14px; }
-        .chat-user { background: rgba(212, 102, 60, 0.05); color: var(--muted); }
-        .chat-admin { background: rgba(122, 158, 126, 0.1); color: var(--sage); font-weight: 500; display: flex; align-items: center; gap: 8px; }
-        
-        /* Statistik */
-        .stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin: 40px 0; }
-        .stat-box { text-align: center; padding: 20px 10px; background: var(--card); border-radius: 16px; border: 1px solid var(--border); }
-        .stat-num { font-size: 28px; font-weight: 700; color: var(--accent); font-family: 'Space Grotesk', sans-serif; }
-        .stat-label { font-size: 12px; color: var(--muted); margin-top: 4px; }
+    /* GALERI */
+    .galeri-page{padding:4rem 2rem;max-width:1200px;margin:0 auto}
+    .galeri-tabs{display:flex;gap:.5rem;margin-bottom:2rem;border-bottom:1px solid var(--border);padding-bottom:1rem;overflow-x:auto}
+    .galeri-tab{padding:.6rem 1.2rem;background:transparent;border:1px solid transparent;color:var(--muted);font-family:inherit;font-size:.95rem;font-weight:600;border-radius:8px;cursor:pointer;white-space:nowrap;transition:all .25s ease}
+    .galeri-tab:hover{color:var(--fg);background:rgba(255,255,255,.04)}
+    .galeri-tab.active{background:var(--card);border-color:var(--border);color:var(--accent)}
+    .galeri-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1.5rem;margin-top:1.5rem}
+    .galeri-item{background:var(--bg);border:1px solid var(--border);border-radius:12px;overflow:hidden;transition:all .3s ease}
+    .galeri-item:hover{transform:translateY(-4px);border-color:var(--accent);box-shadow:0 15px 30px rgba(0,0,0,.3)}
+    .galeri-thumb{height:160px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+    .galeri-info{padding:1.25rem}
+    .galeri-cat{font-size:.7rem;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:1px;margin-bottom:.4rem}
+    .galeri-name{font-weight:700;font-size:1rem;margin-bottom:.3rem}
+    .galeri-desc{color:var(--muted);font-size:.85rem}
 
-        /* Section Styles */
-        section { padding: 40px 0; }
-        .section-title { font-size: 24px; font-weight: 700; margin-bottom: 12px; }
-        .section-sub { color: var(--muted); font-size: 14px; margin-bottom: 24px; }
-        
-        .grid-team { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
-        .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; text-align: center; }
-        .avatar { width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, var(--accent-light), var(--sage-light)); margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-family: 'Space Grotesk', sans-serif; }
-        .card h4 { font-size: 14px; font-weight: 600; }
-        .card p { font-size: 12px; color: var(--muted); }
+    /* PROYEK */
+    .proyek-page{padding:4rem 2rem;max-width:1200px;margin:0 auto}
+    .proyek-list{display:flex;flex-direction:column;gap:2rem}
+    .proyek-card{background:var(--card);border:1px solid var(--border);border-radius:20px;overflow:hidden;transition:all .3s ease}
+    .proyek-card:hover{border-color:rgba(205,255,0,.15);box-shadow:0 20px 40px rgba(0,0,0,.3)}
+    .proyek-header{padding:2rem 2rem 0;display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;flex-wrap:wrap}
+    .proyek-title{font-size:1.4rem;font-weight:800}
+    .proyek-status{padding:.35rem 1rem;border-radius:50px;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;flex-shrink:0}
+    .proyek-status.berjalan{background:rgba(205,255,0,.12);color:var(--accent);border:1px solid rgba(205,255,0,.25)}
+    .proyek-status.selesai{background:rgba(0,206,201,.12);color:var(--teal);border:1px solid rgba(0,206,201,.25)}
+    .proyek-status.rencana{background:rgba(162,155,254,.12);color:var(--purple);border:1px solid rgba(162,155,254,.25)}
+    .proyek-body{padding:1rem 2rem 2rem}
+    .proyek-desc{color:var(--muted);margin-bottom:1.5rem;line-height:1.7}
+    .proyek-meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem;margin-bottom:1.5rem}
+    .proyek-meta-item{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:1rem}
+    .proyek-meta-label{font-size:.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:.3rem}
+    .proyek-meta-value{font-weight:700;font-size:.95rem}
+    .proyek-tags{display:flex;flex-wrap:wrap;gap:.5rem}
+    .proyek-tag{padding:.4rem .9rem;background:var(--bg);border:1px solid var(--border);border-radius:50px;font-size:.8rem;font-weight:600;transition:all .2s ease}
 
-        /* Footer */
-        footer { text-align: center; padding: 30px 20px; color: var(--muted); font-size: 12px; border-top: 1px solid var(--border); margin-top: 40px; background: var(--bg); }
+    /* TENTANG KAMI */
+    .about-page{padding:4rem 2rem;max-width:1200px;margin:0 auto}
+    .about-grid{display:grid;grid-template-columns:1fr 1fr;gap:3rem;margin-bottom:3rem}
+    .about-text h3{font-size:1.3rem;margin-bottom:1rem;color:var(--accent)}
+    .about-text p{color:var(--muted);margin-bottom:1rem;line-height:1.8}
+    .info-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1.5rem}
+    .info-box{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:1.5rem}
+    .info-box h4{color:var(--accent);margin-bottom:.5rem;font-size:.8rem;text-transform:uppercase;letter-spacing:1px}
+    .info-box p{font-size:1.1rem;font-weight:600}
 
-        /* --- DASHBOARD PAGES STYLES --- */
-        .page-title { font-size: 22px; font-weight: 700; margin-bottom: 5px; padding-top: 20px; }
-        .page-subtitle { color: var(--muted); font-size: 14px; margin-bottom: 25px; }
-        
-        .grid-2 { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; }
-        .media-item { display: flex; align-items: center; gap: 15px; padding: 15px; background: rgba(122, 158, 126, 0.05); text-align: left; }
-        .media-icon { width: 40px; height: 40px; background: var(--sage-light); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: var(--sage); flex-shrink: 0; }
+    /* TIM / ANGGOTA */
+    .tim-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1.5rem;margin-top:2rem}
+    .tim-card{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:1.5rem;text-align:center;transition:all .2s ease}
+    .tim-card:hover{transform:translateY(-3px);border-color:rgba(205,255,0,.2)}
+    .tim-avatar{width:60px;height:60px;border-radius:50%;margin:0 auto 1rem;display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:800;color:var(--bg)}
+    .tim-name{font-weight:700;margin-bottom:.25rem}
+    .tim-role{font-size:.85rem;color:var(--accent)}
 
-        /* FAB Button */
-        .fab-fixed {
-            position: fixed; bottom: 20px; right: 20px;
-            background: var(--sage); color: white;
-            width: 56px; height: 56px; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 4px 15px rgba(122, 158, 126, 0.3);
-            z-index: 50; cursor: pointer; border: none;
-        }
-        /* Hide FAB on curhat page */
-        body:has(#curhat.active) .fab-fixed { display: none; }
+    /* PENGUMUMAN */
+    .pengumuman-page{padding:4rem 2rem;max-width:900px;margin:0 auto}
+    .pengumuman-list{display:flex;flex-direction:column;gap:1.5rem}
+    .pengumuman-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:2rem;transition:all .3s ease;position:relative;overflow:hidden}
+    .pengumuman-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;border-radius:0 4px 4px 0}
+    .pengumuman-card.penting::before{background:var(--danger)}
+    .pengumuman-card.info::before{background:var(--teal)}
+    .pengumuman-card.kegiatan::before{background:var(--warm)}
+    .pengumuman-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:.5rem}
+    .pengumuman-type{padding:.3rem .8rem;border-radius:50px;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+    .pengumuman-type.penting{background:rgba(255,71,87,.12);color:var(--danger)}
+    .pengumuman-type.info{background:rgba(0,206,201,.12);color:var(--teal)}
+    .pengumuman-type.kegiatan{background:rgba(255,140,66,.12);color:var(--warm)}
+    .pengumuman-date{color:var(--muted);font-size:.85rem}
+    .pengumuman-title{font-size:1.2rem;font-weight:800;margin-bottom:.75rem}
+    .pengumuman-body{color:var(--muted);line-height:1.7;font-size:.95rem}
 
-        /* Iframe for Curhat Page */
-        .iframe-box { height: 450px; width: 100%; background: #f5f5f5; border-radius: 10px; overflow: hidden; margin-top: 15px; }
-        iframe { width: 100%; height: 100%; border: none; }
-    </style>
+    /* TESTIMONI (SISWA/GURU) */
+    .testimoni-page{padding:4rem 2rem;max-width:1200px;margin:0 auto}
+    .testimoni-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:1.5rem}
+    .testimoni-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:2rem;transition:all .3s ease}
+    .testimoni-card:hover{transform:translateY(-4px);border-color:rgba(205,255,0,.2)}
+    .testimoni-text{color:var(--muted);font-size:.95rem;line-height:1.7;margin-bottom:1.5rem;font-style:italic}
+    .testimoni-author{display:flex;align-items:center;gap:1rem}
+    .testimoni-avatar{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1rem;color:var(--bg);flex-shrink:0}
+    .testimoni-name{font-weight:700;font-size:.95rem}
+    .testimoni-role{font-size:.8rem;color:var(--muted)}
+
+    /* KONTAK */
+    .kontak-page{padding:4rem 2rem;max-width:1000px;margin:0 auto}
+    .kontak-grid{display:grid;grid-template-columns:1fr 1.5fr;gap:3rem}
+    .kontak-info-cards{display:flex;flex-direction:column;gap:1.25rem}
+    .ci-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.5rem;display:flex;align-items:center;gap:1rem;transition:all .25s ease}
+    .ci-card:hover{border-color:var(--accent);transform:translateX(4px)}
+    .ci-icon{width:48px;height:48px;background:var(--accent-dim);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .ci-icon svg{width:22px;height:22px;stroke:var(--accent)}
+    .ci-label{font-size:.8rem;color:var(--muted);margin-bottom:.2rem}
+    .ci-value{font-weight:700;font-size:1rem}
+    .kontak-form{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:2rem}
+    .form-group{margin-bottom:1.25rem}
+    .form-group label{display:block;font-size:.85rem;font-weight:600;margin-bottom:.5rem;color:var(--fg)}
+    .form-group input,.form-group select,.form-group textarea{width:100%;padding:.75rem 1rem;background:var(--bg);border:1px solid var(--border);border-radius:10px;color:var(--fg);font-family:inherit;font-size:.95rem;transition:border-color .25s ease;outline:none}
+    .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--accent)}
+    .form-group textarea{min-height:120px;resize:vertical}
+    .form-error{color:var(--danger);font-size:.8rem;margin-top:.3rem;display:none}
+    .form-success{display:none;background:rgba(205,255,0,.1);border:1px solid rgba(205,255,0,.3);color:var(--accent);padding:1rem;border-radius:10px;text-align:center;font-weight:600;margin-top:1rem}
+
+    /* FOOTER */
+    .footer{background:var(--bg-secondary);border-top:1px solid var(--border);padding:3rem 2rem;margin-top:4rem}
+    .footer-inner{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:2fr 1fr 1fr;gap:3rem}
+    .footer-brand p{color:var(--muted);margin-top:1rem;font-size:.95rem}
+    .footer-title{font-weight:700;margin-bottom:1rem}
+    .footer-links{list-style:none;display:flex;flex-direction:column;gap:.75rem}
+    .footer-links a{color:var(--muted);text-decoration:none;transition:color .25s ease}
+    .footer-links a:hover{color:var(--accent)}
+    .footer-bottom{max-width:1200px;margin:0 auto;padding-top:2rem;margin-top:2rem;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:.9rem}
+
+    /* ANIMATIONS */
+    @keyframes fadeInUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+    .reveal{opacity:0;transform:translateY(30px);transition:all .6s ease}
+    .reveal.visible{opacity:1;transform:translateY(0)}
+
+    /* RESPONSIVE */
+    @media(max-width:900px){
+        .hero-content{grid-template-columns:1fr;gap:3rem}
+        .hero-visual{order:-1}
+        .stats-grid{grid-template-columns:repeat(2,1fr)}
+        .stat-card.featured{grid-column:span 2}
+        .footer-inner{grid-template-columns:1fr;gap:2rem}
+        .footer-bottom{flex-direction:column;gap:1rem;text-align:center}
+        .about-grid{grid-template-columns:1fr}
+        .kontak-grid{grid-template-columns:1fr}
+    }
+    @media(max-width:768px){
+        .nav{padding:.75rem 1rem}
+        .nav-links{position:fixed;top:60px;left:0;right:0;background:rgba(10,10,10,.98);backdrop-filter:blur(20px);flex-direction:column;padding:1rem;gap:.25rem;border-bottom:1px solid var(--border);transform:translateY(-100%);opacity:0;pointer-events:none;transition:all .3s ease}
+        .nav-links.open{transform:translateY(0);opacity:1;pointer-events:all}
+        .mobile-toggle{display:block}
+        .mobile-toggle.open span:nth-child(1){transform:rotate(45deg) translate(5px,5px)}
+        .mobile-toggle.open span:nth-child(2){opacity:0}
+        .mobile-toggle.open span:nth-child(3){transform:rotate(-45deg) translate(5px,-5px)}
+        .hero{padding:1.5rem}
+        .hero-title{font-size:2.2rem}
+        .hero-actions{flex-direction:column}
+        .btn{justify-content:center}
+        .stats-grid{grid-template-columns:1fr}
+        .stat-card.featured{grid-column:span 1}
+    }
+    *{-webkit-tap-highlight-color:transparent}
+    input,textarea,select{-webkit-user-select:text;user-select:text}
+  </style>
 </head>
 <body>
+  <canvas id="particles"></canvas>
+  <div class="bg-canvas"></div>
 
-    <!-- Overlay for Mobile Sidebar -->
-    <div class="overlay-bg" id="overlayBg" onclick="toggleSidebar()"></div>
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="/home" class="logo" data-page="home">
+        <div class="logo-icon"><svg viewBox="0 0 24 24"><path d="M13 2L4 14h7l-2 8 9-12h-7l2-8z"/></svg></div>
+        <div><div>Pemantik</div><div class="logo-text-sub">Sekolah</div></div>
+      </a>
+      <div class="nav-links" id="navLinks">
+        <a href="/home" class="nav-link active" data-page="home">Beranda</a>
+        <a href="/divisi" class="nav-link" data-page="divisi">Divisi</a>
+        <a href="/galeri" class="nav-link" data-page="galeri">Galeri</a>
+        <a href="/proyek" class="nav-link" data-page="proyek">Proyek</a>
+        <a href="/tentang" class="nav-link" data-page="tentang">Tentang</a>
+        <a href="/testimoni" class="nav-link" data-page="testimoni">Testimoni</a>
+        <a href="/pengumuman" class="nav-link" data-page="pengumuman">Pengumuman</a>
+        <a href="/kontak" class="nav-link" data-page="kontak">Kontak</a>
+      </div>
+      <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+    </div>
+  </nav>
 
-    <!-- SIDEBAR -->
-    <aside class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <div class="logo-img"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/></svg></div>
-            <div class="logo-text">PEMANTIK</div>
-        </div>
-
-        <nav class="nav-menu">
-            <div class="nav-section-title">Menu Utama</div>
-            <a class="nav-link active" onclick="showPage('beranda')">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-                Beranda
-            </a>
-            <a class="nav-link" onclick="showPage('tentang')">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-                Tentang Kami
-            </a>
-            
-            <div class="nav-section-title">Struktur</div>
-            <a class="nav-link" onclick="showPage('anggota')">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                Anggota
-            </a>
-            <a class="nav-link" onclick="showPage('guru')">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                Guru Pembina
-            </a>
-            <a class="nav-link" onclick="showPage('media')">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-                Divisi Media
-            </a>
-
-            <div class="nav-section-title">Lainnya</div>
-            <a class="nav-link" onclick="showPage('aplikasi')">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
-                Aplikasi
-            </a>
-            <a class="nav-link" onclick="showPage('curhat')" style="color: var(--accent);">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                Curhat
-            </a>
-        </nav>
-    </aside>
-
-    <!-- MAIN CONTENT -->
-    <main class="main-content">
-        <!-- Mobile Top Bar -->
-        <div class="top-bar">
-            <button class="hamburger" onclick="toggleSidebar()">
-                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-            </button>
-            <span style="font-weight:600;">PEMANTIK</span>
-            <div style="width:24px;"></div>
-        </div>
-
-        <!-- PAGE: BERANDA (YOUR CUSTOM CODE) -->
-        <div id="beranda" class="page-container active">
-            <!-- Hero Section -->
-            <section class="hero">
-                <div class="container">
-                    <div class="hero-content">
-                        <div class="badge">Siap Membantu 24/7</div>
-                        <h1>Kamu Tidak <br><span>Sendirian</span></h1>
-                        <p class="desc">Tempat aman untuk bercerita tanpa takut dihakimi. Kami siap mendengarkan setiap ceritamu dengan penuh empati.</p>
-                        
-                        <!-- Tombol diarahkan ke fungsi showPage('curhat') -->
-                        <button class="btn btn-primary" onclick="showPage('curhat')">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                            Mulai Curhat
-                        </button>
-                        <button class="btn btn-outline" onclick="showPage('tentang')">Pelajari Dulu</button>
-                    </div>
-
-                    <div class="hero-img">
-                        <div class="chat-bubble chat-user">"Aku merasa diejek teman-temanku, tapi aku takut melapor..."</div>
-                        <div class="chat-bubble chat-admin">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/></svg>
-                            Kami di sini untukmu. Ceritakan saja...
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Stats -->
-            <div class="container">
-                <div class="stats">
-                    <div class="stat-box"><div class="stat-num">247+</div><div class="stat-label">Teman Terbantu</div></div>
-                    <div class="stat-box"><div class="stat-num">12</div><div class="stat-label">Relawan</div></div>
-                    <div class="stat-box"><div class="stat-num">100%</div><div class="stat-label">Rahasia</div></div>
-                    <div class="stat-box"><div class="stat-num">24</div><div class="stat-label">Jam Aktif</div></div>
-                </div>
+  <main class="pages">
+    <!-- HOME -->
+    <section class="page active" id="home">
+      <div class="hero">
+        <div class="hero-content">
+          <div class="hero-text">
+            <div class="hero-badge"><span class="badge-dot"></span>Ekstrakurikuler Media Kreatif</div>
+            <h1 class="hero-title">Wadah Kreativitas <span>Siswa</span></h1>
+            <p class="hero-desc">Pemantik Sekolah adalah ruang bagi siswa untuk mengembangkan bakat di bidang fotografi, videografi, desain, jurnalistik, dan media sosial. Dari sini, ide-ide cemerlang lahir.</p>
+            <div class="hero-actions">
+              <a href="/divisi" class="btn btn-primary" data-page="divisi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 00-3-3l-4 9v11h11.28a2 2 0 002-1.7l1.38-9a2 2 0 00-2-2.3zM7 22H4a2 2 0 01-2-2v-7a2 2 0 012-2h3"/></svg>Lihat Divisi</a>
+              <a href="/galeri" class="btn btn-secondary" data-page="galeri"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>Galeri Karya</a>
             </div>
-
-            <!-- Tentang -->
-            <section id="tentang-preview">
-                <div class="container">
-                    <h2 class="section-title">Apa itu PEMANTIK?</h2>
-                    <p class="section-sub">Kami adalah organisasi peer support yang siap menjadi teman curhatmu dalam menghadapi masalah bullying atau masalah pribadi lainnya.</p>
-                </div>
-            </section>
-
-            <!-- Tim Preview -->
-            <section id="tim-preview">
-                <div class="container">
-                    <h2 class="section-title">Teman Curhatmu</h2>
-                    <div class="grid-team">
-                        <div class="card">
-                            <div class="avatar">R</div>
-                            <h4></h4>
-                            <p>Koordinator</p>
-                        </div>
-                        <div class="card">
-                            <div class="avatar">D</div>
-                            <h4></h4>
-                            <p>Konselor</p>
-                        </div>
-                        <div class="card">
-                            <div class="avatar">S</div>
-                            <h4></h4>
-                            <p>Mediator</p>
-                        </div>
-                        <div class="card">
-                            <div class="avatar">B</div>
-                            <h4></h4>
-                            <p>Support</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <footer>
-                &copy; 2026 PEMANTIK. Dibuat dengan kasih untuk kesehatan mentalmu.
-            </footer>
-        </div>
-
-        <!-- PAGE: TENTANG -->
-        <div id="tentang" class="page-container">
-            <div class="container">
-                <h1 class="page-title">Tentang Kami</h1>
-                <p class="page-subtitle">Kenali lebih dekat organisasi Pemantik.</p>
-                
-                <div class="card" style="text-align:left;">
-                    <h3 style="font-size:16px; margin-bottom:8px;">Apa itu PEMANTIK?</h3>
-                    <p style="font-size:14px; color:var(--muted);">
-                        Pemantik adalah organisasi peer support (pendukung sebaya) di lingkungan sekolah yang bertujuan memberikan ruang aman bagi siswa yang mengalami perundungan (bullying) atau masalah pribadi.
-                    </p>
-                </div>
-                <div class="card" style="text-align:left;">
-                    <h3 style="font-size:16px; margin-bottom:8px;">Visi & Misi</h3>
-                    <ul style="font-size:14px; color:var(--muted); padding-left:20px;">
-                        <li>Menciptakan lingkungan sekolah yang aman dan nyaman.</li>
-                        <li>Menjadi wadah curhat yang terpercaya dan rahasia.</li>
-                        <li>Memberikan edukasi pencegahan bullying.</li>
-                    </ul>
-                </div>
+          </div>
+          <div class="hero-visual">
+            <div class="stats-grid">
+              <div class="stat-card featured">
+                <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+                <div class="stat-value">30+</div>
+                <div class="stat-label">Karya Dipamerkan</div>
+                <div class="status-indicator"><span class="status-dot"></span><span>Anggota Aktif: 25 siswa</span></div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg></div>
+                <div class="stat-value">5</div>
+                <div class="stat-label">Divisi Kreatif</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+                <div class="stat-value">10+</div>
+                <div class="stat-label">Event Sekolah Didukung</div>
+              </div>
             </div>
+          </div>
         </div>
+      </div>
+      <section class="features">
+        <div class="section-header reveal"><h2 class="section-title">Kenapa Bergabung?</h2><p class="section-subtitle">Kembangkan skill, bangun portofolio, dan jadi bagian dari tim kreatif sekolah.</p></div>
+        <div class="features-grid">
+          <div class="feature-card reveal"><div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L4 14h7l-2 8 9-12h-7l2-8z"/></svg></div><h3 class="feature-title">Eksplorasi Minat</h3><p class="feature-desc">Temukan dan dalami bidang yang kamu suka: foto, video, desain, tulisan, atau media sosial.</p></div>
+          <div class="feature-card reveal"><div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><h3 class="feature-title">Belajar Sambil Berkarya</h3><p class="feature-desc">Setiap proyek adalah kesempatan belajar. Didampingi pembina dan kakak kelas yang berpengalaman.</p></div>
+          <div class="feature-card reveal"><div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10M18 20V4M6 20v-4"/></svg></div><h3 class="feature-title">Portofolio Nyata</h3><p class="feature-desc">Karyamu akan dipublikasikan di media sosial sekolah, website, dan pameran. Berguna untuk masa depan.</p></div>
+          <div class="feature-card reveal"><div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg></div><h3 class="feature-title">Tim Solid</h3><p class="feature-desc">Bertemu teman-teman sekreatif kamu, saling support, dan bikin project seru bareng.</p></div>
+        </div>
+      </section>
+    </section>
 
-        <!-- PAGE: ANGGOTA -->
-        <div id="anggota" class="page-container">
-            <div class="container">
-                <h1 class="page-title">Anggota Inti</h1>
-                <p class="page-subtitle">Teman-temanmu yang siap mendengarkan.</p>
-                
-                <div class="grid-team">
-                    <div class="card">
-                        <div class="avatar">R</div>
-                        <div class="member-name"></div>
-                        <div class="member-role">Ketua</div>
-                    </div>
-                    <div class="card">
-                        <div class="avatar">D</div>
-                        <div class="member-name"></div>
-                        <div class="member-role"> Ketua</div>
-                    </div>
-                    <div class="card">
-                        <div class="avatar">S</div>
-                        <div class="member-name"></div>
-                        <div class="member-role">Konselor</div>
-                    </div>
-                    <div class="card">
-                        <div class="avatar">B</div>
-                        <div class="member-name"></div>
-                        <div class="member-role">Konselor</div>
-                    </div>
-                    <div class="card">
-                        <div class="avatar">A</div>
-                        <div class="member-name"></div>
-                        <div class="member-role">Mediator</div>
-                    </div>
-                    <div class="card">
-                        <div class="avatar">F</div>
-                        <div class="member-name"></div>
-                        <div class="member-role">Mediator</div>
-                    </div>
-                </div>
+    <!-- DIVISI (ex-services) -->
+    <section class="page" id="divisi">
+      <div class="divisi-page">
+        <div class="section-header"><h1 class="section-title">Divisi Kreatif</h1><p class="section-subtitle">Pilih bidang yang sesuai dengan passionmu.</p></div>
+        <div class="divisi-grid" id="divisiGrid"></div>
+      </div>
+    </section>
+
+    <!-- GALERI (ex-portfolio) -->
+    <section class="page" id="galeri">
+      <div class="galeri-page">
+        <div class="section-header"><h1 class="section-title">Galeri Karya</h1><p class="section-subtitle">Hasil karya terbaik anggota Pemantik Sekolah.</p></div>
+        <div class="galeri-tabs" id="galeriTabs"></div>
+        <div class="galeri-grid" id="galeriGrid"></div>
+      </div>
+    </section>
+
+    <!-- PROYEK (ex-projects) -->
+    <section class="page" id="proyek">
+      <div class="proyek-page">
+        <div class="section-header"><h1 class="section-title">Proyek & Kegiatan</h1><p class="section-subtitle">Pantau proyek yang sedang dan telah kami kerjakan untuk sekolah.</p></div>
+        <div class="proyek-list" id="proyekList"></div>
+      </div>
+    </section>
+
+    <!-- TENTANG -->
+    <section class="page" id="tentang">
+      <div class="about-page">
+        <div class="section-header"><h1 class="section-title">Tentang Pemantik</h1><p class="section-subtitle">Mengenal lebih dekat ekstrakurikuler media kreatif sekolah.</p></div>
+        <div class="about-tabs" id="aboutTabs">
+          <button class="about-tab active" data-tab="visi-misi">Visi & Misi</button>
+          <button class="about-tab" data-tab="struktur">Struktur Organisasi</button>
+          <button class="about-tab" data-tab="tim">Anggota Tim</button>
+          <button class="about-tab" data-tab="faq">FAQ</button>
+        </div>
+        <div class="about-tab-content">
+          <div class="about-section active" id="visi-misi">
+            <h3 style="margin-bottom:1rem">Visi</h3>
+            <p style="color:var(--muted);margin-bottom:2rem">Menjadi wadah unggulan yang melahirkan generasi muda kreatif, kritis, dan komunikatif melalui media.</p>
+            <h3 style="margin-bottom:1rem">Misi</h3>
+            <ul style="color:var(--muted);margin-left:1.5rem;display:flex;flex-direction:column;gap:.5rem">
+              <li>Mengembangkan keterampilan siswa di bidang produksi media (foto, video, desain, tulis).</li>
+              <li>Mendokumentasikan dan mempublikasikan kegiatan sekolah secara profesional.</li>
+              <li>Menjadi sarana aktualisasi diri dan kolaborasi antar siswa.</li>
+              <li>Meningkatkan literasi digital dan etika bermedia di kalangan siswa.</li>
+            </ul>
+          </div>
+          <div class="about-section" id="struktur">
+            <h3>Struktur Organisasi</h3>
+            <div class="wiki-tree" style="margin-top:1.5rem">
+              <ul class="tree-root">
+                <li>Pembina: Ibu Ratna Dewi, S.Pd.
+                  <ul class="tree-children">
+                    <li><strong>Ketua:</strong> Nayla Azzahra (XII IPS 2)</li>
+                    <li><strong>Wakil Ketua:</strong> Rafi Ahmad (XI MIPA 1)</li>
+                    <li><strong>Sekretaris:</strong> Salsabila Putri (XI IPS 3)</li>
+                    <li><strong>Bendahara:</strong> Dimas Prasetyo (X MIPA 4)</li>
+                    <li><strong>Koordinator Divisi:</strong>
+                      <ul class="tree-children">
+                        <li>Fotografi: Andi Firmansyah</li>
+                        <li>Videografi: Rania Kirana</li>
+                        <li>Desain Grafis: Bayu Setiawan</li>
+                        <li>Jurnalistik: Citra Lestari</li>
+                        <li>Media Sosial: Dinda Ayu</li>
+                      </ul>
+                    </li>
+                  </ul>
+                </li>
+              </ul>
             </div>
+          </div>
+          <div class="about-section" id="tim">
+            <h3>Anggota Aktif</h3>
+            <div class="tim-grid" id="timGrid"></div>
+          </div>
+          <div class="about-section" id="faq">
+            <h3>Pertanyaan Umum</h3>
+            <div id="faqContainer"></div>
+          </div>
         </div>
+      </div>
+    </section>
 
-        <!-- PAGE: GURU -->
-        <div id="guru" class="page-container">
-            <div class="container">
-                <h1 class="page-title">Guru Pembina</h1>
-                <p class="page-subtitle">Dosen dan guru yang membimbing Pemantik.</p>
-                
-                <div class="card media-item">
-                    <div class="avatar" style="font-size:16px;">BK</div>
-                    <div style="text-align:left;">
-                        <div class="member-name"></div>
-                        <div class="member-role">Guru BK & Pembina Utama</div>
-                    </div>
-                </div>
-                <div class="card media-item">
-                    <div class="avatar" style="font-size:16px;">PK</div>
-                    <div style="text-align:left;">
-                        <div class="member-name"></div>
-                        <div class="member-role">Pembina Pendamping</div>
-                    </div>
-                </div>
-            </div>
+    <!-- TESTIMONI -->
+    <section class="page" id="testimoni">
+      <div class="testimoni-page">
+        <div class="section-header"><h1 class="section-title">Testimoni</h1><p class="section-subtitle">Apa kata siswa dan guru tentang Pemantik Sekolah.</p></div>
+        <div class="testimoni-grid" id="testimoniGrid"></div>
+      </div>
+    </section>
+
+    <!-- PENGUMUMAN -->
+    <section class="page" id="pengumuman">
+      <div class="pengumuman-page">
+        <div class="section-header"><h1 class="section-title">Pengumuman & Info</h1><p class="section-subtitle">Update terbaru seputar kegiatan Pemantik Sekolah.</p></div>
+        <div class="pengumuman-list" id="pengumumanList"></div>
+      </div>
+    </section>
+
+    <!-- KONTAK -->
+    <section class="page" id="kontak">
+      <div class="kontak-page">
+        <div class="section-header"><h1 class="section-title">Hubungi Kami</h1><p class="section-subtitle">Punya pertanyaan atau ingin bergabung? Kirim pesan.</p></div>
+        <div class="kontak-grid">
+          <div class="kontak-info-cards">
+            <div class="ci-card"><div class="ci-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div><div><div class="ci-label">Email</div><div class="ci-value">pemantik@sekolah.sch.id</div></div></div>
+            <div class="ci-card"><div class="ci-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg></div><div><div class="ci-label">Instagram</div><div class="ci-value">@pemantiksekolah</div></div></div>
+            <div class="ci-card"><div class="ci-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22.54 6.42a2.78 2.78 0 00-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 00-1.94 2A29 29 0 001 11.75a29 29 0 00.46 5.33A2.78 2.78 0 003.4 19.1c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 001.94-2 29 29 0 00.46-5.25 29 29 0 00-.46-5.43z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"/></svg></div><div><div class="ci-label">YouTube</div><div class="ci-value">Pemantik Sekolah</div></div></div>
+            <div class="ci-card"><div class="ci-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg></div><div><div class="ci-label">Ruang Sekretariat</div><div class="ci-value">Ruang OSIS Lt.2, setiap Jumat 15.30</div></div></div>
+          </div>
+          <div class="kontak-form">
+            <h3 style="font-size:1.2rem;font-weight:800;margin-bottom:1.5rem">Kirim Pesan</h3>
+            <div class="form-group"><label for="cf-name">Nama Lengkap</label><input type="text" id="cf-name" placeholder="Nama kamu"><div class="form-error" id="err-name">Nama wajib diisi</div></div>
+            <div class="form-group"><label for="cf-email">Email</label><input type="email" id="cf-email" placeholder="email@contoh.com"><div class="form-error" id="err-email">Email tidak valid</div></div>
+            <div class="form-group"><label for="cf-service">Tertarik Bergabung di Divisi?</label><select id="cf-service"><option value="">Pilih divisi (opsional)</option><option>Fotografi</option><option>Videografi</option><option>Desain Grafis</option><option>Jurnalistik</option><option>Media Sosial</option></select></div>
+            <div class="form-group"><label for="cf-msg">Pesan / Pertanyaan</label><textarea id="cf-msg" placeholder="Tulis pesanmu di sini..."></textarea><div class="form-error" id="err-msg">Pesan minimal 10 karakter</div></div>
+            <button class="btn btn-primary btn-quote" id="cf-submit" type="button"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>Kirim Pesan</button>
+            <div class="form-success" id="form-success">Pesan terkirim! Kami akan merespons secepatnya.</div>
+          </div>
         </div>
+      </div>
+    </section>
+  </main>
 
-        <!-- PAGE: MEDIA -->
-        <div id="media" class="page-container">
-            <div class="container">
-                <h1 class="page-title">Divisi Media</h1>
-                <p class="page-subtitle">Kelola konten dan kreativitas.</p>
-                
-                <div class="card media-item">
-                    <div class="media-icon">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-                    </div>
-                    <div style="text-align:left;">
-                        <div class="member-name">Desain Grafis</div>
-                        <div class="member-role">Membuat poster & konten visual.</div>
-                    </div>
-                </div>
-                <div class="card media-item">
-                    <div class="media-icon">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
-                    </div>
-                    <div style="text-align:left;">
-                        <div class="member-name">Video & Fotografi</div>
-                        <div class="member-role">Dokumentasi kegiatan.</div>
-                    </div>
-                </div>
-            </div>
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <a href="/home" class="logo" data-page="home"><div class="logo-icon"><svg viewBox="0 0 24 24"><path d="M13 2L4 14h7l-2 8 9-12h-7l2-8z"/></svg></div><div><div>Pemantik</div><div class="logo-text-sub">Sekolah</div></div></a>
+        <p>Wadah kreativitas siswa di bidang media. Dari siswa, oleh siswa, untuk sekolah.</p>
+      </div>
+      <div><h4 class="footer-title">Navigasi</h4><ul class="footer-links"><li><a href="/home" data-page="home">Beranda</a></li><li><a href="/divisi" data-page="divisi">Divisi</a></li><li><a href="/galeri" data-page="galeri">Galeri</a></li><li><a href="/proyek" data-page="proyek">Proyek</a></li><li><a href="/tentang" data-page="tentang">Tentang</a></li><li><a href="/kontak" data-page="kontak">Kontak</a></li></ul></div>
+      <div><h4 class="footer-title">Sosial Media</h4><ul class="footer-links"><li><a href="#">Instagram</a></li><li><a href="#">YouTube</a></li><li><a href="#">TikTok</a></li></ul></div>
+    </div>
+    <div class="footer-bottom"><span>© 2025 Pemantik Sekolah. SMAN 1 Creative Media.</span><span>✨ Berkarya Bersama</span></div>
+  </footer>
+
+  <script>
+    // ==================== DATA ====================
+    const divisiData = [
+      { name:"Fotografi", tag:"Dokumentasi & Artistik", desc:"Mengabadikan momen sekolah dari sudut pandang kreatif. Belajar teknik foto, editing, dan visual storytelling.", features:["Event Coverage","Photo Editing","Composition","Lighting"], icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>' },
+      { name:"Videografi", tag:"Produksi & Editing", desc:"Produksi video profil sekolah, liputan acara, dan konten kreatif. Kuasai pengambilan gambar dan editing.", features:["Shooting","Video Editing","Motion Graphic","Storyboard"], icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>' },
+      { name:"Desain Grafis", tag:"Visual & Branding", desc:"Membuat poster, feed Instagram, dan materi promosi kegiatan sekolah yang menarik.", features:["Adobe Suite","Canva","Layout","Typography"], icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>' },
+      { name:"Jurnalistik", tag:"Tulis & Reportase", desc:"Menulis berita sekolah, artikel feature, dan wawancara. Mengasah kemampuan menulis dan berpikir kritis.", features:["News Writing","Interview","Copywriting","Editing"], icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>' },
+      { name:"Media Sosial", tag:"Konten & Engagement", desc:"Mengelola akun media sosial sekolah, membuat konten yang engaging, dan analisis performa.", features:["Content Planning","Caption Writing","Trend Research","Analytics"], icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>' }
+    ];
+
+    const galeriKategori = [
+      { id:"all", name:"Semua" },{ id:"foto", name:"Fotografi" },{ id:"video", name:"Video" },{ id:"desain", name:"Desain" }
+    ];
+    const galeriItems = [
+      { name:"Upacara Hari Pahlawan", cat:"foto", desc:"Dokumentasi upacara dan penampilan drama kolosal.", color:"linear-gradient(135deg,#FF6B6B,#ee5a24)" },
+      { name:"Poster Pensi 2025", cat:"desain", desc:"Desain poster utama Pentas Seni tahunan.", color:"linear-gradient(135deg,#CDFF00,#82c700)" },
+      { name:"Liputan Lomba Debat", cat:"video", desc:"Highlight video lomba debat antar sekolah.", color:"linear-gradient(135deg,#FF8C42,#d35400)" },
+      { name:"Feeds Instagram Classmeet", cat:"desain", desc:"Konten feeds informatif selama class meeting.", color:"linear-gradient(135deg,#a29bfe,#6c5ce7)" },
+      { name:"Ekskul Photography Session", cat:"foto", desc:"Hasil hunting foto anggota divisi fotografi.", color:"linear-gradient(135deg,#fd79a8,#e84393)" },
+      { name:"Video Profil Sekolah 2025", cat:"video", desc:"Video profil terbaru untuk PPDB.", color:"linear-gradient(135deg,#00cec9,#0984e3)" }
+    ];
+
+    const proyekData = [
+      { title:"Dokumentasi Pensi Sekolah", status:"selesai", desc:"Dokumentasi foto dan video seluruh rangkaian Pentas Seni. Hasil dipublikasikan di YouTube sekolah.", timeline:"Jan - Feb 2025", divisi:["Fotografi","Videografi"], progress:100 },
+      { title:"Redesign Buletin Sekolah", status:"berjalan", desc:"Mendesain ulang layout dan konten buletin cetak bulanan sekolah. Target terbit April.", timeline:"Mar - Apr 2025", divisi:["Desain Grafis","Jurnalistik"], progress:60 },
+      { title:"Kampanye Anti-Bullying", status:"berjalan", desc:"Produksi konten video pendek dan poster untuk kampanye anti-bullying di lingkungan sekolah.", timeline:"Feb - Mei 2025", divisi:["Videografi","Desain Grafis","Media Sosial"], progress:40 },
+      { title:"Pelatihan Jurnalistik Dasar", status:"rencana", desc:"Mengadakan workshop menulis berita untuk anggota baru dan perwakilan kelas.", timeline:"Mei 2025", divisi:["Jurnalistik"], progress:0 }
+    ];
+
+    const anggotaTim = [
+      { name:"Nayla Azzahra", role:"Ketua (XII IPS 2)", initial:"NA", color:"linear-gradient(135deg,#CDFF00,#82c700)" },
+      { name:"Rafi Ahmad", role:"Wakil Ketua (XI MIPA 1)", initial:"RA", color:"linear-gradient(135deg,#FF8C42,#d35400)" },
+      { name:"Salsabila Putri", role:"Sekretaris (XI IPS 3)", initial:"SP", color:"linear-gradient(135deg,#a29bfe,#6c5ce7)" },
+      { name:"Andi Firmansyah", role:"Koord. Fotografi", initial:"AF", color:"linear-gradient(135deg,#00cec9,#0984e3)" },
+      { name:"Rania Kirana", role:"Koord. Videografi", initial:"RK", color:"linear-gradient(135deg,#fd79a8,#e84393)" },
+      { name:"Bayu Setiawan", role:"Koord. Desain", initial:"BS", color:"linear-gradient(135deg,#ffeaa7,#fdcb6e)" },
+      { name:"Citra Lestari", role:"Koord. Jurnalistik", initial:"CL", color:"linear-gradient(135deg,#55efc4,#00b894)" },
+      { name:"Dinda Ayu", role:"Koord. Medsos", initial:"DA", color:"linear-gradient(135deg,#ff9ff3,#f368e0)" }
+    ];
+
+    const faqData = [
+      { q:"Siapa yang boleh bergabung?", a:"Seluruh siswa aktif dari kelas X dan XI. Tidak perlu pengalaman, yang penting minat dan semangat belajar." },
+      { q:"Kapan jadwal latihan/pertemuan?", a:"Setiap Jumat pukul 15.30 - 17.30 di ruang OSIS. Untuk proyek khusus, jadwal fleksibel menyesuaikan." },
+      { q:"Apakah ada biaya pendaftaran?", a:"Tidak ada biaya. Ekstrakurikuler ini gratis untuk seluruh siswa." },
+      { q:"Apa saja fasilitas yang disediakan?", a:"Kami memiliki kamera DSLR, tripod, lighting sederhana, dan komputer editing. Anggota juga boleh menggunakan peralatan pribadi." },
+      { q:"Bagaimana cara mendaftar?", a:"Datang langsung ke sekretariat saat jam ekskul, atau hubungi via Instagram/email." }
+    ];
+
+    const testimoniData = [
+      { name:"Fajar Ramadhan", role:"Kelas XI MIPA 2", text:"Gabung Pemantik bikin aku makin percaya diri. Sekarang aku jadi fotografer andalan di tiap acara sekolah!", color:"#CDFF00" },
+      { name:"Ibu Ratna Dewi", role:"Pembina", text:"Pemantik membantu sekolah dalam dokumentasi dan publikasi. Karya siswa sangat membanggakan dan profesional.", color:"#FF8C42" },
+      { name:"Luna Maharani", role:"Kelas X IPS 1", text:"Awalnya cuma iseng, sekarang aku ketagihan bikin desain. Teman-teman di sini supportif banget!", color:"#a29bfe" }
+    ];
+
+    const pengumumanData = [
+      { type:"penting", title:"Pendaftaran Anggota Baru Dibuka!", date:"10 Mar 2025", body:"Pemantik Sekolah membuka pendaftaran anggota baru untuk tahun ajaran 2025/2026. Datang langsung ke stand ekskul saat MPLS atau hubungi sekretariat." },
+      { type:"kegiatan", title:"Workshop Fotografi Bareng Alumni", date:"5 Mar 2025", body:"Akan diadakan workshop dasar fotografi bersama alumni yang kini menjadi fotografer profesional. Sabtu, 15 Maret 2025 pukul 13.00 di Aula." },
+      { type:"info", title:"Jadwal Libur Awal Puasa", date:"28 Feb 2025", body:"Selama minggu pertama Ramadhan, kegiatan ekskul ditiadakan. Akan aktif kembali pada pertemuan Jumat pekan berikutnya." },
+      { type:"kegiatan", title:"Liputan Khusus Class Meeting", date:"20 Feb 2025", body:"Bagi anggota yang ingin terlibat dalam tim liputan class meeting, silakan daftar ke koordinator masing-masing divisi." }
+    ];
+
+    // ==================== PARTICLES ====================
+    const canvas = document.getElementById('particles');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+    const noMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    function resizeCanvas(){canvas.width=window.innerWidth;canvas.height=window.innerHeight}
+    function createParticles(){particles=[];const c=Math.min(65,Math.floor(window.innerWidth/24));for(let i=0;i<c;i++)particles.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,vx:(Math.random()-.5)*.22,vy:(Math.random()-.5)*.22,radius:Math.max(1,Math.random()*2),opacity:Math.random()*.35+.12})}
+    function drawParticles(){ctx.clearRect(0,0,canvas.width,canvas.height);particles.forEach((p,i)=>{p.x+=p.vx;p.y+=p.vy;if(p.x<0)p.x=canvas.width;if(p.x>canvas.width)p.x=0;if(p.y<0)p.y=canvas.height;if(p.y>canvas.height)p.y=0;ctx.beginPath();ctx.arc(p.x,p.y,p.radius,0,Math.PI*2);ctx.fillStyle=`rgba(205,255,0,${p.opacity})`;ctx.fill();particles.slice(i+1).forEach(p2=>{const dx=p.x-p2.x,dy=p.y-p2.y,dist=Math.sqrt(dx*dx+dy*dy);if(dist<100){ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(p2.x,p2.y);ctx.strokeStyle=`rgba(205,255,0,${0.06*(1-dist/100)})`;ctx.stroke()}})});requestAnimationFrame(drawParticles)}
+    if(!noMotion){resizeCanvas();createParticles();drawParticles();window.addEventListener('resize',()=>{resizeCanvas();createParticles()})}
+
+    // ==================== NAVIGATION ====================
+    const allNavLinks=document.querySelectorAll('.nav-link,[data-page]');
+    const pages=document.querySelectorAll('.page');
+    const mobileToggle=document.getElementById('mobileToggle');
+    const navLinksContainer=document.getElementById('navLinks');
+    const nav=document.querySelector('.nav');
+
+    function showPage(pageId){
+      pageId=pageId.replace(/\/$/,'');
+      const target=document.getElementById(pageId);
+      if(!target){showPage('home');return}
+      pages.forEach(p=>p.classList.remove('active'));
+      target.classList.add('active');
+      allNavLinks.forEach(l=>{l.classList.remove('active');if(l.getAttribute('data-page')===pageId)l.classList.add('active')});
+      navLinksContainer.classList.remove('open');mobileToggle.classList.remove('open');
+      window.scrollTo({top:0,behavior:'smooth'});
+      setTimeout(observeElements,100);
+    }
+
+    allNavLinks.forEach(link=>{link.addEventListener('click',e=>{e.preventDefault();const pid=link.getAttribute('data-page');const url=link.getAttribute('href');window.history.pushState({page:pid},'',''+url);showPage(pid)})});
+    window.addEventListener('popstate',e=>{if(e.state&&e.state.page)showPage(e.state.page);else showPage('home')});
+
+    let initPath=window.location.pathname.replace(/\/$/,'')||'/home';
+    if(initPath==='/')initPath='/home';
+    const initPage=initPath.substring(1);
+    window.history.replaceState({page:initPage},'',''+initPath);
+    showPage(initPage);
+
+    mobileToggle.addEventListener('click',()=>{mobileToggle.classList.toggle('open');navLinksContainer.classList.toggle('open')});
+    window.addEventListener('scroll',()=>nav.classList.toggle('scrolled',window.scrollY>50));
+
+    // ==================== RENDER DIVISI ====================
+    document.getElementById('divisiGrid').innerHTML=divisiData.map(d=>`<div class="divisi-card"><div class="divisi-image"><div class="divisi-icon-box">${d.icon}</div></div><div class="divisi-content"><span class="divisi-tag">${d.tag}</span><h3 class="divisi-title">${d.name}</h3><p class="divisi-desc">${d.desc}</p><div class="divisi-features">${d.features.map(f=>`<span class="divisi-feat">${f}</span>`).join('')}</div></div></div>`).join('');
+
+    // ==================== RENDER GALERI ====================
+    const galeriTabs=document.getElementById('galeriTabs');
+    const galeriGrid=document.getElementById('galeriGrid');
+    galeriKategori.forEach(cat=>{const btn=document.createElement('button');btn.className=`galeri-tab ${cat.id==='all'?'active':''}`;btn.textContent=cat.name;btn.dataset.cat=cat.id;btn.addEventListener('click',()=>{galeriTabs.querySelectorAll('.galeri-tab').forEach(t=>t.classList.remove('active'));btn.classList.add('active');renderGaleri(cat.id);});galeriTabs.appendChild(btn)});
+    function renderGaleri(catId){const filtered=catId==='all'?galeriItems:galeriItems.filter(p=>p.cat===catId);galeriGrid.innerHTML=filtered.map(p=>`<div class="galeri-item"><div class="galeri-thumb"><div class="port-thumb-inner" style="background:${p.color}"><svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="rgba(255,255,255,.6)" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></div></div><div class="galeri-info"><div class="galeri-cat">${p.cat}</div><div class="galeri-name">${p.name}</div><div class="galeri-desc">${p.desc}</div></div></div>`).join('');}
+    renderGaleri('all');
+
+    // ==================== RENDER PROYEK ====================
+    document.getElementById('proyekList').innerHTML=proyekData.map(p=>`
+      <div class="proyek-card">
+        <div class="proyek-header"><h3 class="proyek-title">${p.title}</h3><span class="proyek-status ${p.status}">${p.status==='berjalan'?'Sedang Berjalan':p.status==='selesai'?'Selesai':'Rencana'}</span></div>
+        <div class="proyek-body">
+          <p class="proyek-desc">${p.desc}</p>
+          <div class="proyek-meta">
+            <div class="proyek-meta-item"><div class="proyek-meta-label">Timeline</div><div class="proyek-meta-value" style="color:var(--accent)">${p.timeline}</div></div>
+            <div class="proyek-meta-item"><div class="proyek-meta-label">Progress</div><div class="proyek-meta-value">${p.progress}%</div></div>
+          </div>
+          <div class="proyek-tags">${p.divisi.map(d=>`<span class="proyek-tag">${d}</span>`).join('')}</div>
         </div>
+      </div>`).join('');
 
-        <!-- PAGE: APLIKASI -->
-        <div id="aplikasi" class="page-container">
-            <div class="container">
-                <h1 class="page-title">Aplikasi Pemantik</h1>
-                <p class="page-subtitle">Platform digital untuk membantumu.</p>
-                
-                <div class="card" style="text-align:center; padding:30px;">
-                    <div style="font-size:40px; margin-bottom:10px;">📱</div>
-                    <h3 style="font-size:16px; margin-bottom:5px;">Versi Mobile App</h3>
-                    <p style="font-size:13px; color:var(--muted); margin-bottom:15px;">Tersedia di Github</p>
-                    <a href="https://github.com/NeedFriend0998/Pemantik49App.apk/releases/download/V2.0-Rebuilt/PemantikAppRebuilt.3.apk https://github.com"  class="btn btn-primary" style="width:100%;">Download</a>
-                </div>
-            </div>
-        </div>
+    // ==================== TENTANG TABS ====================
+    const aboutTabs=document.querySelectorAll('.about-tab');
+    const aboutSections=document.querySelectorAll('.about-section');
+    function activateAboutTab(tabId){
+      aboutTabs.forEach(t=>{t.classList.remove('active');if(t.dataset.tab===tabId)t.classList.add('active')});
+      aboutSections.forEach(s=>{s.classList.remove('active');if(s.id===tabId)s.classList.add('active')});
+    }
+    aboutTabs.forEach(tab=>tab.addEventListener('click',()=>activateAboutTab(tab.dataset.tab)));
 
-        <!-- PAGE: CURHAT -->
-        <div id="curhat" class="page-container">
-            <div class="container">
-                <h1 class="page-title">Form Curhat</h1>
-                <p class="page-subtitle">Ceritakan masalahmu dengan aman dan rahasia.</p>
-                
-                <div class="card" style="background:rgba(122, 158, 126, 0.1); border:none; margin-bottom:15px;">
-                    <p style="font-size:13px; color:var(--sage); text-align:center; font-weight:500;">
-                        Data kamu dijaga kerahasiaannya 100%.
-                    </p>
-                </div>
+    // Render Tim
+    document.getElementById('timGrid').innerHTML=anggotaTim.map(a=>`<div class="tim-card"><div class="tim-avatar" style="background:${a.color}">${a.initial}</div><div class="tim-name">${a.name}</div><div class="tim-role">${a.role}</div></div>`).join('');
 
-                <div class="iframe-box">
-                    <!-- GANTI LINK DI BAWAH INI DENGAN LINK GOOGLE FORMS KAMU -->
-                    <iframe src="https://app.youform.com/forms/0vkaiqpt" loading="lazy">Loading...</iframe>
-                </div>
-            </div>
-        </div>
+    // Render FAQ
+    const faqContainer=document.getElementById('faqContainer');
+    faqData.forEach(item=>{const el=document.createElement('div');el.className='faq-item';el.innerHTML=`<div class="faq-question">${item.q}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div><div class="faq-answer"><p>${item.a}</p></div>`;el.querySelector('.faq-question').addEventListener('click',()=>{faqContainer.querySelectorAll('.faq-item.open').forEach(x=>{if(x!==el)x.classList.remove('open')});el.classList.toggle('open')});faqContainer.appendChild(el)});
 
-    </main>
+    // Render Testimoni
+    document.getElementById('testimoniGrid').innerHTML=testimoniData.map(t=>`<div class="testimoni-card"><p class="testimoni-text">"${t.text}"</p><div class="testimoni-author"><div class="testimoni-avatar" style="background:${t.color}">${t.name.charAt(0)}</div><div><div class="testimoni-name">${t.name}</div><div class="testimoni-role">${t.role}</div></div></div></div>`).join('');
 
-    <!-- Floating Action Button (FAB) -->
-    <button class="fab-fixed" onclick="showPage('curhat')">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-    </button>
+    // Render Pengumuman
+    document.getElementById('pengumumanList').innerHTML=pengumumanData.map(a=>`<div class="pengumuman-card ${a.type}"><div class="pengumuman-header"><span class="pengumuman-type ${a.type}">${a.type==='penting'?'Penting':a.type==='kegiatan'?'Kegiatan':'Info'}</span><span class="pengumuman-date">${a.date}</span></div><h3 class="pengumuman-title">${a.title}</h3><div class="pengumuman-body">${a.body}</div></div>`).join('');
 
-    <script>
-        // Fungsi Navigasi Halaman
-        function showPage(pageId) {
-            // 1. Sembunyikan semua halaman
-            document.querySelectorAll('.page-container').forEach(page => {
-                page.classList.remove('active');
-            });
+    // ==================== CONTACT FORM ====================
+    document.getElementById('cf-submit').addEventListener('click',()=>{
+      let valid=true;
+      const name=document.getElementById('cf-name'),email=document.getElementById('cf-email'),msg=document.getElementById('cf-msg');
+      document.querySelectorAll('.form-error').forEach(e=>e.style.display='none');
+      if(!name.value.trim()){document.getElementById('err-name').style.display='block';valid=false}
+      if(!email.value.trim()||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)){document.getElementById('err-email').style.display='block';valid=false}
+      if(!msg.value.trim()||msg.value.trim().length<10){document.getElementById('err-msg').style.display='block';valid=false}
+      if(valid){document.getElementById('form-success').style.display='block';name.value='';email.value='';document.getElementById('cf-service').value='';msg.value=''}
+    });
 
-            // 2. Tampilkan halaman yang dipilih
-            document.getElementById(pageId).classList.add('active');
-
-            // 3. Update menu aktif di sidebar
-            document.querySelectorAll('.nav-link').forEach(link => {
-                link.classList.remove('active');
-            });
-            
-            // Karena bisa dipanggil dari FAB (tanpa event), kita cari link manual
-            const targetLink = document.querySelector(`.nav-link[onclick="showPage('${pageId}')"]`);
-            if(targetLink) targetLink.classList.add('active');
-
-            // 4. Tutup sidebar jika di HP
-            if (window.innerWidth <= 768) {
-                closeSidebar();
-            }
-
-            // 5. Scroll ke atas
-            document.querySelector('.main-content').scrollTop = 0;
-        }
-
-        // Fungsi Sidebar (Mobile)
-        function toggleSidebar() {
-            document.getElementById('sidebar').classList.toggle('active');
-            document.getElementById('overlayBg').classList.toggle('active');
-        }
-        function closeSidebar() {
-            document.getElementById('sidebar').classList.remove('active');
-            document.getElementById('overlayBg').classList.remove('active');
-        }
-    </script>
+    // ==================== SCROLL REVEAL ====================
+    function observeElements(){const reveals=document.querySelectorAll('.reveal');const observer=new IntersectionObserver(entries=>{entries.forEach((entry,i)=>{if(entry.isIntersecting)setTimeout(()=>entry.target.classList.add('visible'),i*100)})},{threshold:.1});reveals.forEach(el=>observer.observe(el))}
+    observeElements();
+  </script>
 </body>
 </html>
