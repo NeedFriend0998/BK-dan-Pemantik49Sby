@@ -762,7 +762,7 @@
       navLinksContainer.classList.remove('open');mobileToggle.classList.remove('open');
       window.scrollTo({top:0,behavior:'smooth'});
       setTimeout(observeElements,100);
-      if(pageId==='curhat')initCommentBox();
+      
     }
 
     allNavLinks.forEach(link=>{link.addEventListener('click',e=>{e.preventDefault();const pid=link.getAttribute('data-page');const url=link.getAttribute('href');window.history.pushState({page:pid},'',''+url);showPage(pid)})});
