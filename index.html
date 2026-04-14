@@ -1,520 +1,925 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PEMANTIK - Dashboard</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg: #FDF8F3;
-            --sidebar: #FFFFFF;
-            --card: #FFFFFF;
-            --text: #2D2A26;
-            --muted: #6B635B;
-            --accent: #D4663C;
-            --accent-light: #E8A089;
-            --sage: #7A9E7E;
-            --sage-light: #C5DBC7;
-            --border: #E5DDD5;
-        }
+  <meta charset="UTF-8">
+  <title>Pemantik Media Division | Spark Your Creative Vision</title>
+  <meta name="description" content="Pemantik Media Division — divisi kreatif yang memantik ide menjadi konten bermakna. Layanan content creation, social media management, graphic design, video production, dan brand strategy.">
+  <meta property="og:title" content="Pemantik Media Division | Creative Media Agency">
+  <meta property="og:description" content="Kami memantik ide brilianmu menjadi karya yang menginspirasi. Join our creative division today!">
+  <meta property="og:url" content="https://pemantikmedia.netlify.app">
+  <base href="/">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+        --bg: #0a0a0a;
+        --bg-secondary: #111111;
+        --fg: #f0f0f0;
+        --muted: #7a7a7a;
+        --accent: #CDFF00;
+        --accent-glow: rgba(205, 255, 0, 0.25);
+        --accent-dim: rgba(205, 255, 0, 0.08);
+        --card: #161616;
+        --border: #262626;
+        --danger: #ff4757;
+        --warning: #ffa502;
+        --warm: #FF8C42;
+        --coral: #FF6B6B;
+        --teal: #00cec9;
+        --purple: #a29bfe;
+    }
+    *{margin:0;padding:0;box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--fg);min-height:100vh;overflow-x:hidden;line-height:1.6}
+    .bg-canvas{position:fixed;inset:0;z-index:-1;background:radial-gradient(ellipse at 15% 15%,rgba(205,255,0,.06) 0%,transparent 50%),radial-gradient(ellipse at 85% 80%,rgba(255,140,66,.04) 0%,transparent 50%),var(--bg)}
+    .bg-canvas::after{content:'';position:fixed;inset:0;z-index:-1;opacity:.025;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");pointer-events:none}
+    #particles{position:fixed;inset:0;z-index:-1;pointer-events:none}
 
-        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body {
-            font-family: 'DM Sans', sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            display: flex;
-            height: 100vh;
-            overflow: hidden;
-        }
-        h1, h2, h3, h4, button { font-family: 'Space Grotesk', sans-serif; }
+    /* NAV */
+    .nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:1rem 2rem;background:rgba(10,10,10,.88);backdrop-filter:blur(24px);border-bottom:1px solid var(--border);transition:all .3s ease}
+    .nav.scrolled{padding:.7rem 2rem}
+    .nav-inner{max-width:1400px;margin:0 auto;display:flex;justify-content:space-between;align-items:center}
+    .logo{font-size:1.4rem;font-weight:900;color:var(--fg);text-decoration:none;display:flex;align-items:center;gap:.6rem}
+    .logo-icon{width:36px;height:36px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center}
+    .logo-icon svg{width:22px;height:22px;fill:var(--bg)}
+    .logo-text-sub{font-weight:400;font-size:.7rem;color:var(--muted);letter-spacing:.5px;text-transform:uppercase}
+    .nav-links{display:flex;gap:.35rem}
+    .nav-link{padding:.55rem 1rem;color:var(--muted);text-decoration:none;font-weight:500;font-size:.9rem;border-radius:8px;transition:all .25s ease;position:relative}
+    .nav-link:hover,.nav-link.active{color:var(--fg);background:rgba(255,255,255,.04)}
+    .nav-link.active::after{content:'';position:absolute;bottom:3px;left:50%;transform:translateX(-50%);width:18px;height:2px;background:var(--accent);border-radius:2px}
+    .mobile-toggle{display:none;background:none;border:none;cursor:pointer;padding:.5rem}
+    .mobile-toggle span{display:block;width:24px;height:2px;background:var(--fg);margin:5px 0;transition:all .3s ease;border-radius:2px}
 
-        /* --- SIDEBAR AREA --- */
-        .sidebar {
-            width: 260px;
-            height: 100%;
-            background: var(--sidebar);
-            border-right: 1px solid var(--border);
-            display: flex;
-            flex-direction: column;
-            position: fixed;
-            left: 0; top: 0;
-            z-index: 100;
-            transition: transform 0.3s ease;
-        }
-        
-        /* Responsive Sidebar */
-        @media (max-width: 768px) {
-            .sidebar { transform: translateX(-100%); }
-            .sidebar.active { transform: translateX(0); }
-            .overlay-bg { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.2); z-index:99; }
-            .overlay-bg.active { display: block; }
-        }
+    /* PAGES */
+    .pages{padding-top:76px}
+    .page{display:none;opacity:0;transform:translateY(20px);transition:opacity .4s ease,transform .4s ease}
+    .page.active{display:block;opacity:1;transform:translateY(0)}
 
-        .sidebar-header {
-            padding: 20px;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        .logo-img { width: 36px; height: 36px; background: linear-gradient(135deg, var(--accent), var(--accent-light)); border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-        .logo-img svg { stroke: white; width: 20px; height: 20px; }
-        .logo-text { font-weight: 700; font-size: 18px; }
+    /* HERO */
+    .hero{min-height:calc(100vh - 76px);display:flex;align-items:center;padding:2rem;position:relative}
+    .hero-content{max-width:1400px;margin:0 auto;width:100%;display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center}
+    .hero-text{animation:fadeInUp .8s ease forwards}
+    .hero-badge{display:inline-flex;align-items:center;gap:.5rem;padding:.4rem 1rem;background:var(--accent-dim);border:1px solid rgba(205,255,0,.2);border-radius:50px;font-size:.85rem;color:var(--accent);margin-bottom:1.5rem}
+    .badge-dot{width:8px;height:8px;background:var(--accent);border-radius:50%;animation:pulse 2s infinite}
+    .hero-title{font-size:clamp(2.5rem,6vw,4.5rem);font-weight:900;line-height:1.08;margin-bottom:1.5rem;letter-spacing:-.02em}
+    .hero-title span{background:linear-gradient(135deg,var(--accent),var(--warm));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .hero-desc{font-size:1.15rem;color:var(--muted);margin-bottom:2rem;max-width:500px}
+    .hero-actions{display:flex;gap:1rem;flex-wrap:wrap}
+    .btn{display:inline-flex;align-items:center;gap:.5rem;padding:.9rem 1.8rem;font-family:inherit;font-size:.95rem;font-weight:600;text-decoration:none;border-radius:10px;cursor:pointer;transition:all .25s ease;border:none}
+    .btn-primary{background:var(--accent);color:var(--bg)}
+    .btn-primary:hover{transform:translateY(-2px);box-shadow:0 10px 30px var(--accent-glow)}
+    .btn-secondary{background:var(--card);color:var(--fg);border:1px solid var(--border)}
+    .btn-secondary:hover{background:var(--bg-secondary);border-color:var(--accent)}
+    .btn svg{width:18px;height:18px}
 
-        .nav-menu { flex: 1; padding: 20px 15px; overflow-y: auto; }
-        .nav-section-title { font-size: 11px; text-transform: uppercase; color: var(--muted); letter-spacing: 1px; margin-bottom: 10px; padding-left: 10px; }
-        
-        .nav-link {
-            display: flex; align-items: center; gap: 12px;
-            padding: 12px 15px; border-radius: 10px;
-            color: var(--muted); text-decoration: none;
-            font-weight: 500; font-size: 14px;
-            transition: all 0.2s; margin-bottom: 5px;
-            cursor: pointer;
-        }
-        .nav-link:hover { background: var(--bg); color: var(--text); }
-        .nav-link.active { background: rgba(212, 102, 60, 0.1); color: var(--accent); font-weight: 600; }
-        .nav-link svg { width: 18px; height: 18px; }
+    /* STATS */
+    .hero-visual{animation:fadeInUp .8s ease .2s forwards;opacity:0}
+    .stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1.5rem}
+    .stat-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:1.5rem;transition:all .3s ease}
+    .stat-card:hover{transform:translateY(-4px);border-color:var(--accent);box-shadow:0 20px 40px rgba(0,0,0,.3)}
+    .stat-card.featured{grid-column:span 2;background:linear-gradient(135deg,rgba(205,255,0,.06),rgba(255,140,66,.04));border-color:rgba(205,255,0,.2)}
+    .stat-icon{width:48px;height:48px;background:var(--accent-dim);border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:1rem}
+    .stat-icon svg{width:24px;height:24px;stroke:var(--accent)}
+    .stat-value{font-size:2rem;font-weight:800;margin-bottom:.25rem}
+    .stat-label{font-size:.9rem;color:var(--muted)}
+    .status-indicator{display:inline-flex;align-items:center;gap:.5rem;background:var(--accent-dim);padding:.3rem .8rem;border-radius:50px;font-size:.8rem;color:var(--accent);margin-top:.5rem}
+    .status-dot{width:6px;height:6px;background:var(--accent);border-radius:50%;animation:pulse 2s infinite}
 
-        /* --- MAIN CONTENT AREA --- */
-        .main-content {
-            flex: 1; margin-left: 260px; 
-            height: 100%; overflow-y: auto; 
-            position: relative; z-index: 1;
-        }
-        @media (max-width: 768px) {
-            .main-content { margin-left: 0; }
-        }
+    /* SECTION HEADERS */
+    .section-header{text-align:center;margin-bottom:4rem}
+    .section-title{font-size:clamp(2rem,4vw,3rem);font-weight:800;margin-bottom:1rem;letter-spacing:-.01em}
+    .section-subtitle{color:var(--muted);font-size:1.1rem;max-width:600px;margin:0 auto}
 
-        /* Mobile Top Bar */
-        .top-bar {
-            display: none; padding: 15px 20px; background: var(--bg); border-bottom: 1px solid var(--border); justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 50;
-        }
-        @media (max-width: 768px) {
-            .top-bar { display: flex; }
-        }
-        .hamburger { background: none; border: none; cursor: pointer; padding: 5px; }
-        .hamburger svg { width: 24px; height: 24px; stroke: var(--text); }
+    /* FEATURES */
+    .features{padding:6rem 2rem;background:var(--bg-secondary)}
+    .features-grid{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem}
+    .feature-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:2rem;transition:all .3s ease}
+    .feature-card:hover{transform:translateY(-4px);border-color:var(--accent)}
+    .feature-icon{width:56px;height:56px;background:linear-gradient(135deg,rgba(205,255,0,.12),rgba(255,140,66,.08));border-radius:14px;display:flex;align-items:center;justify-content:center;margin-bottom:1.5rem}
+    .feature-icon svg{width:28px;height:28px;stroke:var(--accent)}
+    .feature-title{font-size:1.2rem;font-weight:700;margin-bottom:.7rem}
+    .feature-desc{color:var(--muted);font-size:.95rem}
 
-        /* Page Container */
-        .page-container { display: none; animation: fadeIn 0.4s ease; }
-        .page-container.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    /* SERVICE CARDS */
+    .services-page{padding:4rem 2rem;max-width:1400px;margin:0 auto}
+    .service-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:2rem}
+    .service-card{background:var(--card);border:1px solid var(--border);border-radius:20px;overflow:hidden;transition:all .3s ease}
+    .service-card:hover{transform:translateY(-8px);box-shadow:0 20px 40px rgba(0,0,0,.4)}
+    .service-image{height:180px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;background:linear-gradient(135deg,rgba(205,255,0,.08),rgba(255,140,66,.04))}
+    .service-image::before{content:'';position:absolute;width:300px;height:300px;background:radial-gradient(circle,var(--accent-glow) 0%,transparent 70%);opacity:.15;animation:float 6s ease-in-out infinite}
+    .service-icon-box{width:80px;height:80px;position:relative;z-index:1}
+    .service-icon-box svg{width:100%;height:100%;stroke:var(--fg);stroke-width:1.5}
+    .service-content{padding:1.5rem 2rem 2rem}
+    .service-tag{display:inline-block;padding:.3rem .8rem;background:var(--accent-dim);color:var(--accent);border-radius:50px;font-size:.75rem;font-weight:600;margin-bottom:1rem}
+    .service-title{font-size:1.4rem;font-weight:800;margin-bottom:.7rem}
+    .service-desc{color:var(--muted);font-size:.95rem;margin-bottom:1.5rem;min-height:50px}
+    .service-features{display:flex;flex-wrap:wrap;gap:.5rem}
+    .svc-feat{padding:.4rem .8rem;background:var(--bg);border-radius:6px;font-size:.8rem;color:var(--fg);border:1px solid var(--border)}
 
-        /* --- STYLES FROM YOUR CODE (HOMEPAGE) --- */
-        .container { width: 100%; max-width: 800px; margin: 0 auto; padding: 0 20px; }
-        
-        /* Hero Section */
-        .hero { padding: 100px 0 60px; position: relative; }
-        .hero-content { position: relative; z-index: 2; }
-        .badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 50px; font-size: 12px; font-weight: 500; color: var(--accent); background: rgba(212, 102, 60, 0.1); margin-bottom: 20px; }
-        .badge::before { content: ''; width: 6px; height: 6px; background: var(--accent); border-radius: 50%; }
-        
-        h1 { font-size: 32px; font-weight: 700; line-height: 1.2; margin-bottom: 16px; }
-        h1 span { color: var(--accent); }
-        .desc { font-size: 16px; color: var(--muted); margin-bottom: 24px; max-width: 400px; }
-        
-        /* Tombol */
-        .btn {
-            display: inline-flex; align-items: center; gap: 8px;
-            padding: 12px 24px; border-radius: 50px; font-weight: 600;
-            font-size: 14px; border: none; cursor: pointer; transition: transform 0.2s;
-            text-decoration-color: none;
-        }
-        .btn:active { transform: scale(0.98); }
-        .btn-primary { background: var(--accent);
-        color: white; 
-          text-decoration: none;
-        }
-        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); margin-top: 10px; }
-        
-        /* Ilustrasi Sederhana */
-        .hero-img { margin-top: 40px; background: var(--card); border-radius: 20px; padding: 20px; border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0,0,0,0.03); }
-        .chat-bubble { padding: 12px; border-radius: 12px; margin-bottom: 10px; font-size: 14px; }
-        .chat-user { background: rgba(212, 102, 60, 0.05); color: var(--muted); }
-        .chat-admin { background: rgba(122, 158, 126, 0.1); color: var(--sage); font-weight: 500; display: flex; align-items: center; gap: 8px; }
-        
-        /* Statistik */
-        .stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin: 40px 0; }
-        .stat-box { text-align: center; padding: 20px 10px; background: var(--card); border-radius: 16px; border: 1px solid var(--border); }
-        .stat-num { font-size: 28px; font-weight: 700; color: var(--accent); font-family: 'Space Grotesk', sans-serif; }
-        .stat-label { font-size: 12px; color: var(--muted); margin-top: 4px; }
+    /* PORTFOLIO */
+    .portfolio-page{padding:4rem 2rem;max-width:1200px;margin:0 auto}
+    .port-tabs{display:flex;gap:.5rem;margin-bottom:2rem;border-bottom:1px solid var(--border);padding-bottom:1rem;overflow-x:auto}
+    .port-tab{padding:.6rem 1.2rem;background:transparent;border:1px solid transparent;color:var(--muted);font-family:inherit;font-size:.95rem;font-weight:600;border-radius:8px;cursor:pointer;white-space:nowrap;transition:all .25s ease}
+    .port-tab:hover{color:var(--fg);background:rgba(255,255,255,.04)}
+    .port-tab.active{background:var(--card);border-color:var(--border);color:var(--accent)}
+    .port-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1.5rem;margin-top:1.5rem}
+    .port-item{background:var(--bg);border:1px solid var(--border);border-radius:12px;overflow:hidden;transition:all .3s ease}
+    .port-item:hover{transform:translateY(-4px);border-color:var(--accent);box-shadow:0 15px 30px rgba(0,0,0,.3)}
+    .port-thumb{height:160px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+    .port-thumb-inner{width:100%;height:100%;display:flex;align-items:center;justify-content:center}
+    .port-info{padding:1.25rem}
+    .port-cat{font-size:.7rem;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:1px;margin-bottom:.4rem}
+    .port-name{font-weight:700;font-size:1rem;margin-bottom:.3rem}
+    .port-desc{color:var(--muted);font-size:.85rem}
 
-        /* Section Styles */
-        section { padding: 40px 0; }
-        .section-title { font-size: 24px; font-weight: 700; margin-bottom: 12px; }
-        .section-sub { color: var(--muted); font-size: 14px; margin-bottom: 24px; }
-        
-        .grid-team { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
-        .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; text-align: center; }
-        .avatar { width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, var(--accent-light), var(--sage-light)); margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-family: 'Space Grotesk', sans-serif; }
-        .card h4 { font-size: 14px; font-weight: 600; }
-        .card p { font-size: 12px; color: var(--muted); }
+    /* ABOUT PAGE */
+    .about-page{padding:4rem 2rem;max-width:1200px;margin:0 auto}
+    .about-grid{display:grid;grid-template-columns:1fr 1fr;gap:3rem;margin-bottom:3rem}
+    .about-text h3{font-size:1.3rem;margin-bottom:1rem;color:var(--accent)}
+    .about-text p{color:var(--muted);margin-bottom:1rem;line-height:1.8}
+    .info-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1.5rem}
+    .info-box{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:1.5rem}
+    .info-box h4{color:var(--accent);margin-bottom:.5rem;font-size:.8rem;text-transform:uppercase;letter-spacing:1px}
+    .info-box p{font-size:1.1rem;font-weight:600}
 
-        /* Footer */
-        footer { text-align: center; padding: 30px 20px; color: var(--muted); font-size: 12px; border-top: 1px solid var(--border); margin-top: 40px; background: var(--bg); }
+    /* TREE DIAGRAM */
+    .wiki-tree{margin-top:2rem}
+    .tree-root{list-style:none;padding-left:0}
+    .tree-root>li{font-size:1.2rem;font-weight:800;color:var(--accent);margin-bottom:1.5rem;padding-bottom:.5rem;border-bottom:1px solid var(--border)}
+    .tree-children{list-style:none;padding-left:25px;margin-top:1rem;position:relative}
+    .tree-children::before{content:'';position:absolute;left:8px;top:0;bottom:10px;width:2px;background:var(--border);border-radius:2px}
+    .tree-children li{position:relative;padding:8px 0 8px 25px;color:var(--fg);line-height:1.5}
+    .tree-children li::before{content:'';position:absolute;left:8px;top:18px;width:15px;height:2px;background:var(--border)}
+    .tree-children li::after{content:'';position:absolute;left:5px;top:15px;width:8px;height:8px;background:var(--accent);border-radius:50%;z-index:1}
+    .tree-children li strong{color:var(--accent);font-weight:700;margin-right:5px}
 
-        /* --- DASHBOARD PAGES STYLES --- */
-        .page-title { font-size: 22px; font-weight: 700; margin-bottom: 5px; padding-top: 20px; }
-        .page-subtitle { color: var(--muted); font-size: 14px; margin-bottom: 25px; }
-        
-        .grid-2 { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; }
-        .media-item { display: flex; align-items: center; gap: 15px; padding: 15px; background: rgba(122, 158, 126, 0.05); text-align: left; }
-        .media-icon { width: 40px; height: 40px; background: var(--sage-light); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: var(--sage); flex-shrink: 0; }
+    /* STAFF / TEAM */
+    .staff-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1.5rem;margin-top:2rem}
+    .staff-card{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:1.5rem;text-align:center;transition:all .2s ease}
+    .staff-card:hover{transform:translateY(-3px);border-color:rgba(205,255,0,.2)}
+    .staff-avatar{width:60px;height:60px;border-radius:50%;margin:0 auto 1rem;display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:800;color:var(--bg)}
+    .staff-name{font-weight:700;margin-bottom:.25rem}
+    .staff-role{font-size:.85rem;color:var(--accent)}
+    .btn-more-info{display:inline-flex;align-items:center;gap:.4rem;margin-top:1rem;padding:.5rem 1rem;background:var(--accent-dim);border:1px solid rgba(205,255,0,.2);color:var(--accent);font-family:inherit;font-size:.8rem;font-weight:600;border-radius:8px;cursor:pointer;transition:all .25s ease}
+    .btn-more-info:hover{background:rgba(205,255,0,.15);border-color:var(--accent);transform:translateY(-1px)}
+    .btn-more-info svg{width:14px;height:14px;stroke:currentColor;transition:transform .25s ease}
+    .btn-more-info:hover svg{transform:translateX(3px)}
 
-        /* FAB Button */
-        .fab-fixed {
-            position: fixed; bottom: 20px; right: 20px;
-            background: var(--sage); color: white;
-            width: 56px; height: 56px; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 4px 15px rgba(122, 158, 126, 0.3);
-            z-index: 50; cursor: pointer; border: none;
-        }
-        /* Hide FAB on curhat page */
-        body:has(#curhat.active) .fab-fixed { display: none; }
+    /* STAFF DETAIL */
+    .staff-detail-page{padding:2rem 2rem 4rem;max-width:900px;margin:0 auto;animation:fadeInUp .5s ease}
+    .staff-detail-back{display:inline-flex;align-items:center;gap:.5rem;padding:.6rem 1.2rem;background:var(--card);border:1px solid var(--border);color:var(--muted);font-family:inherit;font-size:.9rem;font-weight:600;border-radius:10px;cursor:pointer;transition:all .25s ease;margin-bottom:2rem}
+    .staff-detail-back:hover{color:var(--fg);border-color:var(--accent);background:var(--accent-dim)}
+    .staff-detail-back svg{width:18px;height:18px;stroke:currentColor}
+    .staff-detail-hero{background:var(--card);border:1px solid var(--border);border-radius:20px;overflow:hidden;margin-bottom:2rem}
+    .sd-hero-top{height:150px;background:linear-gradient(135deg,rgba(205,255,0,.12) 0%,rgba(255,140,66,.06) 50%,rgba(205,255,0,.03) 100%);position:relative;overflow:hidden}
+    .sd-hero-top::before{content:'';position:absolute;width:400px;height:400px;background:radial-gradient(circle,var(--accent-glow) 0%,transparent 70%);top:-200px;left:50%;transform:translateX(-50%);opacity:.3;animation:float 8s ease-in-out infinite}
+    .sd-hero-top::after{content:'';position:absolute;bottom:0;left:0;right:0;height:60px;background:linear-gradient(to top,var(--card),transparent)}
+    .sd-hero-body{padding:0 2rem 2rem;display:flex;align-items:flex-end;gap:1.5rem;margin-top:-50px;position:relative;z-index:1;flex-wrap:wrap}
+    .sd-avatar{width:100px;height:100px;border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:2.2rem;font-weight:900;color:var(--bg);border:4px solid var(--card);box-shadow:0 10px 30px rgba(0,0,0,.4);flex-shrink:0}
+    .sd-identity{flex:1;min-width:200px}
+    .sd-name{font-size:2rem;font-weight:900;line-height:1.2;margin-bottom:.25rem}
+    .sd-role-badge{display:inline-flex;align-items:center;gap:.4rem;padding:.35rem 1rem;border-radius:50px;font-size:.85rem;font-weight:600}
+    .sd-role-badge.owner{background:rgba(205,255,0,.1);border:1px solid rgba(205,255,0,.3);color:var(--accent)}
+    .sd-role-badge.lead{background:rgba(255,140,66,.1);border:1px solid rgba(255,140,66,.3);color:var(--warm)}
+    .sd-bio{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:1.75rem;margin-bottom:2rem}
+    .sd-bio h3{font-size:.85rem;font-weight:700;color:var(--accent);margin-bottom:.75rem;text-transform:uppercase;letter-spacing:1px}
+    .sd-bio p{color:var(--muted);line-height:1.8}
+    .sd-info-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;margin-bottom:2rem}
+    .sd-info-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.25rem}
+    .sd-info-label{font-size:.75rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:.4rem;display:flex;align-items:center;gap:.4rem}
+    .sd-info-label svg{width:14px;height:14px;stroke:var(--accent)}
+    .sd-info-value{font-size:1rem;font-weight:700}
+    .sd-info-value.acc{color:var(--accent)}
+    .sd-section{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:1.75rem;margin-bottom:2rem}
+    .sd-section h3{font-size:.85rem;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:1px;margin-bottom:1rem;display:flex;align-items:center;gap:.5rem}
+    .sd-section h3 svg{width:18px;height:18px;stroke:var(--accent)}
+    .sd-resp-list{list-style:none;display:flex;flex-direction:column;gap:.6rem}
+    .sd-resp-list li{display:flex;align-items:flex-start;gap:.75rem;padding:.6rem .75rem;background:var(--bg);border-radius:8px;font-size:.95rem;border:1px solid transparent;transition:border-color .2s ease}
+    .sd-resp-list li:hover{border-color:var(--border)}
+    .sd-resp-list li svg{width:16px;height:16px;stroke:var(--accent);flex-shrink:0;margin-top:3px}
+    .sd-tags{display:flex;flex-wrap:wrap;gap:.5rem}
+    .sd-tag{padding:.45rem 1rem;background:var(--bg);border:1px solid var(--border);border-radius:50px;font-size:.85rem;font-weight:600;transition:all .2s ease}
+    .sd-tag:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-dim)}
+    .sd-socials{display:flex;gap:.75rem;flex-wrap:wrap}
+    .sd-social-btn{display:inline-flex;align-items:center;gap:.5rem;padding:.6rem 1.25rem;background:var(--bg);border:1px solid var(--border);border-radius:10px;color:var(--fg);font-family:inherit;font-size:.9rem;font-weight:600;text-decoration:none;cursor:pointer;transition:all .25s ease}
+    .sd-social-btn:hover{border-color:var(--accent);color:var(--accent);transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,0,0,.2)}
+    .sd-social-btn svg{width:18px;height:18px;stroke:currentColor}
+    .staff-detail-empty{text-align:center;padding:4rem 2rem}
+    .staff-detail-empty svg{width:64px;height:64px;stroke:var(--muted);margin-bottom:1rem;opacity:.5}
+    .staff-detail-empty h3{font-size:1.25rem;margin-bottom:.5rem}
+    .staff-detail-empty p{color:var(--muted)}
 
-        /* Iframe for Curhat Page */
-        .iframe-box { height: 450px; width: 100%; background: #f5f5f5; border-radius: 10px; overflow: hidden; margin-top: 15px; }
-        iframe { width: 100%; height: 100%; border: none; }
-    </style>
+    /* ABOUT WIKI TABS */
+    .about-tabs{display:flex;gap:.5rem;margin-bottom:2rem;border-bottom:1px solid var(--border);padding-bottom:1rem;overflow-x:auto}
+    .about-tab{padding:.6rem 1.2rem;background:transparent;border:1px solid transparent;color:var(--muted);font-family:inherit;font-size:.95rem;font-weight:600;border-radius:8px;cursor:pointer;white-space:nowrap;transition:all .25s ease}
+    .about-tab:hover{color:var(--fg);background:rgba(255,255,255,.04)}
+    .about-tab.active{background:var(--card);border-color:var(--border);color:var(--accent)}
+    .about-tab-content{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:2rem}
+    .about-section{display:none}
+    .about-section.active{display:block;animation:fadeIn .3s ease}
+
+    /* FAQ */
+    .faq-item{border-bottom:1px solid var(--border);padding:1.25rem 0}
+    .faq-item:last-child{border-bottom:none}
+    .faq-question{font-weight:700;margin-bottom:.5rem;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+    .faq-question svg{width:18px;height:18px;stroke:var(--muted);transition:transform .3s ease;flex-shrink:0}
+    .faq-item.open .faq-question svg{transform:rotate(180deg)}
+    .faq-answer{color:var(--muted);max-height:0;overflow:hidden;transition:max-height .3s ease}
+    .faq-item.open .faq-answer{max-height:300px}
+
+    /* TESTIMONIALS */
+    .testimonials-page{padding:4rem 2rem;max-width:1200px;margin:0 auto}
+    .test-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:1.5rem}
+    .test-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:2rem;transition:all .3s ease;position:relative}
+    .test-card:hover{transform:translateY(-4px);border-color:rgba(205,255,0,.2)}
+    .test-stars{display:flex;gap:3px;margin-bottom:1rem}
+    .test-stars svg{width:18px;height:18px;fill:var(--accent)}
+    .test-text{color:var(--muted);font-size:.95rem;line-height:1.7;margin-bottom:1.5rem;font-style:italic}
+    .test-author{display:flex;align-items:center;gap:1rem}
+    .test-avatar{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1rem;color:var(--bg);flex-shrink:0}
+    .test-name{font-weight:700;font-size:.95rem}
+    .test-role{font-size:.8rem;color:var(--muted)}
+
+    /* PRICING */
+    .pricing-page{padding:4rem 2rem;max-width:1200px;margin:0 auto}
+    .pricing-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:2rem;align-items:start}
+    .price-card{background:var(--card);border:1px solid var(--border);border-radius:20px;overflow:hidden;transition:all .3s ease;position:relative}
+    .price-card:hover{transform:translateY(-6px);box-shadow:0 25px 50px rgba(0,0,0,.3)}
+    .price-card.highlighted{border-color:var(--accent);box-shadow:0 0 60px var(--accent-glow)}
+    .price-badge{position:absolute;top:1rem;right:1rem;padding:.3rem .8rem;border-radius:50px;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;z-index:2}
+    .price-badge.pop{background:var(--accent);color:var(--bg)}
+    .price-badge.best{background:var(--warm);color:var(--bg)}
+    .price-top{height:120px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+    .price-top::before{content:'';position:absolute;width:200px;height:200px;background:radial-gradient(circle,var(--accent-glow) 0%,transparent 70%);opacity:.2;animation:float 6s ease-in-out infinite}
+    .price-top-icon{width:56px;height:56px;position:relative;z-index:1}
+    .price-top-icon svg{width:100%;height:100%;stroke:var(--accent);stroke-width:1.5}
+    .price-body{padding:1.75rem}
+    .price-name{font-size:1.4rem;font-weight:800;margin-bottom:.5rem}
+    .price-desc{color:var(--muted);font-size:.9rem;margin-bottom:1.5rem}
+    .price-amount{font-size:2.5rem;font-weight:900;color:var(--accent);margin-bottom:.25rem}
+    .price-period{font-size:.85rem;color:var(--muted);margin-bottom:1.5rem}
+    .price-features{margin-bottom:1.75rem;display:flex;flex-direction:column;gap:.6rem}
+    .price-feat{display:flex;align-items:center;gap:.6rem;font-size:.9rem}
+    .price-feat svg{width:16px;height:16px;stroke:var(--accent);flex-shrink:0}
+    .price-feat.disabled{color:var(--muted)}
+    .price-feat.disabled svg{stroke:var(--muted)}
+    .btn-quote{width:100%;justify-content:center;padding:1rem;font-size:1rem}
+
+    /* CONTACT */
+    .contact-page{padding:4rem 2rem;max-width:1000px;margin:0 auto}
+    .contact-grid{display:grid;grid-template-columns:1fr 1.5fr;gap:3rem}
+    .contact-info-cards{display:flex;flex-direction:column;gap:1.25rem}
+    .ci-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.5rem;display:flex;align-items:center;gap:1rem;transition:all .25s ease}
+    .ci-card:hover{border-color:var(--accent);transform:translateX(4px)}
+    .ci-icon{width:48px;height:48px;background:var(--accent-dim);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .ci-icon svg{width:22px;height:22px;stroke:var(--accent)}
+    .ci-label{font-size:.8rem;color:var(--muted);margin-bottom:.2rem}
+    .ci-value{font-weight:700;font-size:1rem}
+    .contact-form{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:2rem}
+    .form-group{margin-bottom:1.25rem}
+    .form-group label{display:block;font-size:.85rem;font-weight:600;margin-bottom:.5rem;color:var(--fg)}
+    .form-group input,.form-group select,.form-group textarea{width:100%;padding:.75rem 1rem;background:var(--bg);border:1px solid var(--border);border-radius:10px;color:var(--fg);font-family:inherit;font-size:.95rem;transition:border-color .25s ease;outline:none}
+    .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--accent)}
+    .form-group textarea{min-height:120px;resize:vertical}
+    .form-group select option{background:var(--bg);color:var(--fg)}
+    .form-error{color:var(--danger);font-size:.8rem;margin-top:.3rem;display:none}
+    .form-success{display:none;background:rgba(205,255,0,.1);border:1px solid rgba(205,255,0,.3);color:var(--accent);padding:1rem;border-radius:10px;text-align:center;font-weight:600;margin-top:1rem}
+
+    /* BLOG */
+    .blog-page{padding:4rem 2rem;max-width:900px;margin:0 auto}
+    .blog-list{display:flex;flex-direction:column;gap:1.5rem}
+    .blog-card{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;transition:all .3s ease}
+    .blog-card:hover{border-color:rgba(205,255,0,.2)}
+    .blog-card-header{padding:1.5rem 2rem 0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem}
+    .blog-cat{padding:.3rem .8rem;background:var(--accent-dim);color:var(--accent);border-radius:50px;font-size:.75rem;font-weight:600}
+    .blog-date{color:var(--muted);font-size:.85rem}
+    .blog-card-body{padding:1rem 2rem 1.5rem}
+    .blog-card-title{font-size:1.2rem;font-weight:800;margin-bottom:.5rem}
+    .blog-card-excerpt{color:var(--muted);font-size:.9rem;line-height:1.6}
+    .blog-comments{padding:2rem;border-top:1px solid var(--border);margin-top:2rem}
+    .blog-comments h3{font-size:1.1rem;margin-bottom:1rem}
+
+    /* PROJECTS PAGE */
+    .projects-page{padding:4rem 2rem;max-width:1200px;margin:0 auto}
+    .project-list{display:flex;flex-direction:column;gap:2rem}
+    .project-card{background:var(--card);border:1px solid var(--border);border-radius:20px;overflow:hidden;transition:all .3s ease}
+    .project-card:hover{border-color:rgba(205,255,0,.15);box-shadow:0 20px 40px rgba(0,0,0,.3)}
+    .project-header{padding:2rem 2rem 0;display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;flex-wrap:wrap}
+    .project-title{font-size:1.4rem;font-weight:800}
+    .project-status{padding:.35rem 1rem;border-radius:50px;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;flex-shrink:0}
+    .project-status.ongoing{background:rgba(205,255,0,.12);color:var(--accent);border:1px solid rgba(205,255,0,.25)}
+    .project-status.completed{background:rgba(0,206,201,.12);color:var(--teal);border:1px solid rgba(0,206,201,.25)}
+    .project-status.planning{background:rgba(162,155,254,.12);color:var(--purple);border:1px solid rgba(162,155,254,.25)}
+    .project-body{padding:1rem 2rem 2rem}
+    .project-desc{color:var(--muted);margin-bottom:1.5rem;line-height:1.7}
+    .project-meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem;margin-bottom:1.5rem}
+    .project-meta-item{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:1rem}
+    .project-meta-label{font-size:.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:.3rem}
+    .project-meta-value{font-weight:700;font-size:.95rem}
+    .project-meta-value.acc{color:var(--accent)}
+    .project-tags{display:flex;flex-wrap:wrap;gap:.5rem}
+    .project-tag{padding:.4rem .9rem;background:var(--bg);border:1px solid var(--border);border-radius:50px;font-size:.8rem;font-weight:600;transition:all .2s ease}
+    .project-tag:hover{border-color:var(--accent);color:var(--accent)}
+
+    /* ANNOUNCEMENTS PAGE */
+    .announcements-page{padding:4rem 2rem;max-width:900px;margin:0 auto}
+    .ann-list{display:flex;flex-direction:column;gap:1.5rem}
+    .ann-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:2rem;transition:all .3s ease;position:relative;overflow:hidden}
+    .ann-card:hover{border-color:rgba(205,255,0,.15)}
+    .ann-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;border-radius:0 4px 4px 0}
+    .ann-card.important::before{background:var(--danger)}
+    .ann-card.update::before{background:var(--accent)}
+    .ann-card.info::before{background:var(--teal)}
+    .ann-card.event::before{background:var(--warm)}
+    .ann-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:.5rem}
+    .ann-type{padding:.3rem .8rem;border-radius:50px;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+    .ann-type.important{background:rgba(255,71,87,.12);color:var(--danger)}
+    .ann-type.update{background:rgba(205,255,0,.12);color:var(--accent)}
+    .ann-type.info{background:rgba(0,206,201,.12);color:var(--teal)}
+    .ann-type.event{background:rgba(255,140,66,.12);color:var(--warm)}
+    .ann-date{color:var(--muted);font-size:.85rem}
+    .ann-title{font-size:1.2rem;font-weight:800;margin-bottom:.75rem}
+    .ann-body{color:var(--muted);line-height:1.7;font-size:.95rem}
+    .ann-body ul{list-style:none;margin-top:.75rem;display:flex;flex-direction:column;gap:.4rem}
+    .ann-body li{padding-left:1.25rem;position:relative}
+    .ann-body li::before{content:'';position:absolute;left:0;top:.55rem;width:6px;height:6px;background:var(--accent);border-radius:50%}
+
+    /* QUOTE MODAL */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.88);backdrop-filter:blur(10px);z-index:2000;display:none;align-items:center;justify-content:center;padding:1rem;opacity:0;transition:opacity .3s ease}
+    .modal-overlay.active{display:flex;opacity:1}
+    .modal-quote{background:var(--card);border:1px solid var(--border);border-radius:20px;width:100%;max-width:520px;max-height:85vh;overflow-y:auto;transform:scale(.95);transition:transform .3s ease;padding:2.5rem}
+    .modal-overlay.active .modal-quote{transform:scale(1)}
+    .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem}
+    .modal-header h3{font-weight:800;font-size:1.3rem}
+    .modal-close{background:none;border:none;color:var(--muted);cursor:pointer;padding:.5rem;transition:color .25s ease;display:flex;align-items:center;justify-content:center}
+    .modal-close:hover{color:var(--fg)}
+    .modal-close svg{width:24px;height:24px}
+
+    /* FOOTER */
+    .footer{background:var(--bg-secondary);border-top:1px solid var(--border);padding:3rem 2rem;margin-top:4rem}
+    .footer-inner{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:2fr 1fr 1fr;gap:3rem}
+    .footer-brand p{color:var(--muted);margin-top:1rem;font-size:.95rem}
+    .footer-title{font-weight:700;margin-bottom:1rem}
+    .footer-links{list-style:none;display:flex;flex-direction:column;gap:.75rem}
+    .footer-links a{color:var(--muted);text-decoration:none;transition:color .25s ease}
+    .footer-links a:hover{color:var(--accent)}
+    .footer-bottom{max-width:1200px;margin:0 auto;padding-top:2rem;margin-top:2rem;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:.9rem}
+
+    /* ANIMATIONS */
+    @keyframes fadeInUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+    @keyframes float{0%,100%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(-50%,-50%) scale(1.2)}}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .reveal{opacity:0;transform:translateY(30px);transition:all .6s ease}
+    .reveal.visible{opacity:1;transform:translateY(0)}
+
+    /* RESPONSIVE */
+    @media(max-width:900px){
+        .hero-content{grid-template-columns:1fr;gap:3rem}
+        .hero-visual{order:-1}
+        .stats-grid{grid-template-columns:repeat(2,1fr)}
+        .stat-card.featured{grid-column:span 2}
+        .footer-inner{grid-template-columns:1fr;gap:2rem}
+        .footer-bottom{flex-direction:column;gap:1rem;text-align:center}
+        .about-grid{grid-template-columns:1fr}
+        .contact-grid{grid-template-columns:1fr}
+        .pricing-grid{grid-template-columns:1fr}
+    }
+    @media(max-width:768px){
+        .nav{padding:.75rem 1rem}
+        .nav-links{position:fixed;top:60px;left:0;right:0;background:rgba(10,10,10,.98);backdrop-filter:blur(20px);flex-direction:column;padding:1rem;gap:.25rem;border-bottom:1px solid var(--border);transform:translateY(-100%);opacity:0;pointer-events:none;transition:all .3s ease}
+        .nav-links.open{transform:translateY(0);opacity:1;pointer-events:all}
+        .mobile-toggle{display:block}
+        .mobile-toggle.open span:nth-child(1){transform:rotate(45deg) translate(5px,5px)}
+        .mobile-toggle.open span:nth-child(2){opacity:0}
+        .mobile-toggle.open span:nth-child(3){transform:rotate(-45deg) translate(5px,-5px)}
+        .hero{padding:1.5rem}
+        .hero-title{font-size:2.2rem}
+        .hero-actions{flex-direction:column}
+        .btn{justify-content:center}
+        .stats-grid{grid-template-columns:1fr}
+        .stat-card.featured{grid-column:span 1}
+        .sd-hero-body{flex-direction:column;align-items:center;text-align:center}
+        .sd-avatar{width:80px;height:80px;font-size:1.8rem}
+        .sd-info-grid{grid-template-columns:1fr}
+        .test-grid,.service-grid,.port-grid,.project-meta{grid-template-columns:1fr}
+        .project-header{flex-direction:column}
+    }
+    @media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+    a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+    *{-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+    input,textarea,select{-webkit-user-select:text;user-select:text}
+  </style>
 </head>
 <body>
+  <canvas id="particles"></canvas>
+  <div class="bg-canvas"></div>
 
-    <!-- Overlay for Mobile Sidebar -->
-    <div class="overlay-bg" id="overlayBg" onclick="toggleSidebar()"></div>
+  <nav class="nav" role="navigation" aria-label="Main navigation">
+    <div class="nav-inner">
+      <a href="/home" class="logo" data-page="home">
+        <div class="logo-icon"><svg viewBox="0 0 24 24"><path d="M13 2L4 14h7l-2 8 9-12h-7l2-8z"/></svg></div>
+        <div><div>Pemantik</div><div class="logo-text-sub">Media Division</div></div>
+      </a>
+      <div class="nav-links" id="navLinks">
+        <a href="/home" class="nav-link active" data-page="home">Home</a>
+        <a href="/services" class="nav-link" data-page="services">Services</a>
+        <a href="/portfolio" class="nav-link" data-page="portfolio">Portfolio</a>
+        <a href="/projects" class="nav-link" data-page="projects">Projects</a>
+        <a href="/about" class="nav-link" data-page="about">About</a>
+        <a href="/testimonials" class="nav-link" data-page="testimonials">Testimonials</a>
+        <a href="/pricing" class="nav-link" data-page="pricing">Pricing</a>
+        <a href="/contact" class="nav-link" data-page="contact">Contact</a>
+        <a href="/blog" class="nav-link" data-page="blog">Blog</a>
+        <a href="/announcements" class="nav-link" data-page="announcements">Announcements</a>
+      </div>
+      <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+    </div>
+  </nav>
 
-    <!-- SIDEBAR -->
-    <aside class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <div class="logo-img"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/></svg></div>
-            <div class="logo-text">PEMANTIK</div>
-        </div>
+  <main class="pages">
+    <!-- STAFF DETAIL PAGE -->
+    <section class="page" id="staff-detail"><div class="staff-detail-page" id="staffDetailContent"></div></section>
 
-        <nav class="nav-menu">
-            <div class="nav-section-title">Menu Utama</div>
-            <a class="nav-link active" onclick="showPage('beranda')">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-                Beranda
-            </a>
-            <a class="nav-link" onclick="showPage('tentang')">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-                Tentang Kami
-            </a>
-            
-            <div class="nav-section-title">Struktur</div>
-            <a class="nav-link" onclick="showPage('anggota')">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                Anggota
-            </a>
-            <a class="nav-link" onclick="showPage('guru')">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                Guru Pembina
-            </a>
-            <a class="nav-link" onclick="showPage('media')">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-                Divisi Media
-            </a>
-
-            <div class="nav-section-title">Lainnya</div>
-            <a class="nav-link" onclick="showPage('aplikasi')">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
-                Aplikasi
-            </a>
-            <a class="nav-link" onclick="showPage('curhat')" style="color: var(--accent);">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                Curhat
-            </a>
-        </nav>
-    </aside>
-
-    <!-- MAIN CONTENT -->
-    <main class="main-content">
-        <!-- Mobile Top Bar -->
-        <div class="top-bar">
-            <button class="hamburger" onclick="toggleSidebar()">
-                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-            </button>
-            <span style="font-weight:600;">PEMANTIK</span>
-            <div style="width:24px;"></div>
-        </div>
-
-        <!-- PAGE: BERANDA (YOUR CUSTOM CODE) -->
-        <div id="beranda" class="page-container active">
-            <!-- Hero Section -->
-            <section class="hero">
-                <div class="container">
-                    <div class="hero-content">
-                        <div class="badge">Siap Membantu 24/7</div>
-                        <h1>Kamu Tidak <br><span>Sendirian</span></h1>
-                        <p class="desc">Tempat aman untuk bercerita tanpa takut dihakimi. Kami siap mendengarkan setiap ceritamu dengan penuh empati.</p>
-                        
-                        <!-- Tombol diarahkan ke fungsi showPage('curhat') -->
-                        <button class="btn btn-primary" onclick="showPage('curhat')">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                            Mulai Curhat
-                        </button>
-                        <button class="btn btn-outline" onclick="showPage('tentang')">Pelajari Dulu</button>
-                    </div>
-
-                    <div class="hero-img">
-                        <div class="chat-bubble chat-user">"Aku merasa diejek teman-temanku, tapi aku takut melapor..."</div>
-                        <div class="chat-bubble chat-admin">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/></svg>
-                            Kami di sini untukmu. Ceritakan saja...
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Stats -->
-            <div class="container">
-                <div class="stats">
-                    <div class="stat-box"><div class="stat-num">247+</div><div class="stat-label">Teman Terbantu</div></div>
-                    <div class="stat-box"><div class="stat-num">12</div><div class="stat-label">Relawan</div></div>
-                    <div class="stat-box"><div class="stat-num">100%</div><div class="stat-label">Rahasia</div></div>
-                    <div class="stat-box"><div class="stat-num">24</div><div class="stat-label">Jam Aktif</div></div>
-                </div>
+    <!-- HOME -->
+    <section class="page active" id="home">
+      <div class="hero">
+        <div class="hero-content">
+          <div class="hero-text">
+            <div class="hero-badge"><span class="badge-dot"></span>Creative Media Agency</div>
+            <h1 class="hero-title">We Spark Ideas Into <span>Powerful Content</span></h1>
+            <p class="hero-desc">Pemantik Media Division mengubah visi kreatif kamu menjadi konten yang menginspirasi, menggerakkan, dan memberikan dampak nyata.</p>
+            <div class="hero-actions">
+              <a href="/pricing" class="btn btn-primary" data-page="pricing"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 00-3-3l-4 9v11h11.28a2 2 0 002-1.7l1.38-9a2 2 0 00-2-2.3zM7 22H4a2 2 0 01-2-2v-7a2 2 0 012-2h3"/></svg>Lihat Paket Harga</a>
+              <a href="/portfolio" class="btn btn-secondary" data-page="portfolio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>Portfolio Kami</a>
             </div>
-
-            <!-- Tentang -->
-            <section id="tentang-preview">
-                <div class="container">
-                    <h2 class="section-title">Apa itu PEMANTIK?</h2>
-                    <p class="section-sub">Kami adalah organisasi peer support yang siap menjadi teman curhatmu dalam menghadapi masalah bullying atau masalah pribadi lainnya.</p>
-                </div>
-            </section>
-
-            <!-- Tim Preview -->
-            <section id="tim-preview">
-                <div class="container">
-                    <h2 class="section-title">Teman Curhatmu</h2>
-                    <div class="grid-team">
-                        <div class="card">
-                            <div class="avatar">R</div>
-                            <h4></h4>
-                            <p>Koordinator</p>
-                        </div>
-                        <div class="card">
-                            <div class="avatar">D</div>
-                            <h4></h4>
-                            <p>Konselor</p>
-                        </div>
-                        <div class="card">
-                            <div class="avatar">S</div>
-                            <h4></h4>
-                            <p>Mediator</p>
-                        </div>
-                        <div class="card">
-                            <div class="avatar">B</div>
-                            <h4></h4>
-                            <p>Support</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <footer>
-                &copy; 2026 PEMANTIK. Dibuat dengan kasih untuk kesehatan mentalmu.
-            </footer>
-        </div>
-
-        <!-- PAGE: TENTANG -->
-        <div id="tentang" class="page-container">
-            <div class="container">
-                <h1 class="page-title">Tentang Kami</h1>
-                <p class="page-subtitle">Kenali lebih dekat organisasi Pemantik.</p>
-                
-                <div class="card" style="text-align:left;">
-                    <h3 style="font-size:16px; margin-bottom:8px;">Apa itu PEMANTIK?</h3>
-                    <p style="font-size:14px; color:var(--muted);">
-                        Pemantik adalah organisasi peer support (pendukung sebaya) di lingkungan sekolah yang bertujuan memberikan ruang aman bagi siswa yang mengalami perundungan (bullying) atau masalah pribadi.
-                    </p>
-                </div>
-                <div class="card" style="text-align:left;">
-                    <h3 style="font-size:16px; margin-bottom:8px;">Visi & Misi</h3>
-                    <ul style="font-size:14px; color:var(--muted); padding-left:20px;">
-                        <li>Menciptakan lingkungan sekolah yang aman dan nyaman.</li>
-                        <li>Menjadi wadah curhat yang terpercaya dan rahasia.</li>
-                        <li>Memberikan edukasi pencegahan bullying.</li>
-                    </ul>
-                </div>
+          </div>
+          <div class="hero-visual">
+            <div class="stats-grid">
+              <div class="stat-card featured">
+                <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+                <div class="stat-value">50+</div>
+                <div class="stat-label">Proyek Selesai</div>
+                <div class="status-indicator"><span class="status-dot"></span><span>Available for New Projects</span></div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg></div>
+                <div class="stat-value">30+</div>
+                <div class="stat-label">Klien Puas</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+                <div class="stat-value">4.9/5</div>
+                <div class="stat-label">Rating Klien</div>
+              </div>
             </div>
+          </div>
         </div>
+      </div>
+      <section class="features">
+        <div class="section-header reveal"><h2 class="section-title">Kenapa Memilih Kami</h2><p class="section-subtitle">Kombinasi kreativitas, strategi, dan eksekusi yang menghasilkan konten luar biasa.</p></div>
+        <div class="features-grid">
+          <div class="feature-card reveal"><div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L4 14h7l-2 8 9-12h-7l2-8z"/></svg></div><h3 class="feature-title">Ide Segar</h3><p class="feature-desc">Setiap proyek dimulai dari brainstorming mendalam untuk menemukan sudut pandang unik yang membedakan kontenmu.</p></div>
+          <div class="feature-card reveal"><div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><h3 class="feature-title">Tepat Waktu</h3><p class="feature-desc">Deadline adalah prioritas. Kami berkomitmen menyelesaikan setiap proyek sesuai timeline yang disepakati.</p></div>
+          <div class="feature-card reveal"><div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10M18 20V4M6 20v-4"/></svg></div><h3 class="feature-title">Data-Driven</h3><p class="feature-desc">Setiap keputusan kreatif didukung oleh data dan analisis. Kami membuat konten yang terukur hasilnya.</p></div>
+          <div class="feature-card reveal"><div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg></div><h3 class="feature-title">Full Service</h3><p class="feature-desc">Dari konsep hingga distribusi, kami handle semuanya. Kamu fokus pada bisnismu, biar kami urus kontennya.</p></div>
+          <div class="feature-card reveal"><div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg></div><h3 class="feature-title">Tim Kolaboratif</h3><p class="feature-desc">Setiap proyek dikerjakan oleh tim multidisiplin — desainer, penulis, videografer, dan strategist.</p></div>
+        </div>
+      </section>
+    </section>
 
-        <!-- PAGE: ANGGOTA -->
-        <div id="anggota" class="page-container">
-            <div class="container">
-                <h1 class="page-title">Anggota Inti</h1>
-                <p class="page-subtitle">Teman-temanmu yang siap mendengarkan.</p>
-                
-                <div class="grid-team">
-                    <div class="card">
-                        <div class="avatar">R</div>
-                        <div class="member-name"></div>
-                        <div class="member-role">Ketua</div>
-                    </div>
-                    <div class="card">
-                        <div class="avatar">D</div>
-                        <div class="member-name"></div>
-                        <div class="member-role"> Ketua</div>
-                    </div>
-                    <div class="card">
-                        <div class="avatar">S</div>
-                        <div class="member-name"></div>
-                        <div class="member-role">Konselor</div>
-                    </div>
-                    <div class="card">
-                        <div class="avatar">B</div>
-                        <div class="member-name"></div>
-                        <div class="member-role">Konselor</div>
-                    </div>
-                    <div class="card">
-                        <div class="avatar">A</div>
-                        <div class="member-name"></div>
-                        <div class="member-role">Mediator</div>
-                    </div>
-                    <div class="card">
-                        <div class="avatar">F</div>
-                        <div class="member-name"></div>
-                        <div class="member-role">Mediator</div>
-                    </div>
-                </div>
+    <!-- SERVICES -->
+    <section class="page" id="services">
+      <div class="services-page">
+        <div class="section-header"><h1 class="section-title">Layanan Kami</h1><p class="section-subtitle">Solusi media kreatif yang komprehensif untuk membangun brandmu.</p></div>
+        <div class="service-grid" id="serviceGrid"></div>
+      </div>
+    </section>
+
+    <!-- PORTFOLIO -->
+    <section class="page" id="portfolio">
+      <div class="portfolio-page">
+        <div class="section-header"><h1 class="section-title">Portfolio</h1><p class="section-subtitle">Karya-karya terbaik yang telah kami hasilkan untuk klien kami.</p></div>
+        <div class="port-tabs" id="portTabs"></div>
+        <div class="port-grid" id="portGrid"></div>
+      </div>
+    </section>
+
+    <!-- PROJECTS -->
+    <section class="page" id="projects">
+      <div class="projects-page">
+        <div class="section-header"><h1 class="section-title">Proyek Aktif</h1><p class="section-subtitle">Pantau progress proyek-proyek yang sedang dan telah kami kerjakan.</p></div>
+        <div class="project-list" id="projectList"></div>
+      </div>
+    </section>
+
+    <!-- ABOUT -->
+    <section class="page" id="about">
+      <div class="about-page">
+        <div class="section-header"><h1 class="section-title">Tentang Kami</h1><p class="section-subtitle">Mengenal lebih dekat Pemantik Media Division.</p></div>
+        <div class="about-tabs" id="aboutTabs">
+          <button class="about-tab active" data-tab="how-it-works">Bagaimana Kami Bekerja</button>
+          <button class="about-tab" data-tab="data-security">Keamanan Data</button>
+          <button class="about-tab" data-tab="staff">Tim Kami</button>
+          <button class="about-tab" data-tab="faq">FAQ</button>
+        </div>
+        <div class="about-tab-content">
+          <div class="about-section active" id="how-it-works">
+            <h3 style="margin-bottom:.5rem;font-size:1.1rem">Proses Kerja Kami</h3>
+            <p style="color:var(--muted);margin-bottom:1rem">Transparansi adalah fondasi setiap proyek yang kami kerjakan.</p>
+            <div class="wiki-tree">
+              <ul class="tree-root">
+                <li>Alur Proyek Standar
+                  <ul class="tree-children">
+                    <li><strong>(1)</strong> Discovery — Memahami brand, target audiens, dan tujuan bisnismu melalui sesi diskusi mendalam.</li>
+                    <li><strong>(2)</strong> Strategy — Merancang strategi konten yang terukur, relevan, dan selaras dengan identitas brand.</li>
+                    <li><strong>(3)</strong> Creation — Produksi konten dengan standar kualitas tinggi oleh tim profesional kami.</li>
+                    <li><strong>(4)</strong> Review — Kamu review hasilnya, kami revisi hingga kamu 100% puas.</li>
+                    <li><strong>(5)</strong> Delivery — Konten final siap dipublikasikan sesuai timeline yang telah disepakati.</li>
+                  </ul>
+                </li>
+              </ul>
             </div>
-        </div>
-
-        <!-- PAGE: GURU -->
-        <div id="guru" class="page-container">
-            <div class="container">
-                <h1 class="page-title">Guru Pembina</h1>
-                <p class="page-subtitle">Dosen dan guru yang membimbing Pemantik.</p>
-                
-                <div class="card media-item">
-                    <div class="avatar" style="font-size:16px;">BK</div>
-                    <div style="text-align:left;">
-                        <div class="member-name"></div>
-                        <div class="member-role">Guru BK & Pembina Utama</div>
-                    </div>
-                </div>
-                <div class="card media-item">
-                    <div class="avatar" style="font-size:16px;">PK</div>
-                    <div style="text-align:left;">
-                        <div class="member-name"></div>
-                        <div class="member-role">Pembina Pendamping</div>
-                    </div>
-                </div>
+          </div>
+          <div class="about-section" id="data-security">
+            <h3 style="margin-bottom:.5rem;font-size:1.1rem">Keamanan Data Klien</h3>
+            <p style="color:var(--muted);margin-bottom:1rem">Kami menganggap keamanan data klien sebagai prioritas utama.</p>
+            <div class="wiki-tree">
+              <ul class="tree-root">
+                <li>Kebijakan Keamanan
+                  <ul class="tree-children">
+                    <li><strong>(1)</strong> Semua data klien dienkripsi dan disimpan secara aman di server yang terproteksi.</li>
+                    <li><strong>(2)</strong> Kami tidak pernah membagikan, menjual, atau menyewakan data klien ke pihak ketiga.</li>
+                    <li><strong>(3)</strong> NDA (Non-Disclosure Agreement) tersedia untuk proyek-proyek yang bersifat sensitif.</li>
+                    <li><strong>(4)</strong> Akses data dibatasi hanya untuk anggota tim yang terkait dengan proyek bersangkutan.</li>
+                    <li><strong>(5)</strong> Setiap sesi kerja menggunakan komunikasi terenkripsi end-to-end.</li>
+                  </ul>
+                </li>
+              </ul>
             </div>
+          </div>
+          <div class="about-section" id="staff">
+            <h3 style="margin-bottom:.5rem;font-size:1.1rem">Tim Kami</h3>
+            <p style="color:var(--muted);margin-bottom:1rem">Orang-orang di balik setiap karya.</p>
+            <div class="staff-grid" id="staffGrid"></div>
+          </div>
+          <div class="about-section" id="faq">
+            <h3 style="margin-bottom:1rem;font-size:1.1rem">Frequently Asked Questions</h3>
+            <div id="faqContainer"></div>
+          </div>
         </div>
+      </div>
+    </section>
 
-        <!-- PAGE: MEDIA -->
-        <div id="media" class="page-container">
-            <div class="container">
-                <h1 class="page-title">Divisi Media</h1>
-                <p class="page-subtitle">Kelola konten dan kreativitas.</p>
-                
-                <div class="card media-item">
-                    <div class="media-icon">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-                    </div>
-                    <div style="text-align:left;">
-                        <div class="member-name">Desain Grafis</div>
-                        <div class="member-role">Membuat poster & konten visual.</div>
-                    </div>
-                </div>
-                <div class="card media-item">
-                    <div class="media-icon">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
-                    </div>
-                    <div style="text-align:left;">
-                        <div class="member-name">Video & Fotografi</div>
-                        <div class="member-role">Dokumentasi kegiatan.</div>
-                    </div>
-                </div>
-            </div>
+    <!-- TESTIMONIALS -->
+    <section class="page" id="testimonials">
+      <div class="testimonials-page">
+        <div class="section-header"><h1 class="section-title">Testimoni Klien</h1><p class="section-subtitle">Apa kata mereka tentang bekerja sama dengan Pemantik Media Division.</p></div>
+        <div class="test-grid" id="testGrid"></div>
+      </div>
+    </section>
+
+    <!-- PRICING -->
+    <section class="page" id="pricing">
+      <div class="pricing-page">
+        <div class="section-header"><h1 class="section-title">Paket Harga</h1><p class="section-subtitle">Pilih paket yang sesuai dengan kebutuhan dan budgetmu. Semua paket bisa dikustomisasi.</p></div>
+        <div class="pricing-grid" id="pricingGrid"></div>
+      </div>
+    </section>
+
+    <!-- CONTACT -->
+    <section class="page" id="contact">
+      <div class="contact-page">
+        <div class="section-header"><h1 class="section-title">Hubungi Kami</h1><p class="section-subtitle">Punya proyek atau pertanyaan? Kami siap membantu.</p></div>
+        <div class="contact-grid">
+          <div class="contact-info-cards">
+            <div class="ci-card"><div class="ci-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div><div><div class="ci-label">Email</div><div class="ci-value">pemantikmedia@gmail.com</div></div></div>
+            <div class="ci-card"><div class="ci-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div><div><div class="ci-label">Discord</div><div class="ci-value">pemantikmedia</div></div></div>
+            <div class="ci-card"><div class="ci-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg></div><div><div class="ci-label">Instagram</div><div class="ci-value">@pemantikmedia</div></div></div>
+            <div class="ci-card"><div class="ci-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22.54 6.42a2.78 2.78 0 00-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 00-1.94 2A29 29 0 001 11.75a29 29 0 00.46 5.33A2.78 2.78 0 003.4 19.1c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 001.94-2 29 29 0 00.46-5.25 29 29 0 00-.46-5.43z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"/></svg></div><div><div class="ci-label">YouTube</div><div class="ci-value">Pemantik Media</div></div></div>
+          </div>
+          <div class="contact-form">
+            <h3 style="font-size:1.2rem;font-weight:800;margin-bottom:1.5rem">Kirim Pesan</h3>
+            <div class="form-group"><label for="cf-name">Nama Lengkap</label><input type="text" id="cf-name" placeholder="Masukkan namamu"><div class="form-error" id="err-name">Nama wajib diisi</div></div>
+            <div class="form-group"><label for="cf-email">Email</label><input type="email" id="cf-email" placeholder="email@contoh.com"><div class="form-error" id="err-email">Email tidak valid</div></div>
+            <div class="form-group"><label for="cf-service">Layanan yang Diminati</label><select id="cf-service"><option value="">Pilih layanan...</option><option>Content Creation</option><option>Social Media Management</option><option>Graphic Design</option><option>Video Production</option><option>Brand Strategy</option><option>Web Development</option><option>Lainnya</option></select></div>
+            <div class="form-group"><label for="cf-msg">Pesan</label><textarea id="cf-msg" placeholder="Ceritakan tentang proyekmu..."></textarea><div class="form-error" id="err-msg">Pesan wajib diisi (min. 10 karakter)</div></div>
+            <button class="btn btn-primary btn-quote" id="cf-submit" type="button"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>Kirim Pesan</button>
+            <div class="form-success" id="form-success">Pesanmu berhasil dikirim! Kami akan menghubungimu dalam 1x24 jam.</div>
+          </div>
         </div>
+      </div>
+    </section>
 
-        <!-- PAGE: APLIKASI -->
-        <div id="aplikasi" class="page-container">
-            <div class="container">
-                <h1 class="page-title">Aplikasi Pemantik</h1>
-                <p class="page-subtitle">Platform digital untuk membantumu.</p>
-                
-                <div class="card" style="text-align:center; padding:30px;">
-                    <div style="font-size:40px; margin-bottom:10px;">📱</div>
-                    <h3 style="font-size:16px; margin-bottom:5px;">Versi Mobile App</h3>
-                    <p style="font-size:13px; color:var(--muted); margin-bottom:15px;">Tersedia di Github</p>
-                    <a href="https://github.com/NeedFriend0998/Pemantik49App.apk/releases/download/V2.0-Rebuilt/PemantikAppRebuilt.3.apk https://github.com"  class="btn btn-primary" style="width:100%;">Download</a>
-                </div>
-            </div>
+    <!-- BLOG -->
+    <section class="page" id="blog">
+      <div class="blog-page">
+        <div class="section-header"><h1 class="section-title">Blog & Insights</h1><p class="section-subtitle">Tips, tren, dan pemikiran dari tim kami tentang dunia media kreatif.</p></div>
+        <div class="blog-list" id="blogList"></div>
+        <div class="blog-comments" id="blogComments"><h3>Leave a Comment</h3><div class="commentbox" style="margin-top:1rem"></div></div>
+        <script src="https://unpkg.com/commentbox.io/dist/commentBox.min.js"></script>
+      </div>
+    </section>
+
+    <!-- ANNOUNCEMENTS -->
+    <section class="page" id="announcements">
+      <div class="announcements-page">
+        <div class="section-header"><h1 class="section-title">Informasi & Announcement</h1><p class="section-subtitle">Update terbaru, pengumuman penting, dan informasi seputar Pemantik Media Division.</p></div>
+        <div class="ann-list" id="annList"></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- QUOTE MODAL -->
+  <div class="modal-overlay" id="quoteModal">
+    <div class="modal-quote">
+      <div class="modal-header"><h3 id="modalTitle">Request Quote</h3><button class="modal-close" id="closeModal" aria-label="Close modal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+      <div id="modalBody">
+        <p style="color:var(--muted);margin-bottom:1.5rem">Isi form di bawah untuk mendapatkan penawaran harga.</p>
+        <div class="form-group"><label>Nama</label><input type="text" id="mq-name" placeholder="Namamu"></div>
+        <div class="form-group"><label>Email</label><input type="email" id="mq-email" placeholder="email@contoh.com"></div>
+        <div class="form-group"><label>Paket</label><input type="text" id="mq-package" readonly style="color:var(--accent)"></div>
+        <div class="form-group"><label>Catatan</label><textarea id="mq-note" placeholder="Kebutuhan khusus atau pertanyaan..." style="min-height:80px"></textarea></div>
+        <button class="btn btn-primary btn-quote" id="mq-submit" type="button">Kirim Request</button>
+        <div class="form-success" id="mq-success">Request terkirim! Kami akan segera menghubungimu.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <a href="/home" class="logo" data-page="home"><div class="logo-icon"><svg viewBox="0 0 24 24"><path d="M13 2L4 14h7l-2 8 9-12h-7l2-8z"/></svg></div><div><div>Pemantik</div><div class="logo-text-sub">Media Division</div></div></a>
+        <p>Memantik ide brilianmu menjadi karya yang menginspirasi dan memberikan dampak nyata.</p>
+      </div>
+      <div><h4 class="footer-title">Navigasi</h4><ul class="footer-links"><li><a href="/home" data-page="home">Home</a></li><li><a href="/services" data-page="services">Services</a></li><li><a href="/portfolio" data-page="portfolio">Portfolio</a></li><li><a href="/projects" data-page="projects">Projects</a></li><li><a href="/about" data-page="about">About</a></li><li><a href="/pricing" data-page="pricing">Pricing</a></li><li><a href="/contact" data-page="contact">Contact</a></li></ul></div>
+      <div><h4 class="footer-title">Connect</h4><ul class="footer-links"><li><a href="https://www.instagram.com/bismasyafif/?utm_source=qr&r=nametag" target="_blank" rel="noopener">Instagram</a></li><li><a href="https://youtube.com/@needfriend2?si=fLuu8Z8mRetJhIrU" target="_blank" rel="noopener">YouTube</a></li><li><a href="#">TikTok</a></li><li><a href="#">Discord</a></li></ul></div>
+    </div>
+    <div class="footer-bottom"><span>2024 - 2026 Pemantik Media Division. All rights reserved.</span><span>Spark Your Vision</span></div>
+  </footer>
+
+  <script>
+    // ==================== DATA ====================
+    const services = [
+      { name:"Content Creation", tag:"Strategy & Copy", desc:"Membuat konten yang engaging dan relevan untuk berbagai platform — dari caption media sosial hingga artikel blog yang mendalam.", features:["Copywriting","Content Calendar","SEO Writing","Storytelling","Caption & Hashtag"], icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>' },
+      { name:"Social Media Management", tag:"Growth & Engagement", desc:"Mengelola seluruh aspek media sosialmu — dari perencanaan konten hingga analisis performa dan community management.", features:["Account Management","Scheduling","Analytics Report","Community Management","Trend Monitoring"], icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>' },
+      { name:"Graphic Design", tag:"Visual Identity", desc:"Desain grafis yang memukau untuk branding, marketing materials, dan kebutuhan visual lainnya.", features:["Logo Design","Brand Identity","Social Media Graphics","Print Materials","Presentation Design"], icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>' },
+      { name:"Video Production", tag:"Motion & Edit", desc:"Produksi video dari konsep hingga final render — termasuk editing, motion graphics, dan short-form content.", features:["Video Editing","Motion Graphics","Short-form Content","Color Grading","Sound Design"], icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>' },
+      { name:"Brand Strategy", tag:"Positioning & Identity", desc:"Merancang strategi brand yang kuat dan konsisten — dari positioning hingga messaging yang resonan.", features:["Brand Audit","Positioning","Messaging Framework","Competitor Analysis","Brand Guidelines"], icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>' },
+      { name:"Web Development", tag:"Build & Optimize", desc:"Membangun website modern, cepat, dan responsif — dari landing page hingga web app.", features:["Landing Pages","Company Profile","Web App","Performance Optimization","SEO Setup"], icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/><line x1="14" y1="4" x2="10" y2="20"/></svg>' }
+    ];
+
+    const portfolioCategories = [
+      { id:"all", name:"Semua" },{ id:"social", name:"Social Media" },{ id:"design", name:"Graphic Design" },{ id:"video", name:"Video" },{ id:"branding", name:"Branding" }
+    ];
+    const portfolioProjects = [
+      { name:"Cafe Nusantara Campaign", cat:"social", desc:"Social media campaign — engagement naik 300% dalam 2 bulan.", color:"linear-gradient(135deg,#FF6B6B,#ee5a24)" },
+      { name:"TechStartup Rebrand", cat:"branding", desc:"Rebranding lengkap termasuk logo, brand guidelines, dan messaging.", color:"linear-gradient(135deg,#CDFF00,#82c700)" },
+      { name:"Fashion Lookbook 2025", cat:"design", desc:"Desain lookbook digital dengan estetika minimalis modern.", color:"linear-gradient(135deg,#FF8C42,#d35400)" },
+      { name:"Product Launch Video", cat:"video", desc:"Video peluncuran produk dengan motion graphics yang powerful.", color:"linear-gradient(135deg,#a29bfe,#6c5ce7)" },
+      { name:"UMKM Digital Growth", cat:"social", desc:"Pengelolaan media sosial 3 bulan — followers naik 500%.", color:"linear-gradient(135deg,#fd79a8,#e84393)" },
+      { name:"Corporate Identity System", cat:"branding", desc:"Sistem identitas visual untuk perusahaan konsultan.", color:"linear-gradient(135deg,#00cec9,#0984e3)" },
+      { name:"Event Highlight Reel", cat:"video", desc:"Video highlight event musik dengan cinematic color grading.", color:"linear-gradient(135deg,#ffeaa7,#fdcb6e)" },
+      { name:"Food Brand Packaging", cat:"design", desc:"Desain kemasan dengan ilustrasi custom dan tipografi kuat.", color:"linear-gradient(135deg,#55efc4,#00b894)" }
+    ];
+
+    const projectsData = [
+      { title:"Brand Identity — Kopi Nusantara", status:"completed", desc:"Proyek rebranding lengkap untuk kedai kopi lokal yang berkembang menjadi chain. Mencakup logo baru, brand guidelines, packaging design, dan signage system. Durasi proyek: 4 minggu.", client:"Kopi Nusantara", timeline:"Nov - Des 2024", services:["Logo Design","Brand Guidelines","Packaging","Signage"], progress:100 },
+      { title:"Social Media Management — GlowUp Beauty", status:"ongoing", desc:"Pengelolaan media sosial selama 6 bulan untuk brand skincare lokal. Target: meningkatkan followers 200% dan engagement rate 5%+. Saat ini memasuki bulan ke-3.", client:"GlowUp Beauty", timeline:"Jan - Jun 2025", services:["Content Strategy","Content Creation","Community Management","Analytics"], progress:50 },
+      { title:"Video Campaign — TechVenture ID", status:"ongoing", desc:"Produksi 4 video campaign untuk peluncuran produk baru. Termasuk concept development, shooting, editing, dan distribusi ke berbagai platform.", client:"TechVenture ID", timeline:"Feb - Apr 2025", services:["Concept Development","Video Production","Motion Graphics","Distribution"], progress:35 },
+      { title:"Website Redesign — FreshFood Co.", status:"planning", desc:"Redesign website perusahaan makanan dengan fokus pada UX improvement dan conversion optimization. Tahap discovery dan wireframing sedang berjalan.", client:"FreshFood Co.", timeline:"Mar - Mei 2025", services:["UX Research","Wireframing","Web Design","Development"], progress:10 },
+      { title:"Content Strategy — Warung Berkah", status:"completed", desc:"Penyusunan strategi konten 3 bulan untuk UMKM kuliner. Hasil: penjualan meningkat 2.5x dan berhasil masuk ke platform delivery online.", client:"Warung Berkah", timeline:"Sep - Nov 2024", services:["Content Audit","Strategy","Implementation","Training"], progress:100 },
+      { title:"Launch Campaign — StyleHive", status:"completed", desc:"Campaign peluncuran brand fashion lokal dengan pendekatan 360° — dari teaser content hingga event launch. Total reach 500K+ impressions.", client:"StyleHive", timeline:"Okt - Nov 2024", services:["Campaign Strategy","Content Creation","Event Support","PR"], progress:100 }
+    ];
+
+    const teamMembers = [
+      { name:"NeedFriend", role:"Founder & Creative Director", initial:"NF", bio:"Founder Pemantik Media Division. Memiliki passion mendalam di dunia kreatif dan teknologi. Memulai perjalanan dari content creator independen hingga membangun divisi media yang melayani berbagai klien. Percaya bahwa setiap brand punya cerita unik yang layak diceritakan dengan cara luar biasa.", joinDate:"2024", specialty:"Creative Strategy & Leadership", discord:"needfriend", status:"Active", responsibilities:["Overall creative direction & vision","Client relationship management","Project quality oversight","Team development & mentoring","Business growth strategy"], tags:["Leader","Strategist","Creative","Developer","Visionary"], socials:{ youtube:"https://youtube.com/@needfriend2?si=fLuu8Z8mRetJhIrU", instagram:"https://www.instagram.com/bismasyafif/?utm_source=qr&r=nametag" }},
+      { name:"", role:"Content Lead", initial:"CL", bio:"Posisi ini terbuka untuk kandidat yang memiliki keahlian dalam content strategy dan copywriting.", joinDate:"-", specialty:"-", discord:"-", status:"Open", responsibilities:["Content strategy development","Copywriting & editing","Content calendar management","Team coordination"], tags:["Open Position","Content"], socials:{} },
+      { name:"", role:"Lead Designer", initial:"LD", bio:"Posisi ini terbuka untuk desainer grafis berpengalaman yang siap memimpin tim desain.", joinDate:"-", specialty:"-", discord:"-", status:"Open", responsibilities:["Design direction & quality","Brand identity projects","Team mentoring","Client presentations"], tags:["Open Position","Design","Leadership"], socials:{} },
+      { name:"", role:"Video Editor", initial:"VE", bio:"Posisi ini terbuka untuk video editor yang mahir dalam editing dan motion graphics.", joinDate:"-", specialty:"-", discord:"-", status:"Open", responsibilities:["Video editing & post-production","Motion graphics creation","Color grading & sound design","Short-form content"], tags:["Open Position","Video"], socials:{} },
+      { name:"", role:"Social Media Specialist", initial:"SM", bio:"Posisi ini terbuka untuk yang passionate tentang social media dan community building.", joinDate:"-", specialty:"-", discord:"-", status:"Open", responsibilities:["Social media management","Community engagement","Analytics & reporting","Trend monitoring"], tags:["Open Position","Social Media"], socials:{} }
+    ];
+
+    const faqData = [
+      { q:"Berapa lama waktu pengerjaan proyek?", a:"Tergantung kompleksitas. Content creation 3-7 hari kerja, branding 2-4 minggu, video production 1-3 minggu. Timeline detail diberikan di awal proyek." },
+      { q:"Apakah ada revisi yang termasuk dalam paket?", a:"Ya. Spark Starter: 1x revisi, Growth: 2x revisi, Enterprise: unlimited revisi hingga kamu puas." },
+      { q:"Bagaimana sistem pembayarannya?", a:"DP 50% di awal, pelunasan 50% setelah selesai. Untuk klien langganan, sistem invoice bulanan." },
+      { q:"Bisa request layanan di luar paket?", a:"Tentu! Semua paket bisa dikustomisasi. Hubungi kami untuk penawaran yang sesuai." },
+      { q:"Apakah kalian menerima proyek internasional?", a:"Ya, kami melayani klien dari mana saja. Komunikasi via email, Discord, atau platform lain. Fasih Bahasa Indonesia dan English." }
+    ];
+
+    const testimonials = [
+      { name:"Andi Pratama", role:"Owner, Kopi Nusantara", text:"Pemantik benar-benar mengubah cara kami melihat konten. Engagement naik 300% dan kami mulai di-recognize di komunitas lokal. Highly recommended!", stars:5, color:"#FF6B6B" },
+      { name:"Sarah Wijaya", role:"CEO, TechVenture ID", text:"Rebranding yang dilakukan Pemantik sangat profesional. Mereka memahami visi kami dan mengeksekusinya dengan sempurna.", stars:5, color:"#CDFF00" },
+      { name:"Budi Santoso", role:"Marketing Manager, FreshFood Co.", text:"Video launch produk viral, 100K+ views dalam 3 hari. Tim yang responsive dan hasilnya selalu top notch.", stars:5, color:"#FF8C42" },
+      { name:"Diana Lee", role:"Founder, StyleHive", text:"Desain lookbook sangat aesthetically pleasing dan sesuai brand image kami. Proses kerjanya smooth dan komunikatif.", stars:5, color:"#a29bfe" },
+      { name:"Rizky Fauzan", role:"Owner, Warung Berkah", text:"Sebagai UMKM, budget kami terbatas. Tapi Pemantik kasih solusi tepat. Followers naik drastis dan penjualan meningkat!", stars:5, color:"#00cec9" },
+      { name:"Maya Putri", role:"Brand Manager, GlowUp Beauty", text:"Social media management sangat terstruktur. Laporan analytics yang detail membantu kami mengambil keputusan lebih baik.", stars:4, color:"#fd79a8" }
+    ];
+
+    const pricingPackages = [
+      { name:"Spark Starter", desc:"Cocok untuk UMKM dan brand yang baru memulai perjalanan konten kreatif.", price:"Rp 1.5jt", period:"/bulan", badge:null, icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13 2L4 14h7l-2 8 9-12h-7l2-8z"/></svg>', features:[{text:"8 konten media sosial/bulan",included:true},{text:"1 desain grafis/bulan",included:true},{text:"Content calendar bulanan",included:true},{text:"Basic analytics report",included:true},{text:"1x revisi per konten",included:true},{text:"Video production",included:false},{text:"Brand strategy",included:false}] },
+      { name:"Growth", desc:"Paket komprehensif untuk brand yang siap scale up dan mendominasi media sosial.", price:"Rp 4jt", period:"/bulan", badge:"popular", icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 20V10M18 20V4M6 20v-4"/></svg>', features:[{text:"20 konten media sosial/bulan",included:true},{text:"5 desain grafis/bulan",included:true},{text:"2 video pendek/bulan",included:true},{text:"Content calendar + strategy",included:true},{text:"Detailed analytics report",included:true},{text:"2x revisi per konten",included:true},{text:"Community management",included:false}] },
+      { name:"Enterprise", desc:"Solusi lengkap untuk perusahaan yang butuh partner media kreatif penuh.", price:"Custom", period:"", badge:"best", icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>', features:[{text:"Unlimited konten",included:true},{text:"Unlimited desain grafis",included:true},{text:"4+ video/bulan",included:true},{text:"Full brand strategy",included:true},{text:"Real-time analytics dashboard",included:true},{text:"Unlimited revisi",included:true},{text:"Dedicated account manager",included:true}] }
+    ];
+
+    const blogArticles = [
+      { cat:"Tips", date:"15 Jan 2025", title:"5 Tren Content Marketing 2025 yang Wajib Kamu Tahu", excerpt:"Tahun ini, konten yang autentik dan interaktif akan mendominasi. Simak 5 tren yang akan mengubah cara brand berkomunikasi dengan audiensnya." },
+      { cat:"Insight", date:"8 Jan 2025", title:"Kenapa UMKM Butuh Social Media Management?", excerpt:"Banyak UMKM mengelola sendiri media sosialnya tanpa strategi. Pendekatan yang tepat bisa meningkatkan penjualan hingga 3x lipat." },
+      { cat:"Case Study", date:"28 Des 2024", title:"Case Study: Engagement 300% dalam 60 Hari", excerpt:"Breakdown strategi nyata yang kami gunakan untuk klien F&B lokal — dari riset audiens hingga eksekusi konten yang viral." },
+      { cat:"Tutorial", date:"20 Des 2024", title:"Panduan Membuat Brand Guidelines untuk Brand Kecil", excerpt:"Brand guidelines bukan hanya untuk perusahaan besar. Panduan langkah demi langkah membuat brand book yang sederhana tapi efektif." }
+    ];
+
+    const announcementsData = [
+      { type:"important", title:"Pembaruan Kebijakan Privasi", date:"20 Jan 2025", body:"Kami telah memperbarui kebijakan privasi kami untuk lebih melindungi data klien. Perubahan utama meliputi:<ul><li>Enkripsi data end-to-end untuk semua komunikasi</li><li>Pembatasan akses data hanya untuk tim terkait proyek</li><li>Opsi penghapusan data klien setelah proyek selesai</li></ul>Silakan baca kebijakan lengkap di halaman About > Keamanan Data." },
+      { type:"update", title:"Paket Harga Baru Tersedia!", date:"15 Jan 2025", body:"Kami dengan senang hati mengumumkan paket harga baru yang lebih fleksibel dan kompetitif. Tiga paket utama: Spark Starter (Rp 1.5jt/bulan), Growth (Rp 4jt/bulan), dan Enterprise (Custom). Semua paket bisa dikustomisasi sesuai kebutuhanmu." },
+      { type:"event", title:"Webinar Gratis: Content Strategy 101", date:"10 Jan 2025", body:"Pemantik Media Division akan mengadakan webinar gratis bertema \"Content Strategy 101 untuk UMKM\" pada tanggal 1 Februari 2025. Webinar ini akan membahas dasar-dasar strategi konten, cara mengenal audiens, dan teknik membuat content calendar yang efektif. Daftar melalui halaman Contact!" },
+      { type:"info", title:"Jam Operasional Libur Imlek", date:"25 Jan 2025", body:"Selama periode libur Imlek (28-30 Januari 2025), tim kami akan beroperasi dengan kapasitas terbatas. Proyek yang sedang berjalan tetap dilanjutkan namun response time mungkin lebih lambat dari biasanya. Penuh kembali pada 31 Januari 2025." },
+      { type:"update", title:"Fitur Baru: Real-time Analytics Dashboard", date:"5 Jan 2025", body:"Untuk klien paket Enterprise, kami kini menyediakan real-time analytics dashboard yang memungkinkan kamu memantau performa konten secara langsung. Dashboard ini mencakup metrics engagement, reach, conversion, dan audience demographics." },
+      { type:"info", title:"Selamat Tahun Baru 2025!", date:"1 Jan 2025", body:"Tim Pemantik Media Division mengucapkan Selamat Tahun Baru 2025! Terima kasih atas kepercayaan semua klien dan partner di tahun 2024. Kami siap melayani dengan lebih baik di tahun ini. Let's spark more ideas together!" }
+    ];
+
+    // ==================== PARTICLES ====================
+    const canvas = document.getElementById('particles');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+    const noMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    function resizeCanvas(){canvas.width=window.innerWidth;canvas.height=window.innerHeight}
+    function createParticles(){particles=[];const c=Math.min(65,Math.floor(window.innerWidth/24));for(let i=0;i<c;i++)particles.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,vx:(Math.random()-.5)*.22,vy:(Math.random()-.5)*.22,radius:Math.max(1,Math.random()*2),opacity:Math.random()*.35+.12})}
+    function drawParticles(){ctx.clearRect(0,0,canvas.width,canvas.height);particles.forEach((p,i)=>{p.x+=p.vx;p.y+=p.vy;if(p.x<0)p.x=canvas.width;if(p.x>canvas.width)p.x=0;if(p.y<0)p.y=canvas.height;if(p.y>canvas.height)p.y=0;ctx.beginPath();ctx.arc(p.x,p.y,p.radius,0,Math.PI*2);ctx.fillStyle=`rgba(205,255,0,${p.opacity})`;ctx.fill();particles.slice(i+1).forEach(p2=>{const dx=p.x-p2.x,dy=p.y-p2.y,dist=Math.sqrt(dx*dx+dy*dy);if(dist<100){ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(p2.x,p2.y);ctx.strokeStyle=`rgba(205,255,0,${0.06*(1-dist/100)})`;ctx.stroke()}})});requestAnimationFrame(drawParticles)}
+    if(!noMotion){resizeCanvas();createParticles();drawParticles();window.addEventListener('resize',()=>{resizeCanvas();createParticles()})}
+
+    // ==================== NAVIGATION ====================
+    const allNavLinks=document.querySelectorAll('.nav-link,[data-page]');
+    const pages=document.querySelectorAll('.page');
+    const mobileToggle=document.getElementById('mobileToggle');
+    const navLinksContainer=document.getElementById('navLinks');
+    const nav=document.querySelector('.nav');
+
+    function showPage(pageId){
+      pageId=pageId.replace(/\/$/,'');
+      const target=document.getElementById(pageId);
+      if(!target){showPage('home');return}
+      pages.forEach(p=>p.classList.remove('active'));
+      target.classList.add('active');
+      allNavLinks.forEach(l=>{l.classList.remove('active');if(l.getAttribute('data-page')===pageId)l.classList.add('active')});
+      navLinksContainer.classList.remove('open');mobileToggle.classList.remove('open');
+      window.scrollTo({top:0,behavior:'smooth'});
+      if(pageId==='blog')initCommentBox();
+      setTimeout(observeElements,100);
+    }
+
+    allNavLinks.forEach(link=>{link.addEventListener('click',e=>{e.preventDefault();const pid=link.getAttribute('data-page');const url=link.getAttribute('href');window.history.pushState({page:pid},'',''+url);showPage(pid)})});
+    window.addEventListener('popstate',e=>{if(e.state&&e.state.page){if(e.state.page==='staff-detail'&&e.state.idx!==undefined){showPage('staff-detail');renderStaffDetail(e.state.idx)}else if(e.state.page==='about'&&e.state.tab){showPage('about');activateAboutTab(e.state.tab)}else if(e.state.page==='portfolio'&&e.state.cat){showPage('portfolio');activatePortTab(e.state.cat)}else showPage(e.state.page)}else showPage('home')});
+
+    let initPath=window.location.pathname.replace(/\/$/,'')||'/home';
+    if(initPath==='/')initPath='/home';
+    const initPage=initPath.substring(1);
+    window.history.replaceState({page:initPage},'',''+initPath);
+    showPage(initPage);
+
+    mobileToggle.addEventListener('click',()=>{mobileToggle.classList.toggle('open');navLinksContainer.classList.toggle('open')});
+    window.addEventListener('scroll',()=>nav.classList.toggle('scrolled',window.scrollY>50));
+
+    // ==================== RENDER SERVICES ====================
+    document.getElementById('serviceGrid').innerHTML=services.map(s=>`<div class="service-card"><div class="service-image"><div class="service-icon-box">${s.icon}</div></div><div class="service-content"><span class="service-tag">${s.tag}</span><h3 class="service-title">${s.name}</h3><p class="service-desc">${s.desc}</p><div class="service-features">${s.features.map(f=>`<span class="svc-feat">${f}</span>`).join('')}</div></div></div>`).join('');
+
+    // ==================== RENDER PORTFOLIO ====================
+    const portTabs=document.getElementById('portTabs');
+    const portGrid=document.getElementById('portGrid');
+    portfolioCategories.forEach(cat=>{const btn=document.createElement('button');btn.className=`port-tab ${cat.id==='all'?'active':''}`;btn.textContent=cat.name;btn.dataset.cat=cat.id;btn.addEventListener('click',()=>{portTabs.querySelectorAll('.port-tab').forEach(t=>t.classList.remove('active'));btn.classList.add('active');renderPortfolio(cat.id);window.history.replaceState({page:'portfolio',cat:cat.id},'','/portfolio')});portTabs.appendChild(btn)});
+
+    function activatePortTab(catId){portTabs.querySelectorAll('.port-tab').forEach(t=>{t.classList.remove('active');if(t.dataset.cat===catId)t.classList.add('active')});renderPortfolio(catId)}
+    function renderPortfolio(catId){const filtered=catId==='all'?portfolioProjects:portfolioProjects.filter(p=>p.cat===catId);portGrid.innerHTML=filtered.length?filtered.map(p=>`<div class="port-item"><div class="port-thumb"><div class="port-thumb-inner" style="background:${p.color}"><svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="rgba(255,255,255,.6)" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></div></div><div class="port-info"><div class="port-cat">${p.cat}</div><div class="port-name">${p.name}</div><div class="port-desc">${p.desc}</div></div></div>`).join(''):'<p style="color:var(--muted);text-align:center;padding:2rem;grid-column:1/-1">Belum ada proyek di kategori ini.</p>'}
+    renderPortfolio('all');
+
+    // ==================== RENDER PROJECTS ====================
+    document.getElementById('projectList').innerHTML=projectsData.map(p=>`
+      <div class="project-card">
+        <div class="project-header"><h3 class="project-title">${p.title}</h3><span class="project-status ${p.status}">${p.status==='ongoing'?'Sedang Berjalan':p.status==='completed'?'Selesai':'Perencanaan'}</span></div>
+        <div class="project-body">
+          <p class="project-desc">${p.desc}</p>
+          <div class="project-meta">
+            <div class="project-meta-item"><div class="project-meta-label">Klien</div><div class="project-meta-value">${p.client}</div></div>
+            <div class="project-meta-item"><div class="project-meta-label">Timeline</div><div class="project-meta-value acc">${p.timeline}</div></div>
+            <div class="project-meta-item"><div class="project-meta-label">Progress</div><div class="project-meta-value" style="color:${p.progress===100?'var(--teal)':p.progress<20?'var(--purple)':'var(--accent)'}">${p.progress}%</div></div>
+          </div>
+          <div class="project-tags">${p.services.map(s=>`<span class="project-tag">${s}</span>`).join('')}</div>
         </div>
+      </div>`).join('');
 
-        <!-- PAGE: CURHAT -->
-        <div id="curhat" class="page-container">
-            <div class="container">
-                <h1 class="page-title">Form Curhat</h1>
-                <p class="page-subtitle">Ceritakan masalahmu dengan aman dan rahasia.</p>
-                
-                <div class="card" style="background:rgba(122, 158, 126, 0.1); border:none; margin-bottom:15px;">
-                    <p style="font-size:13px; color:var(--sage); text-align:center; font-weight:500;">
-                        Data kamu dijaga kerahasiaannya 100%.
-                    </p>
-                </div>
+    // ==================== ABOUT TABS ====================
+    const aboutTabs=document.querySelectorAll('.about-tab');
+    const aboutSections=document.querySelectorAll('.about-section');
 
-                <div class="iframe-box">
-                    <!-- GANTI LINK DI BAWAH INI DENGAN LINK GOOGLE FORMS KAMU -->
-                    <iframe src="https://app.youform.com/forms/0vkaiqpt" loading="lazy">Loading...</iframe>
-                </div>
-            </div>
+    function activateAboutTab(tabId){
+      aboutTabs.forEach(t=>{t.classList.remove('active');if(t.dataset.tab===tabId)t.classList.add('active')});
+      aboutSections.forEach(s=>{s.classList.remove('active');if(s.id===tabId)s.classList.add('active')});
+    }
+
+    aboutTabs.forEach(tab=>{tab.addEventListener('click',()=>{activateAboutTab(tab.dataset.tab);window.history.replaceState({page:'about',tab:tab.dataset.tab},'','/about')})});
+
+    // ==================== RENDER TEAM ====================
+    const staffGrid=document.getElementById('staffGrid');
+    teamMembers.forEach((m,i)=>{
+      const avatarBg=m.role.includes('Founder')?'linear-gradient(135deg,#CDFF00,#82c700)':m.role.includes('Lead')?'linear-gradient(135deg,#FF8C42,#d35400)':'linear-gradient(135deg,#555,#333)';
+      const card=document.createElement('div');card.className='staff-card';
+      card.innerHTML=`<div class="staff-avatar" style="background:${avatarBg}">${m.initial}</div><div class="staff-name">${m.name||'Open Position'}</div><div class="staff-role">${m.role}</div><button class="btn-more-info" data-idx="${i}" aria-label="More info">More Info<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></button>`;
+      staffGrid.appendChild(card);
+    });
+
+    staffGrid.addEventListener('click',e=>{const btn=e.target.closest('.btn-more-info');if(!btn)return;const idx=parseInt(btn.dataset.idx);window.history.pushState({page:'staff-detail',idx},'','/staff-detail');showPage('staff-detail');renderStaffDetail(idx)});
+
+    // ==================== RENDER STAFF DETAIL ====================
+    function renderStaffDetail(idx){
+      const m=teamMembers[idx];
+      if(!m){document.getElementById('staffDetailContent').innerHTML='<div class="staff-detail-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M16 16s-1.5-2-4-2-4 2-4 2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg><h3>Not Found</h3></div>';return}
+      const isOpen=!m.name;
+      const avatarBg=m.role.includes('Founder')?'linear-gradient(135deg,#CDFF00,#82c700)':m.role.includes('Lead')?'linear-gradient(135deg,#FF8C42,#d35400)':'linear-gradient(135deg,#555,#333)';
+      let socialsHTML='';
+      if(m.socials){
+        if(m.socials.youtube)socialsHTML+=`<a href="${m.socials.youtube}" target="_blank" rel="noopener" class="sd-social-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22.54 6.42a2.78 2.78 0 00-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 00-1.94 2A29 29 0 001 11.75a29 29 0 00.46 5.33A2.78 2.78 0 003.4 19.1c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 001.94-2 29 29 0 00.46-5.25 29 29 0 00-.46-5.43z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"/></svg>YouTube</a>`;
+        if(m.socials.instagram)socialsHTML+=`<a href="${m.socials.instagram}" target="_blank" rel="noopener" class="sd-social-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>Instagram</a>`;
+      }
+      if(isOpen)socialsHTML='<span style="color:var(--muted);font-size:.9rem">Social links akan ditambahkan saat posisi ini terisi.</span>';
+
+      document.getElementById('staffDetailContent').innerHTML=isOpen?`
+        <button class="staff-detail-back" id="staffBackBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>Back to Team</button>
+        <div class="staff-detail-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg><h3>${m.role} — Open Position</h3><p>Tertarik bergabung? Hubungi kami melalui halaman Contact!</p><div style="margin-top:1.5rem"><a href="/contact" class="btn btn-primary" data-page="contact"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>Hubungi Kami</a></div></div>`
+        :`
+        <button class="staff-detail-back" id="staffBackBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>Back to Team</button>
+        <div class="staff-detail-hero"><div class="sd-hero-top"></div><div class="sd-hero-body"><div class="sd-avatar" style="background:${avatarBg}">${m.initial}</div><div class="sd-identity"><h1 class="sd-name">${m.name}</h1><span class="sd-role-badge owner">${m.role}</span></div></div></div>
+        <div class="sd-bio"><h3>About</h3><p>${m.bio}</p></div>
+        <div class="sd-info-grid">
+          <div class="sd-info-card"><div class="sd-info-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Bergabung</div><div class="sd-info-value">${m.joinDate}</div></div>
+          <div class="sd-info-card"><div class="sd-info-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>Spesialisasi</div><div class="sd-info-value">${m.specialty}</div></div>
+          <div class="sd-info-card"><div class="sd-info-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>Discord</div><div class="sd-info-value acc">${m.discord}</div></div>
+          <div class="sd-info-card"><div class="sd-info-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>Status</div><div class="sd-info-value" style="color:${m.status==='Active'?'var(--accent)':'var(--muted)'}">${m.status}</div></div>
         </div>
+        <div class="sd-section"><h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>Responsibilities</h3><ul class="sd-resp-list">${m.responsibilities.map(r=>`<li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>${r}</li>`).join('')}</ul></div>
+        <div class="sd-section"><h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>Skills & Tags</h3><div class="sd-tags">${m.tags.map(t=>`<span class="sd-tag">${t}</span>`).join('')}</div></div>
+        <div class="sd-section"><h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>Social Links</h3><div class="sd-socials">${socialsHTML}</div></div>`;
 
-    </main>
+      document.getElementById('staffBackBtn').addEventListener('click',()=>{window.history.pushState({page:'about',tab:'staff'},'','/about');showPage('about');activateAboutTab('staff')});
+      document.querySelectorAll('#staffDetailContent [data-page]').forEach(l=>{l.addEventListener('click',e=>{e.preventDefault();const p=l.getAttribute('data-page');window.history.pushState({page:p},'',''+l.getAttribute('href'));showPage(p)})});
+    }
 
-    <!-- Floating Action Button (FAB) -->
-    <button class="fab-fixed" onclick="showPage('curhat')">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-    </button>
+    // ==================== RENDER FAQ ====================
+    const faqContainer=document.getElementById('faqContainer');
+    faqData.forEach(item=>{const el=document.createElement('div');el.className='faq-item';el.innerHTML=`<div class="faq-question">${item.q}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div><div class="faq-answer"><p>${item.a}</p></div>`;el.querySelector('.faq-question').addEventListener('click',()=>{faqContainer.querySelectorAll('.faq-item.open').forEach(x=>{if(x!==el)x.classList.remove('open')});el.classList.toggle('open')});faqContainer.appendChild(el)});
 
-    <script>
-        // Fungsi Navigasi Halaman
-        function showPage(pageId) {
-            // 1. Sembunyikan semua halaman
-            document.querySelectorAll('.page-container').forEach(page => {
-                page.classList.remove('active');
-            });
+    // ==================== RENDER TESTIMONIALS ====================
+    document.getElementById('testGrid').innerHTML=testimonials.map(t=>`<div class="test-card"><div class="test-stars">${Array(t.stars).fill('<svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>').join('')}</div><p class="test-text">"${t.text}"</p><div class="test-author"><div class="test-avatar" style="background:${t.color}">${t.name.charAt(0)}</div><div><div class="test-name">${t.name}</div><div class="test-role">${t.role}</div></div></div></div>`).join('');
 
-            // 2. Tampilkan halaman yang dipilih
-            document.getElementById(pageId).classList.add('active');
+    // ==================== RENDER PRICING ====================
+    const pricingGrid=document.getElementById('pricingGrid');
+    pricingPackages.forEach(pkg=>{
+      const card=document.createElement('div');card.className=`price-card ${pkg.badge==='popular'?'highlighted':''}`;
+      let badgeHTML='';if(pkg.badge==='popular')badgeHTML='<span class="price-badge pop">Most Popular</span>';else if(pkg.badge==='best')badgeHTML='<span class="price-badge best">Best Value</span>';
+      card.innerHTML=`${badgeHTML}<div class="price-top"><div class="price-top-icon">${pkg.icon}</div></div><div class="price-body"><h3 class="price-name">${pkg.name}</h3><p class="price-desc">${pkg.desc}</p><div class="price-amount">${pkg.price}</div><div class="price-period">${pkg.period?pkg.period:'Hubungi kami untuk penawaran'}</div><div class="price-features">${pkg.features.map(f=>`<div class="price-feat ${f.included?'':'disabled'}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${f.included?'<polyline points="20 6 9 17 4 12"/>':'<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>'}</svg>${f.text}</div>`).join('')}</div><button class="btn btn-primary btn-quote" data-pkg="${pkg.name}">Request Quote</button></div>`;
+      pricingGrid.appendChild(card);
+    });
+    document.querySelectorAll('.btn-quote[data-pkg]').forEach(btn=>{btn.addEventListener('click',()=>{document.getElementById('mq-package').value=btn.dataset.pkg;document.getElementById('mq-success').style.display='none';document.getElementById('quoteModal').classList.add('active')})});
 
-            // 3. Update menu aktif di sidebar
-            document.querySelectorAll('.nav-link').forEach(link => {
-                link.classList.remove('active');
-            });
-            
-            // Karena bisa dipanggil dari FAB (tanpa event), kita cari link manual
-            const targetLink = document.querySelector(`.nav-link[onclick="showPage('${pageId}')"]`);
-            if(targetLink) targetLink.classList.add('active');
+    // ==================== RENDER BLOG ====================
+    document.getElementById('blogList').innerHTML=blogArticles.map(a=>`<div class="blog-card"><div class="blog-card-header"><span class="blog-cat">${a.cat}</span><span class="blog-date">${a.date}</span></div><div class="blog-card-body"><h3 class="blog-card-title">${a.title}</h3><p class="blog-card-excerpt">${a.excerpt}</p></div></div>`).join('');
 
-            // 4. Tutup sidebar jika di HP
-            if (window.innerWidth <= 768) {
-                closeSidebar();
-            }
+    let commentBoxInit=false;
+    function initCommentBox(){if(!commentBoxInit&&typeof commentBox==='function'){commentBox('5700396886523904-proj');commentBoxInit=true}}
 
-            // 5. Scroll ke atas
-            document.querySelector('.main-content').scrollTop = 0;
-        }
+    // ==================== RENDER ANNOUNCEMENTS ====================
+    document.getElementById('annList').innerHTML=announcementsData.map(a=>`<div class="ann-card ${a.type}"><div class="ann-header"><span class="ann-type ${a.type}">${a.type==='important'?'Penting':a.type==='update'?'Update':a.type==='event'?'Event':'Info'}</span><span class="ann-date">${a.date}</span></div><h3 class="ann-title">${a.title}</h3><div class="ann-body">${a.body}</div></div>`).join('');
 
-        // Fungsi Sidebar (Mobile)
-        function toggleSidebar() {
-            document.getElementById('sidebar').classList.toggle('active');
-            document.getElementById('overlayBg').classList.toggle('active');
-        }
-        function closeSidebar() {
-            document.getElementById('sidebar').classList.remove('active');
-            document.getElementById('overlayBg').classList.remove('active');
-        }
-    </script>
+    // ==================== CONTACT FORM ====================
+    document.getElementById('cf-submit').addEventListener('click',()=>{
+      let valid=true;
+      const name=document.getElementById('cf-name'),email=document.getElementById('cf-email'),msg=document.getElementById('cf-msg');
+      document.querySelectorAll('.form-error').forEach(e=>e.style.display='none');
+      if(!name.value.trim()){document.getElementById('err-name').style.display='block';valid=false}
+      if(!email.value.trim()||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)){document.getElementById('err-email').style.display='block';valid=false}
+      if(!msg.value.trim()||msg.value.trim().length<10){document.getElementById('err-msg').style.display='block';valid=false}
+      if(valid){document.getElementById('form-success').style.display='block';name.value='';email.value='';document.getElementById('cf-service').value='';msg.value=''}
+    });
+
+    // ==================== QUOTE MODAL ====================
+    const quoteModal=document.getElementById('quoteModal');
+    document.getElementById('closeModal').addEventListener('click',()=>quoteModal.classList.remove('active'));
+    quoteModal.addEventListener('click',e=>{if(e.target===quoteModal)quoteModal.classList.remove('active')});
+    document.getElementById('mq-submit').addEventListener('click',()=>{
+      const n=document.getElementById('mq-name'),e=document.getElementById('mq-email');
+      if(n.value.trim()&&e.value.trim()){document.getElementById('mq-success').style.display='block';n.value='';e.value='';document.getElementById('mq-note').value='';setTimeout(()=>quoteModal.classList.remove('active'),1500)}
+    });
+
+    // ==================== SCROLL REVEAL ====================
+    function observeElements(){const reveals=document.querySelectorAll('.reveal');const observer=new IntersectionObserver(entries=>{entries.forEach((entry,i)=>{if(entry.isIntersecting)setTimeout(()=>entry.target.classList.add('visible'),i*100)})},{threshold:.1});reveals.forEach(el=>observer.observe(el))}
+    observeElements();
+
+    // ==================== KEYBOARD ====================
+    document.addEventListener('keydown',e=>{if(e.key==='Escape'){quoteModal.classList.remove('active');navLinksContainer.classList.remove('open');mobileToggle.classList.remove('open')}});
+  </script>
 </body>
 </html>
